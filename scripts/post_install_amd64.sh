@@ -164,15 +164,6 @@ EOF
   systemctl start slurmrestd.service
 }
 
-extract() {
-  local template=$1
-  cd /fsx/run
-  aws s3 cp $template .
-  unzip ${template##*/}
-  rm ${template##*/}
-  chown -R ec2-user:ec2-user /fsx/run
-}
-
 fini() {
   local region=$1
   local sns=$2
@@ -242,7 +233,6 @@ case ${cfn_node_type} in
                 #bash pcluster_install_spack.sh
                 systemd_units
                 slurm_db $region
-                extract $template
                 fini $region $sns $ftime $jwt
                 
         ;;
