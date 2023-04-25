@@ -8,7 +8,7 @@ region=$1
 sns=$2
 ftime=$3
 jwt=$4
-template=$5
+
 
 # Set ulimits according to WRF needs
 cat >>/tmp/limits.conf << EOF
