@@ -227,7 +227,7 @@ echo "NODE TYPE: ${cfn_node_type}"
 case ${cfn_node_type} in
         HeadNode)
                 echo "I am the HeadNode node"
-                download_wrf_install_package
+                #download_wrf_install_package
                 cd ${shared_folder}
                 #wget https://raw.githubusercontent.com/
                 #bash pcluster_install_spack.sh
