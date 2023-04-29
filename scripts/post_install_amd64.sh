@@ -213,13 +213,12 @@ EOF
 }
 
 download_wrf_install_package() {
-echo "Download wrf pre-compiled installation package"
-
-chmod 777 ${shared_folder}
-cd ${shared_folder}
-wget https://aws-hpc-builder.s3.amazonaws.com/project/apps/aws_pcluster_3.4_alinux2_wrf_amd64.tar.xz
-tar xpf aws_pcluster_3.4_alinux2_wrf_amd64.tar.xz
-chown -R ec2-user:ec2-user ${shared_folder}
+  echo "Download wrf pre-compiled installation package"
+  chmod 777 ${shared_folder}
+  cd ${shared_folder}
+  wget https://aws-hpc-builder.s3.amazonaws.com/project/apps/aws_pcluster_3.4_alinux2_wrf_amd64.tar.xz
+  tar xpf aws_pcluster_3.4_alinux2_wrf_amd64.tar.xz
+  chown -R ec2-user:ec2-user ${shared_folder}
 }
 
 echo "NODE TYPE: ${cfn_node_type}"
