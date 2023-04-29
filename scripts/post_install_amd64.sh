@@ -212,7 +212,7 @@ EOF
   systemctl start jwt.service
 }
 
-download_wrf_install_package（） {
+download_wrf_install_package() {
 echo "Download wrf pre-compiled installation package"
 
 chmod 777 ${shared_folder}
