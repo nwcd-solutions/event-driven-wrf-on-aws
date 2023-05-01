@@ -221,6 +221,26 @@ download_wrf_install_package() {
   chown -R ec2-user:ec2-user ${shared_folder}
 }
 
+build_dir(){
+  ftime=$1
+  y=${ftime:0:4}
+  m=${ftime:5:2}
+  d=${ftime:8:2}
+  h=${ftime:11:2}
+  jobdir=$y-$m-$d-$h
+  mkdir -p $jobdir/run
+  mkdir -p $jobdir/preproc
+  mkdir -p $jobdir/downloads
+  cd  $jobdir/downloads
+  gfs="gfs"
+  gfs=$gfs.$y$m$d
+  for i in $(seq -f "%02g"  0 3 96)
+  do
+     aws s3 cp --no-sign-request s3://noaa-gfs-bdp-pds/${gfs}/${h}/atmos/gfs.t${h}z.pgrb2.0p50.f0$i .
+  done
+  chown -R ec2-user:ec2-user ${jobdir}
+}
+
 echo "NODE TYPE: ${cfn_node_type}"
 
 case ${cfn_node_type} in
@@ -230,6 +250,7 @@ case ${cfn_node_type} in
                 cd ${shared_folder}
                 #wget https://raw.githubusercontent.com/
                 #bash pcluster_install_spack.sh
+		build_dir $ftime
                 systemd_units
                 slurm_db $region
                 fini $region $sns $ftime $jwt
