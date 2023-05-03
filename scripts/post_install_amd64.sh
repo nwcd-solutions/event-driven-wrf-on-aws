@@ -246,8 +246,8 @@ build_dir(){
      mkdir -p $jobdir/$i/run
      mkdir -p $jobdir/$i/preproc
      aws s3 cp s3://$2/input/$i/namelist.wps $jobdir/$i/preproc/
-     sed -i 's/STARTDATE/'"${start_date}"'/g' $jobdir/$i/preproc/namelist.wps
-     sed -i 's/ENDDATE/'"${end_date}"'/g' $jobdir/$i/preproc/namelist.wps
+     #sed -i 's/STARTDATE/'"${start_date}"'/g' $jobdir/$i/preproc/namelist.wps
+     #sed -i 's/ENDDATE/'"${end_date}"'/g' $jobdir/$i/preproc/namelist.wps
      ln -s ${WPS_DIR}/geogrid* $jobdir/$i/preproc/
      ln -s ${WPS_DIR}/link_grib.csh $jobdir/$i/preproc/
      ln -s ${WPS_DIR}/metgrid* $jobdir/$i/preproc/
@@ -257,7 +257,7 @@ build_dir(){
      rm $jobdir/$i/run/namelist.input
      rm $jobdir/$i/run/wrf.exe
      rm $jobdir/$i/run/real.exe
-     #aws s3 cp s3://$2/input/$i/namelist.input $jobdir/$i/run/
+     aws s3 cp s3://$2/input/$i/namelist.input $jobdir/$i/run/
      #sed -i 's/STARTDATE/'"${start_date}"'/g' $jobdir/$i/run/namelist.input
      #sed -i 's/ENDDATE/'"${end_date}"'/g' $jobdir/$i/run/namelist.input
      ln -s ${WRF_DIR}/main/real.exe  $jobdir/$i/run/real.exe
