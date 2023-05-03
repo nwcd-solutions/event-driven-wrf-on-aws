@@ -228,8 +228,13 @@ build_dir(){
   d=${ftime:8:2}
   h=${ftime:11:2}
   jobdir=$y-$m-$d-$h
-  mkdir -p $jobdir/run
-  mkdir -p $jobdir/preproc
+  job_array=("shandong" "xinjiang" "neimeng" "gansu")
+  for i in "${job_array[@]}"
+  do
+     echo $i
+     mkdir -p $jobdir/$i/run
+     mkdir -p $jobdir/$i/preproc
+  done
   mkdir -p $jobdir/downloads
   cd  $jobdir/downloads
   gfs="gfs"
