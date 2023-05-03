@@ -8,7 +8,7 @@ region=$1
 sns=$2
 ftime=$3
 jwt=$4
-
+bucket=$5
 
 # Set ulimits according to WRF needs
 cat >>/tmp/limits.conf << EOF
@@ -283,7 +283,7 @@ case ${cfn_node_type} in
                 cd ${shared_folder}
                 #wget https://raw.githubusercontent.com/
                 #bash pcluster_install_spack.sh
-		build_dir $ftime
+		build_dir $ftime $bucket
                 systemd_units
                 slurm_db $region
                 fini $region $sns $ftime $jwt
