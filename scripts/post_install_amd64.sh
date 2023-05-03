@@ -247,10 +247,9 @@ build_dir(){
      aws s3 cp s3://$2/input/$i/namelist.wps $jobdir/$i/preproc/
      sed -i 's/STARTDATE/'"${start_date}"'/g' $jobdir/$i/preproc/namelist.wps
      sed -i 's/ENDDATE/'"${end_date}"'/g' $jobdir/$i/preproc/namelist.wps
-     ln -s ${WPS_DIR}/geogrid.exe $jobdir/$i/preproc/geogrid.exe
-     ln -s ${WPS_DIR}/geogrid/GEOGRID.TBL $jobdir/$i/preproc/GEOGRID.TBL
-     ln -s ${WPS_DIR}/metgrid.exe $jobdir/$i/preproc/metgrid.exe
-     ln -s ${WPS_DIR}/metgrid/METGRID.TBL $jobdir/$i/preproc/METGRID.TBL
+     ln -s ${WPS_DIR}/geogrid* $jobdir/$i/preproc/
+     ln -s ${WPS_DIR}/link_grib.csh $jobdir/$i/preproc/
+     ln -s ${WPS_DIR}/metgrid* $jobdir/$i/preproc/
      ln -s ${WPS_DIR}/ungrib.exe $jobdir/$i/preproc/ungrib.exe
      ln -s ${WPS_DIR}/ungrib/Variable_Tables/Vtable.GFS $jobdir/$i/preproc/Vtable
   done
