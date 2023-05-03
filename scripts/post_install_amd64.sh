@@ -223,17 +223,36 @@ download_wrf_install_package() {
 
 build_dir(){
   ftime=$1
+  bucket=$2
   y=${ftime:0:4}
   m=${ftime:5:2}
   d=${ftime:8:2}
   h=${ftime:11:2}
   jobdir=$y-$m-$d-$h
   job_array=("shandong" "xinjiang" "neimeng" "gansu")
+  start_date=$y-$m-$d 
+  end_date=$(date -d ${start_date}"+2 day") 
+  end_date=$(date -d "${end_date}" +%Y-%m-%d)
+  start_date=${start_date}"_00:00:00" 
+  end_date=${end_date}"_00:00:00" 
+  WRF_VERSION=4.2.2 
+  WPS_VERSION=4.2
+  source /apps/scripts/env.sh 3 2
+  WPS_DIR=${HPC_PREFIX}/${HPC_COMPILER}/${HPC_MPI}/WRF-${WRF_VERSION}/WPS-${WPS_VERSION} 
   for i in "${job_array[@]}"
   do
      echo $i
      mkdir -p $jobdir/$i/run
      mkdir -p $jobdir/$i/preproc
+     aws s3 cp s3://$2/input/$i/namelist.wps $jobdir/$i/preproc/
+     sed -i 's/STARTDATE/'"${start_date}"'/g' $jobdir/$i/preproc/namelist.wps
+     sed -i 's/ENDDATE/'"${end_date}"'/g' $jobdir/$i/preproc/namelist.wps
+     ln -s ${WPS_DIR}/geogrid.exe $jobdir/$i/preproc/geogrid.exe
+     ln -s ${WPS_DIR}/geogrid/GEOGRID.TBL $jobdir/$i/preproc/GEOGRID.TBL
+     ln -s ${WPS_DIR}/metgrid.exe $jobdir/$i/preproc/metgrid.exe
+     ln -s ${WPS_DIR}/metgrid/METGRID.TBL $jobdir/$i/preproc/METGRID.TBL
+     ln -s ${WPS_DIR}/ungrib.exe $jobdir/$i/preproc/ungrib.exe
+     ln -s ${WPS_DIR}/ungrib/Variable_Tables/Vtable.GFS $jobdir/$i/preproc/Vtable
   done
   mkdir -p $jobdir/downloads
   cd  $jobdir/downloads
