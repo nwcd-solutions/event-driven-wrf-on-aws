@@ -239,6 +239,7 @@ build_dir(){
   WPS_VERSION=4.2
   source /apps/scripts/env.sh 3 2
   WPS_DIR=${HPC_PREFIX}/${HPC_COMPILER}/${HPC_MPI}/WRF-${WRF_VERSION}/WPS-${WPS_VERSION} 
+  WRF_DIR=${HPC_PREFIX}/${HPC_COMPILER}/${HPC_MPI}/WRF-${WRF_VERSION}
   for i in "${job_array[@]}"
   do
      echo $i
@@ -252,6 +253,9 @@ build_dir(){
      ln -s ${WPS_DIR}/metgrid* $jobdir/$i/preproc/
      ln -s ${WPS_DIR}/ungrib.exe $jobdir/$i/preproc/ungrib.exe
      ln -s ${WPS_DIR}/ungrib/Variable_Tables/Vtable.GFS $jobdir/$i/preproc/Vtable
+     cp -a ${WRF_DIR}/run $jobdir/$i/run
+     ln -s ${WRF_DIR}/main/real.exe  $jobdir/$i/run/real.exe
+     ln -s ${WRF_DIR}/main/wrf.exe  $jobdir/$i/run/wrf.exe
   done
   mkdir -p $jobdir/downloads
   cd  $jobdir/downloads
