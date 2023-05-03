@@ -1,0 +1,67 @@
+Region: us-east-2
+Image:
+  Os: alinux2
+  CustomAmi: ami-0a7309444dfeeb105
+Tags:
+  - Key: Purpose
+    Value: Event Driven Weather Forecast
+HeadNode:
+  InstanceType: c6a.2xlarge
+  Networking:
+    SubnetId: subnet-06a43f36f728f6977
+    AdditionalSecurityGroups: !!seq
+      - sg-061abebb370cbf50c
+  Iam:
+    AdditionalIamPolicies:
+      - Policy: arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      - Policy: arn:aws:iam::aws:policy/AmazonS3FullAccess
+      - Policy: arn:aws:iam::aws:policy/AmazonFSxFullAccess
+      - Policy: arn:aws:iam::aws:policy/SecretsManagerReadWrite
+      - Policy: arn:aws:iam::aws:policy/AmazonSNSFullAccess
+      - Policy: arn:aws:iam::880755836258:policy/KMSALL
+  Ssh:
+    KeyName: us-east-2
+  LocalStorage:
+    RootVolume:
+      Size: 50
+  CustomActions:
+    OnNodeConfigured:
+      Script: https://raw.githubusercontent.com/nwcd-solutions/wrf-on-aws/master/pc_setup_scripts/post_install_amd.sh
+      Args: !!seq
+        - 'us-east-2'
+        - 'arn:aws:sns:us-east-2:880755836258:WX-forecastNestedStackforecastNestedStackResourceCD5EEE21-1PPFPPZ72ECR3-ForecastSns63AC5997-wc6JYDDx30eB'
+        - '2023-4-25:00:00:00Z'
+        - 'JWTKey'
+        - ’wrf-st00101'
+Scheduling:
+  Scheduler: slurm
+  SlurmQueues:
+    - Name: general
+      ComputeResources:
+        - Name: hpc6a
+          InstanceType: hpc6a.48xlarge
+          MinCount: 0
+          MaxCount: 100
+          Efa:
+            Enabled: true
+      Networking:
+        SubnetIds: !!seq
+          - subnet-06a43f36f728f6977
+        PlacementGroup:
+          Enabled: true
+SharedStorage:
+  - Name: Ebs0
+    StorageType: Ebs
+    MountDir: /apps
+    EbsSettings:
+      VolumeType: gp3
+      DeletionPolicy: Delete
+      Size: '200'
+      Encrypted: false
+      SnapshotId: snap-0b3dfa4d4485115e6
+  - Name: Efs1
+    StorageType: Efs
+    MountDir: /fsx
+    EfsSettings:
+      ThroughputMode: bursting
+
