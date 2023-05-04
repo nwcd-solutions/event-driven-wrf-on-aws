@@ -22,12 +22,11 @@ HPC_MPI_DEBUG=1
 source /apps/scripts/mpi_settings.sh
 
 
-cd /fsx/sdtest
-WRF_LOG=log/mpirun_${SARCH}_${HPC_COMPILER}_${HPC_MPI}_wrf-${WRF_VERSION}.log
-mkdir -p log
+cd run
+WRF_LOG=mpirun_${SARCH}_${HPC_COMPILER}_${HPC_MPI}_wrf-${WRF_VERSION}.log
 
 echo "Running WRF on $(date)"
-ln -sfn ${HPC_PREFIX}/${HPC_COMPILER}/${HPC_MPI}/WRF-${WRF_VERSION}/main/wrf.exe .
+#ln -sfn ${HPC_PREFIX}/${HPC_COMPILER}/${HPC_MPI}/WRF-${WRF_VERSION}/main/wrf.exe .
 START_DATE=$(date)
 echo "zzz *** ${START_DATE} *** - JobStart - $(basename ${JOB_DIR}) - ${HPC_COMPILER} - ${HPC_MPI}" >> ${WRF_LOG} 2>&1
 mpirun ${MPI_SHOW_BIND_OPTS} ./wrf.exe >> ${WRF_LOG} 2>&1
