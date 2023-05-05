@@ -9,6 +9,7 @@ sns=$2
 ftime=$3
 jwt=$4
 bucket=$5
+domains_num=$6
 
 # Set ulimits according to WRF needs
 cat >>/tmp/limits.conf << EOF
@@ -240,7 +241,8 @@ build_dir(){
   source /apps/scripts/env.sh 3 2
   WPS_DIR=${HPC_PREFIX}/${HPC_COMPILER}/${HPC_MPI}/WRF-${WRF_VERSION}/WPS-${WPS_VERSION} 
   WRF_DIR=${HPC_PREFIX}/${HPC_COMPILER}/${HPC_MPI}/WRF-${WRF_VERSION}
-  for i in "${job_array[@]}"
+  #for i in "${job_array[@]}"
+  for i in {1..$3}
   do
      echo $i
      mkdir -p $jobdir/$i/run
@@ -284,7 +286,7 @@ case ${cfn_node_type} in
                 cd ${shared_folder}
                 #wget https://raw.githubusercontent.com/
                 #bash pcluster_install_spack.sh
-		build_dir $ftime $bucket
+		build_dir $ftime $bucket $domains_num
                 systemd_units
                 slurm_db $region
                 fini $region $sns $ftime $jwt
