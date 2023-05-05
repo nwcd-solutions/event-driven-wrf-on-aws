@@ -242,7 +242,7 @@ build_dir(){
   WPS_DIR=${HPC_PREFIX}/${HPC_COMPILER}/${HPC_MPI}/WRF-${WRF_VERSION}/WPS-${WPS_VERSION} 
   WRF_DIR=${HPC_PREFIX}/${HPC_COMPILER}/${HPC_MPI}/WRF-${WRF_VERSION}
   #for i in "${job_array[@]}"
-  for i in {1..$3}
+  for (( i=1; i<=$3; i++ ))
   do
      echo $i
      mkdir -p $jobdir/$i/run
