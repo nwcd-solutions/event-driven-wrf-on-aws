@@ -9,7 +9,7 @@ import botocore
 import json
 import requests
 
-region = os.getenv("AWS_REGION")
+#region = os.getenv("AWS_REGION")
 ip = "127.0.0.1"
 bucket = os.getenv("BUCKET_NAME")
 job_num=os.getenv("DOMAINS_NUM")
