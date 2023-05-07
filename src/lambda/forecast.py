@@ -70,6 +70,7 @@ def fini(ids):
     template["job"]["nodes"] = 1
     template["job"]["name"] = "fini"
     template["job"]["tasks_per_node"] = 1
+    template["job"]["current_working_directory"] = "/fsx"
     template["job"]["dependency"] = f"afterok:{':'.join([str(x) for x in ids])}"
     template["script"] = script
     print(template)
@@ -104,6 +105,8 @@ def run_wrf(zone,pid):
     script += f"\naws s3 cp wrfoutput* {output}/wrfout/\n"
     template["job"]["name"] = "wrf"
     template["job"]["nodes"] = 2 
+    template["job"]["cpus_per_task"] = 4
+    template["job"]["tasks_per_node"] = 24
     template["job"]["current_working_directory"] = f"/fsx/{zone}"
     template["job"]["dependency"] = f"afterok:{pid}"
     template["script"] = script
