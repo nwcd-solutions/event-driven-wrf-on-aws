@@ -6,7 +6,7 @@ from wx.root import Root
 
 app = cdk.App()
 
-wx = Root(app, 'WX')
+wx = Root(app, 'WX001')
 cdk.Tags.of(wx).add("Purpose", "Event Driven Weather Forecast", priority=300)
 
 app.synth()
