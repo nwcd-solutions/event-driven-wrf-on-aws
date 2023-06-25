@@ -18,7 +18,7 @@ class S3(NestedStack):
         self.bucket = s3.Bucket(self, "nwp-bucket",
                 bucket_name=bucket_name
                 )
-        forecast_template = assets.Asset(self, "RunTemplate", path="resources/run")
+        forecast_template = assets.Asset(self, "inputs", path="resources/inputs")
         Tags.of(self.bucket).add("Purpose", "Event Driven Weather Forecast", priority=300)
 
         CfnOutput(self, "BucketName", value=self.bucket.bucket_name)
