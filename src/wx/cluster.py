@@ -26,8 +26,8 @@ class Cluster(NestedStack):
         bucket_name = kwargs["bucket"]
         vpc = kwargs["vpc"]
 
-        post_head = assets.Asset(self, "PostComputeFileAsset",
-                path="resources/post_install_headnode.sh")
+        post_head_amd64 = assets.Asset(self, "PostComputeFileAsset",
+                path="scripts/post_install_amd64.sh")
         cluster_name = "wx-pcluster"
 
         purl = Fn.import_value("ParallelClusterApiInvokeUrl")
@@ -136,7 +136,7 @@ class Cluster(NestedStack):
                     "PCLUSTER_API_URL": purl,
                     "REGION": Aws.REGION,
                     "FORECAST_TMPL": forecast_tmpl,
-                    "S3_URL_POST_INSTALL_HEADNODE": f"{post_head.s3_object_url}",
+                    "S3_URL_POST_INSTALL_HEADNODE": f"{post_head_amd64.s3_object_url}",
                     "SG": sg_rds.security_group_id,
                     "SNS_TOPIC": sns_topic,
                     "SM_ARN": sm.state_machine_arn,
