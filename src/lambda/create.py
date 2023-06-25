@@ -1,6 +1,4 @@
-
-
-def create(event, context):
+def main(event, context):
     
     msg = json.loads(event["Records"][0]["Sns"]["Message"])
     key = msg["Records"][0]["s3"]["object"]["key"]
