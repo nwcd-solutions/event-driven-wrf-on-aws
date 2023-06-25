@@ -111,10 +111,10 @@ class Cluster(NestedStack):
                 runtime=λ.Runtime.PYTHON_3_9,
                 timeout=Duration.seconds(60)
             )
-        Tags.of(destroy).add("Purpose", "Event Driven Weather Forecast", priority=300)
+        Tags.of(cluster_lambda).add("Purpose", "Event Driven Weather Forecast", priority=300)
 
 
-        outputs = aws_s3_notifications.LambdaDestination(destroy)
+        outputs = aws_s3_notifications.LambdaDestination(cluster_lambda)
         bucket = s3.Bucket.from_bucket_name(self, "nwp-bucket", bucket_name)
         bucket.add_event_notification(s3.EventType.OBJECT_CREATED, outputs,
                 s3.NotificationKeyFilter(prefix="outputs/", suffix="done"))
