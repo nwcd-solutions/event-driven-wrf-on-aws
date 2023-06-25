@@ -17,8 +17,27 @@ from constructs import Construct
 class stepfunction (NestedStack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id)
-
+        bucket_name = kwargs["bucket"]
         vpc = kwargs["vpc"]
+        cluster_name = "wx-pcluster001"
+        purl = Fn.import_value("ParallelClusterApiInvokeUrl")
+        hostname = Fn.select(2, Fn.split("/", Fn.select(0, Fn.split('.', purl))))
+        parn = f"arn:aws:execute-api:{Aws.REGION}::{hostname}/*/*/*"
+
+        jwt_key = Fn.import_value("JWTKey")
+        sns_topic = Fn.import_value("ForecastSnsArn")
+        forecast_tmpl = Fn.import_value("ForecastTemplate")
+
+        sg_rds = ec2.SecurityGroup(
+                self,
+                id="sg_slurm",
+                vpc=vpc,
+                security_group_name="sg_slurm"
+        )
+        sg_rds.add_ingress_rule(
+            peer=ec2.Peer.ipv4(vpc.vpc_cidr_block),
+            connection=ec2.Port.tcp(8080)
+        )
         policy_doc = iam.PolicyDocument(statements=[
             iam.PolicyStatement(
                 actions=["execute-api:Invoke", "execute-api:ManageConnections"],
