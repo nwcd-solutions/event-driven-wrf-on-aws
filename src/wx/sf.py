@@ -94,7 +94,6 @@ class stepfunction (NestedStack):
                     "S3_URL_POST_INSTALL_HEADNODE": f"{post_head_amd64.s3_object_url}",
                     "SG": sg_rds.security_group_id,
                     "SNS_TOPIC": sns_topic,
-                    "SM_ARN": sm.state_machine_arn,
                     "SUBNETID": subnet,
                 },
                 handler="cluster.main",
