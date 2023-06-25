@@ -12,7 +12,7 @@ from wx.forecast import Forecast
 from wx.network import Vpc
 from wx.pclusterapi import ParallelClusterApi
 from wx.slurmdb import SlurmDb
-from wx.sf import Stepfunction
+from wx.sf import stepfunction
 
 class Root(Stack):
 
@@ -31,13 +31,20 @@ class Root(Stack):
         slurmdb.add_dependency(vpc)
 
         s3 = S3(self, "s3", bucket=bucket_name.value_as_string)
-
-        cluster = Cluster(self, "cluster", vpc=vpc.outputs, bucket=bucket_name.value_as_string)
-        cluster.add_dependency(forecast)
-        cluster.add_dependency(pcluster_api)
-        cluster.add_dependency(s3)
-        cluster.add_dependency(slurmdb)
-        cluster.add_dependency(vpc)
+        sf = stepfunction(self, "cluster", vpc=vpc.outputs, bucket=bucket_name.value_as_string)
+        sf.add_dependency(forecast)
+        sf.add_dependency(pcluster_api)
+        sf.add_dependency(s3)
+        sf.add_dependency(slurmdb)
+        sf.add_dependency(vpc)
+        #cluster = Cluster(self, "cluster", vpc=vpc.outputs, bucket=bucket_name.value_as_string)
+        #cluster.add_dependency(forecast)
+        #cluster.add_dependency(pcluster_api)
+        #cluster.add_dependency(s3)
+        #cluster.add_dependency(slurmdb)
+        #cluster.add_dependency(vpc)
+        #cluster.add_dependency(sf)
+        
 
     @property
     def outputs(self):
