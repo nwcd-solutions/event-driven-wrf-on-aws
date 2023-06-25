@@ -25,13 +25,7 @@ zip -r ../layer.zip python
 cd ..
 ```
 
-Download the fix/static files from NOAA. Note, this will take awhile as it
-will download ~ 2 Gigabytes.
-```
-cd resources
-./get_fix.sh
-cd ..
-```
+
 
 Then deploy the CDK stack. Note: you must specify a bucket where you want the
 forecast output uploaded to, in the following example I am using
