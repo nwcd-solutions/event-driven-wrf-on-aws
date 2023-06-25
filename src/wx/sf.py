@@ -13,6 +13,7 @@ from aws_cdk import (
     Aws, CfnOutput, Duration, Fn, NestedStack, Tags
 )
 from constructs import Construct
+import json
 
 class stepfunction (NestedStack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
@@ -114,7 +115,7 @@ class stepfunction (NestedStack):
                     "OutputPath": "$.Payload",
                     "Parameters": {
                         "Payload.$": "$",
-                        "FunctionName": cluster_lambda.functionArn
+                        "FunctionName": cluster_lambda.function_arn
                     },
                     "Retry": [
                         {
@@ -152,7 +153,7 @@ class stepfunction (NestedStack):
                     "Resource": "arn:aws:states:::lambda:invoke",
                     "Parameters": {
                         "Payload.$": "$",
-                        "FunctionName": cluster_lambda.functionArn
+                        "FunctionName": cluster_lambda.function_arn
                     },
                     "Retry": [
                         {
@@ -208,7 +209,7 @@ class stepfunction (NestedStack):
                     "OutputPath": "$.Payload",
                     "Parameters": {
                         "Payload.$": "$",
-                        "FunctionName": cluster_lambda.functionArn
+                        "FunctionName": cluster_lambda.function_arn
                     },
                     "Retry": [
                         {
@@ -252,7 +253,7 @@ class stepfunction (NestedStack):
                     "Resource": "arn:aws:states:::lambda:invoke",
                     "Parameters": {
                         "Payload.$": "$",
-                        "FunctionName": cluster_lambda.functionArn
+                        "FunctionName": cluster_lambda.function_arn
                     },
                     "Retry": [
                         {
