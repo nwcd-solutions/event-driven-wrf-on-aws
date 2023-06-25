@@ -85,13 +85,8 @@ class stepfunction (NestedStack):
                 timeout=Duration.seconds(60)
             )
         Tags.of(cluster_lambda).add("Purpose", "Event Driven Weather Forecast", priority=300)     
-        destroy_sf_def= 
-        destroy_sf = sfn.StateMachine(self, "WX_destroyStateMachine",
-            definition_string=json.dumps(destroy_sf_def),
-            timeout=Duration.minutes(65))
-
-        create_sf_def= {
-            "Comment": "state machine to create cluster",
+        destroy_sf_def={
+            "Comment": "state machine to destroy cluster",
             "StartAt": "destroy cluster",
             "States": {
                 "destroy cluster": {
@@ -101,85 +96,174 @@ class stepfunction (NestedStack):
                     "Parameters": {
                         "Payload.$": "$",
                         "FunctionName": "arn:aws:lambda:us-east-2:880755836258:function:WX-clusterNestedStackclus-lambdafuncdestroy811B2A7-3cxqzYGHhxQz:$LATEST"
-      },
-      "Retry": [
-        {
-          "ErrorEquals": [
-            "Lambda.ServiceException",
-            "Lambda.AWSLambdaException",
-            "Lambda.SdkClientException",
-            "Lambda.TooManyRequestsException"
-          ],
-          "IntervalSeconds": 2,
-          "MaxAttempts": 6,
-          "BackoffRate": 2
+                    },
+                    "Retry": [
+                        {
+                            "ErrorEquals": [
+                                "Lambda.ServiceException",
+                                "Lambda.AWSLambdaException",
+                                "Lambda.SdkClientException",
+                                "Lambda.TooManyRequestsException"
+                            ],
+                            "IntervalSeconds": 2,
+                            "MaxAttempts": 6,
+                            "BackoffRate": 2
+                        }
+                    ],
+                    "Next": "Whether cluster could be deleted"
+                },
+                "Whether cluster could be deleted": {
+                    "Type": "Choice",
+                    "Choices": [
+                        {
+                            "Variable": "$.cluster.clusterStatus",
+                            "StringEquals": "DELETE_IN_PROGRESS",
+                            "Next": "Wait for cluster deleting"
+                        }
+                    ],
+                    "Default": "Fail"
+                },
+                "Wait for cluster deleting": {
+                    "Type": "Wait",
+                    "Seconds": 60,
+                    "Next": "Monitor deleting status"
+                },
+                "Monitor deleting status": {
+                    "Type": "Task",
+                    "Resource": "arn:aws:states:::lambda:invoke",
+                    "Parameters": {
+                        "Payload.$": "$",
+                        "FunctionName": "arn:aws:lambda:us-east-2:880755836258:function:WX-clusterNestedStackclus-lambdafuncdestroy811B2A7-3cxqzYGHhxQz:$LATEST"
+                    },
+                    "Retry": [
+                        {
+                            "ErrorEquals": [
+                                "Lambda.ServiceException",
+                                "Lambda.AWSLambdaException",
+                                "Lambda.SdkClientException",
+                                "Lambda.TooManyRequestsException"
+                            ],
+                            "IntervalSeconds": 2,
+                            "MaxAttempts": 6,
+                            "BackoffRate": 2
+                        }
+                    ],
+                    "Next": "Whether Success Deleted",
+                    "OutputPath": "$.Payload"
+                },
+                "Whether Success Deleted": {
+                    "Type": "Choice",
+                    "Choices": [
+                        {
+                            "Variable": "$.cluster.clusterStatus",
+                            "StringEquals": "DELETE_COMPLETE",
+                            "Next": "Success"
+                        },
+                        {
+                            "Variable": "$.cluster.clusterStatus",
+                            "StringEquals": "DELETE_IN_PROGRESS",
+                            "Next": "Wait for cluster deleting"
+                        }
+                    ],
+                    "Default": "Fail"
+                },
+                "Fail": {
+                    "Type": "Fail"
+                },
+                "Success": {
+                    "Type": "Succeed"
+                }
+            }
+        } 
+        destroy_sf = sfn.StateMachine(self, "WX_destroyStateMachine",
+            definition_string=json.dumps(destroy_sf_def),
+            timeout=Duration.minutes(65))
+
+        create_sf_def= {
+            "Comment": "state machine to create cluster",
+            "StartAt": "Create cluster",
+            "States": {
+                "Create cluster": {
+                    "Type": "Task",
+                    "Resource": "arn:aws:states:::lambda:invoke",
+                    "OutputPath": "$.Payload",
+                    "Parameters": {
+                        "Payload.$": "$",
+                        "FunctionName": "arn:aws:lambda:us-east-2:880755836258:function:WX-clusterNestedStackclus-lambdafuncdestroy811B2A7-3cxqzYGHhxQz:$LATEST"
+                    },
+                    "Retry": [
+                        {
+                            "ErrorEquals": [
+                                "Lambda.ServiceException",
+                                "Lambda.AWSLambdaException",
+                                "Lambda.SdkClientException",
+                                "Lambda.TooManyRequestsException"
+                            ],
+                            "IntervalSeconds": 2,
+                            "MaxAttempts": 6,
+                            "BackoffRate": 2
+                        }
+                    ],
+                    "Next": "Whether cluster could be created"
+                },
+                "Whether cluster could be created": {
+                    "Type": "Choice",
+                    "Choices": [
+                        {
+                            "Not": {
+                                "Variable": "$.clusterStatus",
+                                "StringEquals": "CREATE_IN_PROGRESS"
+                            },
+                            "Next": "Pass"
+                        }
+                    ],
+                    "Default": "Wait for cluster creating"
+                },
+                "Pass": {
+                    "Type": "Pass",
+                    "End": true
+                },
+                "Wait for cluster creating": {
+                    "Type": "Wait",
+                    "Seconds": 60,
+                    "Next": "Monitor creating status"
+                },
+                "Monitor creating status": {
+                    "Type": "Task",
+                    "Resource": "arn:aws:states:::lambda:invoke",
+                    "Parameters": {
+                        "Payload.$": "$",
+                        "FunctionName": "arn:aws:lambda:us-east-2:880755836258:function:WX-clusterNestedStackclus-lambdafuncdestroy811B2A7-3cxqzYGHhxQz:$LATEST"
+                    },
+                    "Retry": [
+                        {
+                            "ErrorEquals": [
+                                "Lambda.ServiceException",
+                                "Lambda.AWSLambdaException",
+                                "Lambda.SdkClientException",
+                                "Lambda.TooManyRequestsException"
+                            ],
+                            "IntervalSeconds": 2,
+                            "MaxAttempts": 6,
+                            "BackoffRate": 2
+                        }
+                    ],
+                    "Next": "Whether Success Created",
+                    "OutputPath": "$.Payload"
+                },
+                "Whether Success Created": {
+                    "Type": "Choice",
+                    "Choices": [
+                        {
+                            "Variable": "$.cluster.clusterStatus",
+                            "StringEquals": "CREATE_IN_PROGRESS",
+                            "Next": "Wait for cluster creating"
+                        }
+                    ],
+                    "Default": "Pass"
+                }
+            }
         }
-      ],
-      "Next": "Whether cluster could be deleted"
-    },
-    "Whether cluster could be deleted": {
-      "Type": "Choice",
-      "Choices": [
-        {
-          "Variable": "$.cluster.clusterStatus",
-          "StringEquals": "DELETE_IN_PROGRESS",
-          "Next": "Wait for cluster deleting"
-        }
-      ],
-      "Default": "Fail"
-    },
-    "Wait for cluster deleting": {
-      "Type": "Wait",
-      "Seconds": 60,
-      "Next": "Monitor deleting status"
-    },
-    "Monitor deleting status": {
-      "Type": "Task",
-      "Resource": "arn:aws:states:::lambda:invoke",
-      "Parameters": {
-        "Payload.$": "$",
-        "FunctionName": "arn:aws:lambda:us-east-2:880755836258:function:WX-clusterNestedStackclus-lambdafuncdestroy811B2A7-3cxqzYGHhxQz:$LATEST"
-      },
-      "Retry": [
-        {
-          "ErrorEquals": [
-            "Lambda.ServiceException",
-            "Lambda.AWSLambdaException",
-            "Lambda.SdkClientException",
-            "Lambda.TooManyRequestsException"
-          ],
-          "IntervalSeconds": 2,
-          "MaxAttempts": 6,
-          "BackoffRate": 2
-        }
-      ],
-      "Next": "Whether Success Deleted",
-      "OutputPath": "$.Payload"
-    },
-    "Whether Success Deleted": {
-      "Type": "Choice",
-      "Choices": [
-        {
-          "Variable": "$.cluster.clusterStatus",
-          "StringEquals": "DELETE_COMPLETE",
-          "Next": "Success"
-        },
-        {
-          "Variable": "$.cluster.clusterStatus",
-          "StringEquals": "DELETE_IN_PROGRESS",
-          "Next": "Wait for cluster deleting"
-        }
-      ],
-      "Default": "Fail"
-    },
-    "Fail": {
-      "Type": "Fail"
-    },
-    "Success": {
-      "Type": "Succeed"
-    }
-  }
-}
         
         create_sf = sfn.StateMachine(self, "WX_createStateMachine",
             definition_string=json.dumps(create_sf_def),
