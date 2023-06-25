@@ -63,6 +63,10 @@ class Cluster(NestedStack):
                 actions=["iam:*"],
                 resources=["*"],
                 effect=iam.Effect.ALLOW),
+            iam.PolicyStatement(
+                actions=["cloudformation:*"],
+                resources=["*"],
+                effect=iam.Effect.ALLOW),
         ])
         lambda_role = iam.Role(self, "Role",
                 assumed_by=iam.CompositePrincipal(
