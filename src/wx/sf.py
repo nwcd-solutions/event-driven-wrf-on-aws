@@ -95,7 +95,7 @@ class stepfunction (NestedStack):
                     "OutputPath": "$.Payload",
                     "Parameters": {
                         "Payload.$": "$",
-                        "FunctionName": "arn:aws:lambda:us-east-2:880755836258:function:WX-clusterNestedStackclus-lambdafuncdestroy811B2A7-3cxqzYGHhxQz:$LATEST"
+                        "FunctionName": cluster_lambda.functionArn
                     },
                     "Retry": [
                         {
@@ -133,7 +133,7 @@ class stepfunction (NestedStack):
                     "Resource": "arn:aws:states:::lambda:invoke",
                     "Parameters": {
                         "Payload.$": "$",
-                        "FunctionName": "arn:aws:lambda:us-east-2:880755836258:function:WX-clusterNestedStackclus-lambdafuncdestroy811B2A7-3cxqzYGHhxQz:$LATEST"
+                        "FunctionName": cluster_lambda.functionArn
                     },
                     "Retry": [
                         {
@@ -189,7 +189,7 @@ class stepfunction (NestedStack):
                     "OutputPath": "$.Payload",
                     "Parameters": {
                         "Payload.$": "$",
-                        "FunctionName": "arn:aws:lambda:us-east-2:880755836258:function:WX-clusterNestedStackclus-lambdafuncdestroy811B2A7-3cxqzYGHhxQz:$LATEST"
+                        "FunctionName": cluster_lambda.functionArn
                     },
                     "Retry": [
                         {
@@ -233,7 +233,7 @@ class stepfunction (NestedStack):
                     "Resource": "arn:aws:states:::lambda:invoke",
                     "Parameters": {
                         "Payload.$": "$",
-                        "FunctionName": "arn:aws:lambda:us-east-2:880755836258:function:WX-clusterNestedStackclus-lambdafuncdestroy811B2A7-3cxqzYGHhxQz:$LATEST"
+                        "FunctionName": cluster_lambda.functionArn
                     },
                     "Retry": [
                         {
@@ -277,7 +277,7 @@ class stepfunction (NestedStack):
                     "Type": "Task",
                     "Resource": "arn:aws:states:::states:startExecution.sync:2",
                     "Parameters": {
-                        "StateMachineArn": "arn:aws:states:us-east-2:880755836258:stateMachine:ClusterCreate",
+                        "StateMachineArn": create_sf.state_machine_arn,
                         "Input": {
                             "action": "create",
                             "type": "od",
@@ -348,7 +348,7 @@ class stepfunction (NestedStack):
                     "Type": "Task",
                     "Resource": "arn:aws:states:::states:startExecution.sync:2",
                     "Parameters": {
-                        "StateMachineArn": "arn:aws:states:us-east-2:880755836258:stateMachine:ClusterDestroy",
+                        "StateMachineArn": destroy_sf.state_machine_arn,
                         "Input": {
                             "action": "destroy",
                             "clusterName.$": "$.clusterName",
