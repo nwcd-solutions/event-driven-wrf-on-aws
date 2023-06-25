@@ -154,7 +154,7 @@ class Cluster(NestedStack):
                     "SM_ARN": sm.state_machine_arn,
                     "SUBNETID": subnet,
                 },
-                handler="cluster.create",
+                handler="create.main",
                 layers=[layer],
                 log_retention=logs.RetentionDays.ONE_DAY,
                 role=lambda_role,
