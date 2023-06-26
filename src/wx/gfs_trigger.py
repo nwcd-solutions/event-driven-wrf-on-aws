@@ -57,11 +57,6 @@ class Cluster(NestedStack):
                 inline_policies={"cluster_lambda": policy_doc},
         )
 
-        subnet = vpc.public_subnets[1].subnet_id
-        for net in vpc.public_subnets:
-            if net.availability_zone == "us-east-2b":
-                subnet = net
-
         layer = λ.LayerVersion(self, "lambda_layer",
                 compatible_runtimes=[λ.Runtime.PYTHON_3_9],
                 code=λ.Code.from_asset("./layer.zip"),
