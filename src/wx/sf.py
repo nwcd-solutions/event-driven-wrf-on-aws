@@ -29,7 +29,37 @@ class stepfunction (NestedStack):
         jwt_key = Fn.import_value("JWTKey")
         sns_topic = Fn.import_value("ForecastSnsArn")
         forecast_tmpl = Fn.import_value("ForecastTemplate")
-
+        
+        sf_topic = sns.Topic(self, "WRF_workflow")
+        main_sf_policy = iam.PolicyDocument(statements=[
+            iam.PolicyStatement(
+                actions=["sns:Publish"],
+                resources=[sf_topic.topic_arn],
+                effect=iam.Effect.ALLOW),
+            iam.PolicyStatement(
+                actions=["events:*"],
+                resources=["*"],
+                effect=iam.Effect.ALLOW),
+            iam.PolicyStatement(
+                actions=["states:*"],
+                resources=["*"],
+                effect=iam.Effect.ALLOW),
+            iam.PolicyStatement(
+                actions=["xray:PutTraceSegments", "xray:PutTelemetryRecords", "xray:GetSamplingRules", "xray:GetSamplingTargets"],
+                resources=["*"],
+                effect=iam.Effect.ALLOW),            
+        ])    
+        main_sf_role = iam.Role(self, "Main SF Role",
+                assumed_by=iam.CompositePrincipal(
+                    iam.ServicePrincipal("states.amazonaws.com"),
+                    iam.ServicePrincipal("sts.amazonaws.com"),
+                ),
+                description="Create Main Step Function Role",
+                managed_policies=[
+                    iam.ManagedPolicy.from_aws_managed_policy_name("service-role/CloudWatchEventsFullAccess"),
+                    ],
+                inline_policies={"main_sf_policy": main_sf_policy},
+        )
         sg_rds = ec2.SecurityGroup(
                 self,
                 id="sg_slurm",
@@ -322,7 +352,7 @@ class stepfunction (NestedStack):
                     "Type": "Task",
                     "Resource": "arn:aws:states:::sns:publish",
                     "Parameters": {
-                        "TopicArn": "arn:aws:sns:us-east-2:880755836258:WRF",
+                        "TopicArn": sf_topic.topic_arn,
                         "Message": {
                             "message": "Clusters failed to be created complete, will start to destroy the cf",
                             "detail information": {
@@ -342,7 +372,7 @@ class stepfunction (NestedStack):
                     "Type": "Task",
                     "Resource": "arn:aws:states:::sns:publish",
                     "Parameters": {
-                        "TopicArn": "arn:aws:sns:us-east-2:880755836258:WRF",
+                        "TopicArn": sf_topic.topic_arn,
                         "Message": {
                             "message": "Clusters have been created successfully, will start to run forecast jobs",
                             "detail information": {
@@ -393,7 +423,7 @@ class stepfunction (NestedStack):
                     "Type": "Task",
                     "Resource": "arn:aws:states:::sns:publish",
                     "Parameters": {
-                        "TopicArn": "arn:aws:sns:us-east-2:880755836258:WRF",
+                        "TopicArn": sf_topic.topic_arn,
                         "Message": {
                             "message": "Clusters has been deleted"
                         }
@@ -405,7 +435,7 @@ class stepfunction (NestedStack):
                     "Type": "Task",
                     "Resource": "arn:aws:states:::sns:publish",
                     "Parameters": {
-                        "TopicArn": "arn:aws:sns:us-east-2:880755836258:WRF",
+                        "TopicArn": sf_topic.topic_arn,
                         "Message": {
                             "message": "Clusters failed to be deleted"
                         }
@@ -423,4 +453,4 @@ class stepfunction (NestedStack):
         }
         main_sf = sfn.CfnStateMachine(self, "WX_mainStateMachine",
             definition_string=json.dumps(main_sf_def),
-            role_arn=)
+            role_arn = main_sf_role.role_arn )
