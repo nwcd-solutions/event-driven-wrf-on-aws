@@ -294,7 +294,7 @@ class stepfunction (NestedStack):
                 },
                 "Pass": {
                     "Type": "Pass",
-                    "End": true
+                    "End": True
                 },
                 "Wait for cluster creating": {
                     "Type": "Wait",
