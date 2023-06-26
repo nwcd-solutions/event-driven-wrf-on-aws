@@ -107,10 +107,38 @@ class stepfunction (NestedStack):
         Tags.of(cluster_lambda).add("Purpose", "Event Driven Weather Forecast", priority=300)    
 
         create_cluster = tasks.LambdaInvoke(
-            self, "LAMBDA:Create Parallelcluster",
+            self, "LAMBDA:Command Parallelcluster",
             lambda_function=cluster_lambda,
             output_path="$.Payload",
-            payload= sfn.TaskInput.from_object({
-                "OrderId": sfn.JsonPath.string_at("$.OrderId")
-    })
+            payload=sfn.TaskInput.from_object({
+                "action": "create",
+                "type": "od",              
+            })
         )
+        destroy_cluster = tasks.LambdaInvoke(
+            self, "LAMBDA:Command Parallelcluster",
+            lambda_function=cluster_lambda,
+            output_path="$.Payload",
+        )
+        check_cluster_status = tasks.LambdaInvoke(
+            self, "LAMBDA:Command Parallelcluster",
+            lambda_function=cluster_lambda,
+            output_path="$.Payload",
+        )
+        wait_x = sfn.Wait(self, "Wait X Seconds",
+            time= 60
+        )
+        process=sfn.Pass(self,"submit jobs")
+        create_failed = sfn.Fail(self,"Cluster create failed")
+        
+        definition=create_cluster.next(sfn.Choice(self,'Whether cluster could be created?')
+                                       .when(sfn.Condition.string_notequals('$.clusterStatus','CREATE_IN_PROGRESS'),wait_x.next(check_cluster_status)
+                                           .next(sfn.Choice(self,'Whether cluster created?')
+                  .when(sfn.Condition.string_equals('$.clusterStatus','CREATE_IN_PROGRESS'),wait_x.next(check_cluster_status))
+                  .when(sfn.Condition.string_equals('$.clusterStatus','CREATE_COMPLETE'),send_create_success_notification.next(process))
+                  .otherwise(send_create_failed_notification)))
+                                       .otherwise(create_failed))\
+          
+                  
+        
+        
