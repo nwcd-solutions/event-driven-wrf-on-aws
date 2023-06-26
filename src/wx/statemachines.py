@@ -477,7 +477,7 @@ class stepfunction (NestedStack):
         main_sf = sfn.CfnStateMachine(self, "WX_mainStateMachine",
             definition_string=json.dumps(main_sf_def),
             role_arn = main_sf_role.role_arn )
-        
+        self.main_sf=main_sf.attr_arn
         CfnOutput(self, "StateMachineArn", value=main_sf.attr_arn,
             export_name="StateMachineArn")
     @property
