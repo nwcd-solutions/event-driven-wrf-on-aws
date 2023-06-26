@@ -195,7 +195,7 @@ class stepfunction (NestedStack):
                 }
             }
         } 
-        destroy_sf = sfn.StateMachine(self, "WX_destroyStateMachine",
+        destroy_sf = sfn.CfnStateMachine(self, "WX_destroyStateMachine",
             definition_string=json.dumps(destroy_sf_def),
             timeout=Duration.minutes(65))
 
@@ -285,7 +285,7 @@ class stepfunction (NestedStack):
             }
         }
         
-        create_sf = sfn.StateMachine(self, "WX_createStateMachine",
+        create_sf = sfn.CfnStateMachine(self, "WX_createStateMachine",
             definition_string=json.dumps(create_sf_def),
             timeout=Duration.minutes(65))
         
@@ -421,6 +421,6 @@ class stepfunction (NestedStack):
                 }
             }
         }
-        main_sf = sfn.StateMachine(self, "WX_mainStateMachine",
+        main_sf = sfn.CfnStateMachine(self, "WX_mainStateMachine",
             definition_string=json.dumps(main_sf_def),
             timeout=Duration.minutes(65))
