@@ -197,7 +197,7 @@ class stepfunction (NestedStack):
         } 
         destroy_sf = sfn.CfnStateMachine(self, "WX_destroyStateMachine",
             definition_string=json.dumps(destroy_sf_def),
-            timeout=Duration.minutes(65))
+            role_arn=)
 
         create_sf_def= {
             "Comment": "state machine to create cluster",
@@ -287,7 +287,7 @@ class stepfunction (NestedStack):
         
         create_sf = sfn.CfnStateMachine(self, "WX_createStateMachine",
             definition_string=json.dumps(create_sf_def),
-            timeout=Duration.minutes(65))
+            role_arn=)
         
         main_sf_def = {
             "Comment": "main state machine workflow",
@@ -297,7 +297,7 @@ class stepfunction (NestedStack):
                     "Type": "Task",
                     "Resource": "arn:aws:states:::states:startExecution.sync:2",
                     "Parameters": {
-                        "StateMachineArn": create_sf.state_machine_arn,
+                        "StateMachineArn": create_sf.attr_arn,
                         "Input": {
                             "action": "create",
                             "type": "od",
@@ -335,7 +335,7 @@ class stepfunction (NestedStack):
                             }
                         }
                     },
-                    "ResultPath": null,
+                    #"ResultPath": null,
                     "Next": "Destroy single Cluster"
                 },
                 "Publish completed message (1)": {
@@ -357,7 +357,7 @@ class stepfunction (NestedStack):
                              }
                         }
                     },
-                    "ResultPath": null,
+                    #"ResultPath": null,
                     "Next": "Pass (1)"
                 },
                 "Pass (1)": {
@@ -368,7 +368,7 @@ class stepfunction (NestedStack):
                     "Type": "Task",
                     "Resource": "arn:aws:states:::states:startExecution.sync:2",
                     "Parameters": {
-                        "StateMachineArn": destroy_sf.state_machine_arn,
+                        "StateMachineArn": destroy_sf.attr_arn,
                         "Input": {
                             "action": "destroy",
                             "clusterName.$": "$.clusterName",
@@ -399,7 +399,7 @@ class stepfunction (NestedStack):
                         }
                     },
                     "Next": "Success",
-                    "ResultPath": null
+                    #"ResultPath": null
                 },
                 "Destroy failed notification (1)": {
                     "Type": "Task",
@@ -411,7 +411,7 @@ class stepfunction (NestedStack):
                         }
                     },
                     "Next": "Fail",
-                    "ResultPath": null
+                    #"ResultPath": null
                 },
                 "Fail": {
                     "Type": "Fail"
@@ -423,4 +423,4 @@ class stepfunction (NestedStack):
         }
         main_sf = sfn.CfnStateMachine(self, "WX_mainStateMachine",
             definition_string=json.dumps(main_sf_def),
-            timeout=Duration.minutes(65))
+            role_arn=)
