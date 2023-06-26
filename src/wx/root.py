@@ -30,7 +30,7 @@ class Root(Stack):
         slurmdb = SlurmDb(self, "slurmdbd", vpc=vpc.outputs)
         slurmdb.add_dependency(vpc)
 
-        s3 = S3(self, "s3", bucket=bucket_name.value_as_string)
+        #s3 = S3(self, "s3", bucket=bucket_name.value_as_string)
         sf = stepfunction(self, "cluster", vpc=vpc.outputs, bucket=bucket_name.value_as_string)
         sf.add_dependency(forecast)
         sf.add_dependency(pcluster_api)
