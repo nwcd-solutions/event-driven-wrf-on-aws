@@ -60,6 +60,28 @@ class stepfunction (NestedStack):
                     ],
                 inline_policies={"main_sf_policy": main_sf_policy},
         )
+        sub_sf_policy = iam.PolicyDocument(statements=[
+            iam.PolicyStatement(
+                actions=["sns:Publish"],
+                resources=[sf_topic.topic_arn],
+                effect=iam.Effect.ALLOW),
+            iam.PolicyStatement(
+                actions=["lambda:InvokeFunction"],
+                resources=[cluster_lambda.function_arn],
+                effect=iam.Effect.ALLOW),
+            iam.PolicyStatement(
+                actions=["xray:PutTraceSegments", "xray:PutTelemetryRecords", "xray:GetSamplingRules", "xray:GetSamplingTargets"],
+                resources=["*"],
+                effect=iam.Effect.ALLOW),            
+        ]) 
+        sub_sf_role = iam.Role(self, "Sub SF Role",
+                assumed_by=iam.CompositePrincipal(
+                    iam.ServicePrincipal("states.amazonaws.com"),
+                    iam.ServicePrincipal("sts.amazonaws.com"),
+                ),
+                description="Create Sub Step Function Role",
+                inline_policies={"sub_sf_policy": sub_sf_policy},
+        )
         sg_rds = ec2.SecurityGroup(
                 self,
                 id="sg_slurm",
@@ -227,7 +249,7 @@ class stepfunction (NestedStack):
         } 
         destroy_sf = sfn.CfnStateMachine(self, "WX_destroyStateMachine",
             definition_string=json.dumps(destroy_sf_def),
-            role_arn=)
+            role_arn= sub_sf_role.role_arn )
 
         create_sf_def= {
             "Comment": "state machine to create cluster",
@@ -317,7 +339,7 @@ class stepfunction (NestedStack):
         
         create_sf = sfn.CfnStateMachine(self, "WX_createStateMachine",
             definition_string=json.dumps(create_sf_def),
-            role_arn=)
+            role_arn= sub_sf_role.role_arn )
         
         main_sf_def = {
             "Comment": "main state machine workflow",
