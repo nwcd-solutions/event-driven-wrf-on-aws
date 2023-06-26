@@ -29,59 +29,7 @@ class stepfunction (NestedStack):
         jwt_key = Fn.import_value("JWTKey")
         sns_topic = Fn.import_value("ForecastSnsArn")
         forecast_tmpl = Fn.import_value("ForecastTemplate")
-        
-        sf_topic = sns.Topic(self, "WRF_workflow")
-        main_sf_policy = iam.PolicyDocument(statements=[
-            iam.PolicyStatement(
-                actions=["sns:Publish"],
-                resources=[sf_topic.topic_arn],
-                effect=iam.Effect.ALLOW),
-            iam.PolicyStatement(
-                actions=["events:*"],
-                resources=["*"],
-                effect=iam.Effect.ALLOW),
-            iam.PolicyStatement(
-                actions=["states:*"],
-                resources=["*"],
-                effect=iam.Effect.ALLOW),
-            iam.PolicyStatement(
-                actions=["xray:PutTraceSegments", "xray:PutTelemetryRecords", "xray:GetSamplingRules", "xray:GetSamplingTargets"],
-                resources=["*"],
-                effect=iam.Effect.ALLOW),            
-        ])    
-        main_sf_role = iam.Role(self, "Main SF Role",
-                assumed_by=iam.CompositePrincipal(
-                    iam.ServicePrincipal("states.amazonaws.com"),
-                    iam.ServicePrincipal("sts.amazonaws.com"),
-                ),
-                description="Create Main Step Function Role",
-                managed_policies=[
-                    iam.ManagedPolicy.from_aws_managed_policy_name("service-role/CloudWatchEventsFullAccess"),
-                    ],
-                inline_policies={"main_sf_policy": main_sf_policy},
-        )
-        sub_sf_policy = iam.PolicyDocument(statements=[
-            iam.PolicyStatement(
-                actions=["sns:Publish"],
-                resources=[sf_topic.topic_arn],
-                effect=iam.Effect.ALLOW),
-            iam.PolicyStatement(
-                actions=["lambda:InvokeFunction"],
-                resources=[cluster_lambda.function_arn],
-                effect=iam.Effect.ALLOW),
-            iam.PolicyStatement(
-                actions=["xray:PutTraceSegments", "xray:PutTelemetryRecords", "xray:GetSamplingRules", "xray:GetSamplingTargets"],
-                resources=["*"],
-                effect=iam.Effect.ALLOW),            
-        ]) 
-        sub_sf_role = iam.Role(self, "Sub SF Role",
-                assumed_by=iam.CompositePrincipal(
-                    iam.ServicePrincipal("states.amazonaws.com"),
-                    iam.ServicePrincipal("sts.amazonaws.com"),
-                ),
-                description="Create Sub Step Function Role",
-                inline_policies={"sub_sf_policy": sub_sf_policy},
-        )
+                
         sg_rds = ec2.SecurityGroup(
                 self,
                 id="sg_slurm",
@@ -156,7 +104,60 @@ class stepfunction (NestedStack):
                 runtime=λ.Runtime.PYTHON_3_9,
                 timeout=Duration.seconds(60)
             )
-        Tags.of(cluster_lambda).add("Purpose", "Event Driven Weather Forecast", priority=300)     
+        Tags.of(cluster_lambda).add("Purpose", "Event Driven Weather Forecast", priority=300)    
+
+        sf_topic = sns.Topic(self, "WRF_workflow")
+        main_sf_policy = iam.PolicyDocument(statements=[
+            iam.PolicyStatement(
+                actions=["sns:Publish"],
+                resources=[sf_topic.topic_arn],
+                effect=iam.Effect.ALLOW),
+            iam.PolicyStatement(
+                actions=["events:*"],
+                resources=["*"],
+                effect=iam.Effect.ALLOW),
+            iam.PolicyStatement(
+                actions=["states:*"],
+                resources=["*"],
+                effect=iam.Effect.ALLOW),
+            iam.PolicyStatement(
+                actions=["xray:PutTraceSegments", "xray:PutTelemetryRecords", "xray:GetSamplingRules", "xray:GetSamplingTargets"],
+                resources=["*"],
+                effect=iam.Effect.ALLOW),            
+        ])    
+        main_sf_role = iam.Role(self, "Main SF Role",
+                assumed_by=iam.CompositePrincipal(
+                    iam.ServicePrincipal("states.amazonaws.com"),
+                    iam.ServicePrincipal("sts.amazonaws.com"),
+                ),
+                description="Create Main Step Function Role",
+                managed_policies=[
+                    iam.ManagedPolicy.from_aws_managed_policy_name("service-role/CloudWatchEventsFullAccess"),
+                    ],
+                inline_policies={"main_sf_policy": main_sf_policy},
+        )
+        sub_sf_policy = iam.PolicyDocument(statements=[
+            iam.PolicyStatement(
+                actions=["sns:Publish"],
+                resources=[sf_topic.topic_arn],
+                effect=iam.Effect.ALLOW),
+            iam.PolicyStatement(
+                actions=["lambda:InvokeFunction"],
+                resources=[cluster_lambda.function_arn],
+                effect=iam.Effect.ALLOW),
+            iam.PolicyStatement(
+                actions=["xray:PutTraceSegments", "xray:PutTelemetryRecords", "xray:GetSamplingRules", "xray:GetSamplingTargets"],
+                resources=["*"],
+                effect=iam.Effect.ALLOW),            
+        ]) 
+        sub_sf_role = iam.Role(self, "Sub SF Role",
+                assumed_by=iam.CompositePrincipal(
+                    iam.ServicePrincipal("states.amazonaws.com"),
+                    iam.ServicePrincipal("sts.amazonaws.com"),
+                ),
+                description="Create Sub Step Function Role",
+                inline_policies={"sub_sf_policy": sub_sf_policy},
+        )
         destroy_sf_def={
             "Comment": "state machine to destroy cluster",
             "StartAt": "destroy cluster",
