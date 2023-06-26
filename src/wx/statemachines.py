@@ -478,7 +478,7 @@ class stepfunction (NestedStack):
             definition_string=json.dumps(main_sf_def),
             role_arn = main_sf_role.role_arn )
         
-        CfnOutput(self, "StateMachineArn", value=main_sf.state_attr_arn,
+        CfnOutput(self, "StateMachineArn", value=main_sf.attr_arn,
             export_name="StateMachineArn")
     @property
     def outputs(self):
