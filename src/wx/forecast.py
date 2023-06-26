@@ -63,7 +63,7 @@ class Forecast(NestedStack):
                 code=λ.Code.from_asset("./lambda"),
                 environment={
                     "BUCKET_NAME": bucket_name,
-                    "DOMAINS_NUM":2,
+                    "DOMAINS_NUM": "2",
                 },
                 handler="forecast.main",
                 layers=[layer],
