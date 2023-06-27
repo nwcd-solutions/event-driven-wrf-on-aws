@@ -91,7 +91,6 @@ class stepfunction (NestedStack):
                     "JWTKEY": jwt_key,
                     "PCLUSTER_API_URL": purl,
                     "REGION": Aws.REGION,
-                    "FORECAST_TMPL": forecast_tmpl,
                     "S3_URL_POST_INSTALL_HEADNODE": f"{post_head_amd64.s3_object_url}",
                     "SG": sg_rds.security_group_id,
                     "SNS_TOPIC": sns_topic,
