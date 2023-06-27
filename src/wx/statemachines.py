@@ -28,7 +28,7 @@ class stepfunction (NestedStack):
                 path="scripts/post_install_amd64.sh")
         jwt_key = Fn.import_value("JWTKey")
         sns_topic = Fn.import_value("ForecastSnsArn")
-        forecast_tmpl = Fn.import_value("ForecastTemplate")
+        
                 
         sg_rds = ec2.SecurityGroup(
                 self,
