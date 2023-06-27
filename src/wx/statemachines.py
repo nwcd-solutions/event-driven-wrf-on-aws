@@ -131,7 +131,7 @@ class stepfunction (NestedStack):
                 ),
                 description="Create Main Step Function Role",
                 managed_policies=[
-                    iam.ManagedPolicy.from_aws_managed_policy_name("service-role/CloudWatchEventsFullAccess"),
+                    iam.ManagedPolicy.from_aws_managed_policy_name("CloudWatchEventsFullAccess"),
                     ],
                 inline_policies={"main_sf_policy": main_sf_policy},
         )
