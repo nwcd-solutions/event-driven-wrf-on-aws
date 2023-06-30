@@ -35,7 +35,7 @@ forecast output uploaded to, in the following example I am using
 cdk bootstrap
 cdk deploy --parameters BucketName=my-bucket-name
 ```
-add policy to the role that contains "ParallelClusterUserRole"
+add inline policy to the role that contains "ParallelClusterUserRole"
 ```
 {
     "Version": "2012-10-17",
