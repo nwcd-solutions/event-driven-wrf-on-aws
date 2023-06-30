@@ -21,29 +21,24 @@ class Root(Stack):
 
         bucket_name = CfnParameter(self, "BucketName", type="String",
             description="The name of the Amazon S3 bucket where the forecast files will be stored.")
-
+        domain_num = CfnParameter(self, "Domain_num", type="String", default="2",description="number of domains for WRF")
+        forecast_days= fnParameter(self, "Forecast_days",type="String", default="2",description="number of forecast days")
+        
         vpc = Vpc(self, "vpc")
 
-        forecast = Forecast(self, "forecast", vpc=vpc.outputs, bucket=bucket_name.value_as_string)
+        forecast = Forecast(self, "forecast", vpc=vpc.outputs, bucket=bucket_name.value_as_string,domains=domain_num.value_as_string,days=forecast_days.value_as_string)
         pcluster_api = ParallelClusterApi(self, "parallel-cluster-api")
 
         slurmdb = SlurmDb(self, "slurmdbd", vpc=vpc.outputs)
         slurmdb.add_dependency(vpc)
 
-        #s3 = S3(self, "s3", bucket=bucket_name.value_as_string)
-        sf = stepfunction(self, "cluster", vpc=vpc.outputs, bucket=bucket_name.value_as_string)
+        sf = stepfunction(self, "cluster", vpc=vpc.outputs, bucket=bucket_name.value_as_string,domains=domain_num.value_as_string,days=forecast_days.value_as_string)
         sf.add_dependency(forecast)
         sf.add_dependency(pcluster_api)        
         sf.add_dependency(slurmdb)
         sf.add_dependency(vpc)
         trigger = Trigger(self, "trigger", sf=sf.outputs)
-        #trigger = Trigger(self, "trigger", sf=sf.outputs, bucket=bucket_name.value_as_string)
-        #cluster.add_dependency(forecast)
-        #cluster.add_dependency(pcluster_api)
-        #cluster.add_dependency(s3)
-        #cluster.add_dependency(slurmdb)
-        #cluster.add_dependency(vpc)
-        #cluster.add_dependency(sf)
+       
         
 
     @property
