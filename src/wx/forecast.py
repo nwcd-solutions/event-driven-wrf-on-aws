@@ -20,7 +20,8 @@ class Forecast(NestedStack):
 
         vpc = kwargs["vpc"]
         bucket_name = kwargs["bucket"]
-
+        domains= kwargs["domains"]
+        forecast_days = kwargs["days"]
         self.sns_kms = kms.Key(self, "ForecastSnsKey",
                 alias="wx/sns",
                 description="KMS Key for Forecast SNS Topic",
@@ -63,7 +64,8 @@ class Forecast(NestedStack):
                 code=λ.Code.from_asset("./lambda"),
                 environment={
                     "BUCKET_NAME": bucket_name,
-                    "DOMAINS_NUM": "2",
+                    "DOMAINS_NUM": domains,
+                    "FORECAST_DAYS":forecast_days,
                 },
                 handler="forecast.main",
                 layers=[layer],
