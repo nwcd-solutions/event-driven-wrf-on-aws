@@ -157,231 +157,241 @@ class stepfunction (NestedStack):
                 description="Create Sub Step Function Role",
                 inline_policies={"sub_sf_policy": sub_sf_policy},
         )
-st_def={
-  "Comment": "state machine to manager lifecycle of cluster",
-  "StartAt": "Create cluster",
-  "States": {
-    "Create cluster": {
-      "Type": "Task",
-      "Resource": "arn:aws:states:::lambda:invoke",
-      "OutputPath": "$.Payload",
-      "Parameters": {
-        "Payload.$": "$",
-        "FunctionName": "arn:aws:lambda:us-east-1:880755836258:function:WX001-clusterNestedStackc-lambdafuncclusterCC7465E-Ntugh5kx6KpR"
-      },
-      "Retry": [
-        {
-          "ErrorEquals": [
-            "Lambda.ServiceException",
-            "Lambda.AWSLambdaException",
-            "Lambda.SdkClientException",
-            "Lambda.TooManyRequestsException"
-          ],
-          "IntervalSeconds": 2,
-          "MaxAttempts": 6,
-          "BackoffRate": 2
+        st_def={
+          "Comment": "state machine to manager lifecycle of cluster",
+          "StartAt": "Create cluster",
+          "States": {
+            "Create cluster": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "OutputPath": "$.Payload",
+              "Parameters": {
+                "Payload.$": "$",
+                "FunctionName": cluster_lambda.function_arn
+              },
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "Lambda.ServiceException",
+                    "Lambda.AWSLambdaException",
+                    "Lambda.SdkClientException",
+                    "Lambda.TooManyRequestsException"
+                  ],
+                  "IntervalSeconds": 2,
+                  "MaxAttempts": 6,
+                  "BackoffRate": 2
+                }
+              ],
+              "Next": "Whether cluster could be created"
+            },
+            "Whether cluster could be created": {
+              "Type": "Choice",
+              "Choices": [
+                {
+                  "Not": {
+                    "Variable": "$.clusterStatus",
+                    "StringEquals": "CREATE_IN_PROGRESS"
+                  },
+                  "Next": "Publish Fail to create cluster message-1"
+                }
+              ],
+              "Default": "Wait for cluster creating"
+            },
+            "Publish Fail to create cluster message-1": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::sns:publish",
+              "Parameters": {
+                "Message.$": "$",
+                "TopicArn":sf_topic.topic_arn
+              },
+              "Next": "Fail"
+            },
+            "Fail": {
+              "Type": "Fail"
+            },
+            "Pass": {
+              "Type": "Pass",
+              "Next": "destroy cluster"
+            },
+            "destroy cluster": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "OutputPath": "$.Payload",
+              "Parameters": {
+                "Payload.$": "$",
+                "FunctionName": cluster_lambda.function_arn
+              },
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "Lambda.ServiceException",
+                    "Lambda.AWSLambdaException",
+                    "Lambda.SdkClientException",
+                    "Lambda.TooManyRequestsException"
+                  ],
+                  "IntervalSeconds": 2,
+                  "MaxAttempts": 6,
+                  "BackoffRate": 2
+                }
+              ],
+              "Next": "Choice"
+            },
+            "Choice": {
+              "Type": "Choice",
+              "Choices": [
+                {
+                  "Variable": "$.cluster.clusterStatus",
+                  "StringEquals": "DELETE_IN_PROGRESS",
+                  "Next": "Wait for cluster deleting"
+                }
+              ],
+              "Default": "Destroy failed notification (1)"
+            },
+            "Destroy failed notification (1)": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::sns:publish",
+              "Parameters": {
+                "Message.$": "$",
+                "TopicArn": sf_topic.topic_arn
+              },
+              "Next": "Fail"
+            },
+            "Wait for cluster deleting": {
+              "Type": "Wait",
+              "Seconds": 60,
+              "Next": "Monitor deleting status"
+            },
+            "Monitor deleting status": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "OutputPath": "$.Payload",
+              "Parameters": {
+                "Payload.$": "$",
+                "FunctionName": cluster_lambda.function_arn
+              },
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "Lambda.ServiceException",
+                    "Lambda.AWSLambdaException",
+                    "Lambda.SdkClientException",
+                    "Lambda.TooManyRequestsException"
+                  ],
+                  "IntervalSeconds": 2,
+                  "MaxAttempts": 6,
+                  "BackoffRate": 2
+                }
+              ],
+              "Next": "Whether Success Deleted"
+            },
+            "Whether Success Deleted": {
+              "Type": "Choice",
+              "Choices": [
+                {
+                  "Variable": "$.cluster.clusterStatus",
+                  "StringEquals": "DELETE_COMPLETE",
+                  "Next": "Destroy complete notification"
+                },
+                {
+                  "Variable": "$.cluster.clusterStatus",
+                  "StringEquals": "DELETE_IN_PROGRESS",
+                  "Next": "Wait for cluster deleting"
+                }
+              ],
+              "Default": "Destroy failed notification (2)"
+            },
+            "Destroy complete notification": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::sns:publish",
+              "Parameters": {
+                "Message.$": "$",
+                "TopicArn": sf_topic.topic_arn
+              },
+              "Next": "Success"
+            },
+            "Destroy failed notification (2)": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::sns:publish",
+              "Parameters": {
+                "Message.$": "$",
+                "TopicArn": sf_topic.topic_arn
+              },
+              "Next": "Fail"
+            },
+            "Success": {
+              "Type": "Succeed"
+            },
+            "Wait for cluster creating": {
+              "Type": "Wait",
+              "Seconds": 60,
+              "Next": "Monitor creating status"
+            },
+            "Monitor creating status": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Parameters": {
+                "Payload.$": "$",
+                "FunctionName": cluster_lambda.function_arn
+              },
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "Lambda.ServiceException",
+                    "Lambda.AWSLambdaException",
+                    "Lambda.SdkClientException",
+                    "Lambda.TooManyRequestsException"
+                  ],
+                  "IntervalSeconds": 2,
+                  "MaxAttempts": 6,
+                  "BackoffRate": 2
+                }
+              ],
+              "Next": "Whether Success Created",
+              "OutputPath": "$.Payload"
+            },
+            "Whether Success Created": {
+              "Type": "Choice",
+              "Choices": [
+                {
+                  "Variable": "$.cluster.clusterStatus",
+                  "StringEquals": "CREATE_IN_PROGRESS",
+                  "Next": "Wait for cluster creating"
+                },
+                {
+                  "Variable": "$.cluster.clusterStatus",
+                  "StringEquals": "CREATE_COMPLETE",
+                  "Next": "Create complete notification"
+                }
+              ],
+              "Default": "Publish Fail to create cluster message-2"
+            },
+            "Publish Fail to create cluster message-2": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::sns:publish",
+              "Parameters": {
+                "Message.$": "$",
+                "TopicArn": sf_topic.topic_arn
+              },
+              "Next": "destroy cluster"
+            },
+            "Create complete notification": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::sns:publish",
+              "Parameters": {
+                "Message.$": "$",
+                "TopicArn": sf_topic.topic_arn
+              },
+              "Next": "Pass"
+            }
+          }
         }
-      ],
-      "Next": "Whether cluster could be created"
-    },
-    "Whether cluster could be created": {
-      "Type": "Choice",
-      "Choices": [
-        {
-          "Not": {
-            "Variable": "$.clusterStatus",
-            "StringEquals": "CREATE_IN_PROGRESS"
-          },
-          "Next": "Publish Fail to create cluster message-1"
-        }
-      ],
-      "Default": "Wait for cluster creating"
-    },
-    "Publish Fail to create cluster message-1": {
-      "Type": "Task",
-      "Resource": "arn:aws:states:::sns:publish",
-      "Parameters": {
-        "Message.$": "$",
-        "TopicArn": "arn:aws:sns:us-east-1:880755836258:WX001-clusterNestedStackclusterNestedStackResource2A62D9A6-YKIXUVZXGUMM-WRFworkflowC6F39B6F-OWxxGcHPLvKB"
-      },
-      "Next": "Fail"
-    },
-    "Fail": {
-      "Type": "Fail"
-    },
-    "Pass": {
-      "Type": "Pass",
-      "Next": "destroy cluster"
-    },
-    "destroy cluster": {
-      "Type": "Task",
-      "Resource": "arn:aws:states:::lambda:invoke",
-      "OutputPath": "$.Payload",
-      "Parameters": {
-        "Payload.$": "$",
-        "FunctionName": "arn:aws:lambda:us-east-1:880755836258:function:WX001-clusterNestedStackc-lambdafuncclusterCC7465E-Ntugh5kx6KpR"
-      },
-      "Retry": [
-        {
-          "ErrorEquals": [
-            "Lambda.ServiceException",
-            "Lambda.AWSLambdaException",
-            "Lambda.SdkClientException",
-            "Lambda.TooManyRequestsException"
-          ],
-          "IntervalSeconds": 2,
-          "MaxAttempts": 6,
-          "BackoffRate": 2
-        }
-      ],
-      "Next": "Choice"
-    },
-    "Choice": {
-      "Type": "Choice",
-      "Choices": [
-        {
-          "Variable": "$.cluster.clusterStatus",
-          "StringEquals": "DELETE_IN_PROGRESS",
-          "Next": "Wait for cluster deleting"
-        }
-      ],
-      "Default": "Destroy failed notification (1)"
-    },
-    "Destroy failed notification (1)": {
-      "Type": "Task",
-      "Resource": "arn:aws:states:::sns:publish",
-      "Parameters": {
-        "Message.$": "$",
-        "TopicArn": "arn:aws:sns:us-east-1:880755836258:WX001-clusterNestedStackclusterNestedStackResource2A62D9A6-YKIXUVZXGUMM-WRFworkflowC6F39B6F-OWxxGcHPLvKB"
-      },
-      "Next": "Fail"
-    },
-    "Wait for cluster deleting": {
-      "Type": "Wait",
-      "Seconds": 60,
-      "Next": "Monitor deleting status"
-    },
-    "Monitor deleting status": {
-      "Type": "Task",
-      "Resource": "arn:aws:states:::lambda:invoke",
-      "OutputPath": "$.Payload",
-      "Parameters": {
-        "Payload.$": "$",
-        "FunctionName": "arn:aws:lambda:us-east-1:880755836258:function:WX001-clusterNestedStackc-lambdafuncclusterCC7465E-Ntugh5kx6KpR"
-      },
-      "Retry": [
-        {
-          "ErrorEquals": [
-            "Lambda.ServiceException",
-            "Lambda.AWSLambdaException",
-            "Lambda.SdkClientException",
-            "Lambda.TooManyRequestsException"
-          ],
-          "IntervalSeconds": 2,
-          "MaxAttempts": 6,
-          "BackoffRate": 2
-        }
-      ],
-      "Next": "Whether Success Deleted"
-    },
-    "Whether Success Deleted": {
-      "Type": "Choice",
-      "Choices": [
-        {
-          "Variable": "$.cluster.clusterStatus",
-          "StringEquals": "DELETE_COMPLETE",
-          "Next": "Destroy complete notification"
-        },
-        {
-          "Variable": "$.cluster.clusterStatus",
-          "StringEquals": "DELETE_IN_PROGRESS",
-          "Next": "Wait for cluster deleting"
-        }
-      ],
-      "Default": "Destroy failed notification (2)"
-    },
-    "Destroy complete notification": {
-      "Type": "Task",
-      "Resource": "arn:aws:states:::sns:publish",
-      "Parameters": {
-        "Message.$": "$",
-        "TopicArn": "arn:aws:sns:us-east-1:880755836258:WX001-clusterNestedStackclusterNestedStackResource2A62D9A6-YKIXUVZXGUMM-WRFworkflowC6F39B6F-OWxxGcHPLvKB"
-      },
-      "Next": "Success"
-    },
-    "Destroy failed notification (2)": {
-      "Type": "Task",
-      "Resource": "arn:aws:states:::sns:publish",
-      "Parameters": {
-        "Message.$": "$",
-        "TopicArn": "arn:aws:sns:us-east-1:880755836258:WX001-clusterNestedStackclusterNestedStackResource2A62D9A6-YKIXUVZXGUMM-WRFworkflowC6F39B6F-OWxxGcHPLvKB"
-      },
-      "Next": "Fail"
-    },
-    "Success": {
-      "Type": "Succeed"
-    },
-    "Wait for cluster creating": {
-      "Type": "Wait",
-      "Seconds": 60,
-      "Next": "Monitor creating status"
-    },
-    "Monitor creating status": {
-      "Type": "Task",
-      "Resource": "arn:aws:states:::lambda:invoke",
-      "Parameters": {
-        "Payload.$": "$",
-        "FunctionName": "arn:aws:lambda:us-east-1:880755836258:function:WX001-clusterNestedStackc-lambdafuncclusterCC7465E-Ntugh5kx6KpR"
-      },
-      "Retry": [
-        {
-          "ErrorEquals": [
-            "Lambda.ServiceException",
-            "Lambda.AWSLambdaException",
-            "Lambda.SdkClientException",
-            "Lambda.TooManyRequestsException"
-          ],
-          "IntervalSeconds": 2,
-          "MaxAttempts": 6,
-          "BackoffRate": 2
-        }
-      ],
-      "Next": "Whether Success Created",
-      "OutputPath": "$.Payload"
-    },
-    "Whether Success Created": {
-      "Type": "Choice",
-      "Choices": [
-        {
-          "Variable": "$.cluster.clusterStatus",
-          "StringEquals": "CREATE_IN_PROGRESS",
-          "Next": "Wait for cluster creating"
-        },
-        {
-          "Variable": "$.cluster.clusterStatus",
-          "StringEquals": "CREATE_COMPLETE",
-          "Next": "Create complete notification"
-        }
-      ],
-      "Default": "Publish Fail to create cluster message-2"
-    },
-    "Publish Fail to create cluster message-2": {
-      "Type": "Task",
-      "Resource": "arn:aws:states:::sns:publish",
-      "Parameters": {
-        "Message.$": "$",
-        "TopicArn": "arn:aws:sns:us-east-1:880755836258:WX001-clusterNestedStackclusterNestedStackResource2A62D9A6-YKIXUVZXGUMM-WRFworkflowC6F39B6F-OWxxGcHPLvKB"
-      },
-      "Next": "destroy cluster"
-    },
-    "Create complete notification": {
-      "Type": "Task",
-      "Resource": "arn:aws:states:::sns:publish",
-      "Parameters": {
-        "Message.$": "$",
-        "TopicArn": "arn:aws:sns:us-east-1:880755836258:WX001-clusterNestedStackclusterNestedStackResource2A62D9A6-YKIXUVZXGUMM-WRFworkflowC6F39B6F-OWxxGcHPLvKB"
-      },
-      "Next": "Pass"
-    }
-  }
-}
+        main_sf = sfn.CfnStateMachine(self, "WX_mainStateMachine",
+            definition_string=json.dumps(sf_def),
+            role_arn = main_sf_role.role_arn )
+        self.main_sf=main_sf.attr_arn
+        CfnOutput(self, "StateMachineArn", value=main_sf.attr_arn,
+            export_name="StateMachineArn")
+
+    @property
+    def outputs(self):
+        return self.main_sf
