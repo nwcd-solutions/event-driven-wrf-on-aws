@@ -186,6 +186,7 @@ class stepfunction (NestedStack):
                 "Message.$": "$",
                 "TopicArn":sf_topic.topic_arn
               },
+              "ResultPath":None,
               "Next": "Fail"
             },
             "Fail": {
@@ -236,6 +237,7 @@ class stepfunction (NestedStack):
                 "Message.$": "$",
                 "TopicArn": sf_topic.topic_arn
               },
+              "ResultPath":None,
               "Next": "Fail"
             },
             "Wait for cluster deleting": {
@@ -289,6 +291,7 @@ class stepfunction (NestedStack):
                 "Message.$": "$",
                 "TopicArn": sf_topic.topic_arn
               },
+              "ResultPath":None,
               "Next": "Success"
             },
             "Destroy failed notification (2)": {
@@ -298,6 +301,7 @@ class stepfunction (NestedStack):
                 "Message.$": "$",
                 "TopicArn": sf_topic.topic_arn
               },
+              "ResultPath":None,                
               "Next": "Fail"
             },
             "Success": {
@@ -354,6 +358,7 @@ class stepfunction (NestedStack):
                 "Message.$": "$",
                 "TopicArn": sf_topic.topic_arn
               },
+              "ResultPath":None,                
               "Next": "destroy cluster"
             },
             "Create complete notification": {
@@ -363,6 +368,7 @@ class stepfunction (NestedStack):
                 "Message.$": "$",
                 "TopicArn": sf_topic.topic_arn
               },
+              "ResultPath":None,                
               "Next": "Pass"
             }
           }
