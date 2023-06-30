@@ -1,4 +1,4 @@
-Region: us-east-2
+Region: {REGION: ''}
 Image:
   Os: alinux2
   CustomAmi: ami-0a7309444dfeeb105
@@ -6,11 +6,11 @@ Tags:
   - Key: Purpose
     Value: Event Driven Weather Forecast
 HeadNode:
-  InstanceType: c6a.2xlarge
+  InstanceType: c6a.xlarge
   Networking:
-    SubnetId: subnet-06a43f36f728f6977
+    SubnetId: {SUBNET: ''}
     AdditionalSecurityGroups: !!seq
-      - sg-061abebb370cbf50c
+      - {SLURM: ''}
   Iam:
     AdditionalIamPolicies:
       - Policy: arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
@@ -28,11 +28,12 @@ HeadNode:
     OnNodeConfigured:
       Script: https://raw.githubusercontent.com/nwcd-solutions/wrf-on-aws/master/pc_setup_scripts/post_install_amd.sh
       Args: !!seq
-        - 'us-east-2'
-        - 'arn:aws:sns:us-east-2:880755836258:WX-forecastNestedStackforecastNestedStackResourceCD5EEE21-1PPFPPZ72ECR3-ForecastSns63AC5997-wc6JYDDx30eB'
-        - '2023-4-25:00:00:00Z'
-        - 'JWTKey'
-        - ’wrf-st00101'
+        - {REGION: ''}
+        - {SNS: ''}
+        - {FTIME: ''}
+        - {JWT: ''}
+        - {BUCKET_NAME: ''}
+        - {FORECASTDAYS: ''}
 Scheduling:
   Scheduler: slurm
   SlurmQueues:
@@ -46,7 +47,7 @@ Scheduling:
             Enabled: true
       Networking:
         SubnetIds: !!seq
-          - subnet-06a43f36f728f6977
+          - {SUBNET: ''}
         PlacementGroup:
           Enabled: true
       Iam:
