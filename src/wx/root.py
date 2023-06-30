@@ -22,7 +22,7 @@ class Root(Stack):
         bucket_name = CfnParameter(self, "BucketName", type="String",
             description="The name of the Amazon S3 bucket where the forecast files will be stored.")
         domain_num = CfnParameter(self, "Domain_num", type="String", default="2",description="number of domains for WRF")
-        forecast_days= fnParameter(self, "Forecast_days",type="String", default="2",description="number of forecast days")
+        forecast_days= CfnParameter(self, "Forecast_days",type="String", default="2",description="number of forecast days")
         
         vpc = Vpc(self, "vpc")
 
