@@ -19,7 +19,7 @@ class ParallelClusterApi(NestedStack):
         template_yaml = assets.Asset(self, "PClusterTemplate",
                 path="resources/parallelcluster-api.yaml"
         )
-        template_url = f"https://{template_yaml.s3_bucket_name}.s3.us-east-1.amazonaws.com/{template_yaml.s3_object_key}"
+        template_url = f"https://{template_yaml.s3_bucket_name}.s3.{region}.amazonaws.com/{template_yaml.s3_object_key}"
         params = {
                 "ApiDefinitionS3Uri": f"s3://{region}-aws-parallelcluster/parallelcluster/{version}/api/ParallelCluster.openapi.yaml",
                 "EnableIamAdminAccess": "true",
