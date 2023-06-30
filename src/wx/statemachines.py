@@ -335,12 +335,12 @@ class stepfunction (NestedStack):
               "Type": "Choice",
               "Choices": [
                 {
-                  "Variable": "$.cluster.clusterStatus",
+                  "Variable": "$.clusterStatus",
                   "StringEquals": "CREATE_IN_PROGRESS",
                   "Next": "Wait for cluster creating"
                 },
                 {
-                  "Variable": "$.cluster.clusterStatus",
+                  "Variable": "$.clusterStatus",
                   "StringEquals": "CREATE_COMPLETE",
                   "Next": "Create complete notification"
                 }
