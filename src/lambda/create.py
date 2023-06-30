@@ -1,3 +1,5 @@
+import json
+
 def main(event, context):
     
     msg = json.loads(event["Records"][0]["Sns"]["Message"])
