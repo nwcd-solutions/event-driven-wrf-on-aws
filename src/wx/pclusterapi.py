@@ -15,7 +15,7 @@ class ParallelClusterApi(NestedStack):
 
         aid = Aws.ACCOUNT_ID
         region = Aws.REGION
-        version = "3.1.4"
+        version = "3.5.0"
         template_yaml = assets.Asset(self, "PClusterTemplate",
                 path="resources/parallelcluster-api.yaml"
         )
