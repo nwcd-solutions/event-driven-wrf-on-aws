@@ -139,7 +139,7 @@ class stepfunction (NestedStack):
                     ],
                 inline_policies={"main_sf_policy": main_sf_policy},
         )
-        st_def={
+        sf_def={
           "Comment": "state machine to manager lifecycle of cluster",
           "StartAt": "Create cluster",
           "States": {
