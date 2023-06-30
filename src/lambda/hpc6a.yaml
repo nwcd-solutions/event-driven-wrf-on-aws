@@ -49,6 +49,10 @@ Scheduling:
           - subnet-06a43f36f728f6977
         PlacementGroup:
           Enabled: true
+      Iam:
+        S3Access:
+          - BucketName: {BUCKET_NAME: ''}
+            EnableWriteAccess: true
 SharedStorage:
   - Name: Ebs0
     StorageType: Ebs
