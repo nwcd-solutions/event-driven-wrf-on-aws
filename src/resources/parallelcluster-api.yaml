@@ -22,7 +22,7 @@ Parameters:
   ApiDefinitionS3Uri:
     Description: S3 URI of the ParallelCluster API spec
     Type: String
-    Default: s3://us-east-1-aws-parallelcluster/parallelcluster/3.1.4/api/ParallelCluster.openapi.yaml
+    Default: s3://us-east-1-aws-parallelcluster/parallelcluster/3.5.0/api/ParallelCluster.openapi.yaml
 
   CustomDomainName:
     Description: When specified, the custom domain name of the ParallelCluster API. Requires specifying a custom domain certificate
@@ -42,7 +42,7 @@ Parameters:
   PublicEcrImageUri:
     Description: When specified, the URI of the Docker image for the Lambda of the ParallelCluster API
     Type: String
-    Default: public.ecr.aws/parallelcluster/pcluster-api:3.1.4
+    Default: public.ecr.aws/parallelcluster/pcluster-api:3.5.0
 
   VpcEndpointId:
     Description: When specified, configure a private API with the specified endpoint
@@ -58,7 +58,28 @@ Parameters:
     AllowedValues:
       - true
       - false
+  
+  EnableFSxS3Access:
+    Description: |
+      When set to true the ParallelCluster API can access, write to the S3 buckets specified in the Filed FsxS3Bucket, it is needed to import/export from/to S3 when creating an FSx filesystem.
+      NOTE - setting this to true grants the Lambda function S3 Get*, List* and PutObject privileges on the buckets specified in FsxS3Buckets.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
 
+  FsxS3Buckets:
+    Description: |
+      Comma separated list of S3 bucket ARNs, to allow the lambda function to import/export from/to S3 when creating an FSx filesystem.
+      NOTE - The setting is used only when EnableFSxS3Access is set to true. (example arn:aws:s3:::<S3_BUCKET_1>,arn:aws:s3:::<S3_BUCKET_2>)
+    Type: String
+    Default: ''
+    AllowedPattern: ^((arn:[a-z\-\*]*:s3:[a-z0-9\-]*:([0-9]{12})*:[^,\s\/]+)?(,arn:[a-z\-\*]*:s3:[a-z0-9\-]*:([0-9]{12})*:[^,\s\/]+)*)$|^\*$
+    ConstraintDescription: |
+      The list of S3 buckets is incorrectly formatted. The list should have the format: arn:<PARTITION>:s3:us-east-1:<ACCOUNT_ID>:<BUCKET_NAME>[,arn:<PARTITION>:s3:us-east-1:<ACCOUNT_ID>:<BUCKET_NAME>,...]
+      Example: arn:aws:s3:::test-bucket-1,arn:aws:s3:::test-bucket-2,arn:aws:s3:::test-bucket-3
+      
   PermissionsBoundaryPolicy:
     Description: |
       ARN of a IAM policy to use as PermissionsBoundary for all IAM resources created by ParallelCluster API.
@@ -87,8 +108,8 @@ Parameters:
 Mappings:
   ParallelCluster:
     Constants:
-      Version: 3.1.4  # major.minor.patch+alpha/beta_identifier
-      ShortVersion: 3.1.4  # major.minor.patch
+      Version: 3.5.0  # major.minor.patch+alpha/beta_identifier
+      ShortVersion: 3.5.0  # major.minor.patch
       Stage: prod
 
 
@@ -155,6 +176,10 @@ Conditions:
     Fn::And:
       - !Not [!Equals [!Ref ImageBuilderVpcId, ""]]
       - !Not [!Equals [!Ref ImageBuilderSubnetId, ""]]
+  EnableFSxS3AccessCondition: !And
+    - !Equals [!Ref EnableFSxS3Access, true]
+    - !Condition CreateIamResources
+  UseAllBucketsForFSxS3: !Equals [!Ref FsxS3Buckets, "*"]
 
 Resources:
 
@@ -238,7 +263,7 @@ Resources:
     Properties:
       Tracing: Active
       PackageType: Image
-      MemorySize: 1024
+      MemorySize: 2048
       Role: !If [UseCustomParallelClusterFunctionRole, !Ref ParallelClusterFunctionRole, !GetAtt ParallelClusterUserRole.Arn]
       Tags:
         'parallelcluster:resource': api
@@ -466,6 +491,36 @@ Resources:
                   aws:RequestedRegion:
                     - !Ref Region
             Sid: ECS
+            
+  FSxS3AccessPolicy:
+    Type: AWS::IAM::Policy
+    Condition: EnableFSxS3AccessCondition
+    Properties:
+      PolicyName: FSxS3AccessPolicy
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Action:
+              - iam:CreateServiceLinkedRole
+              - iam:AttachRolePolicy
+              - iam:PutRolePolicy
+            Resource: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/s3.data-source.lustre.fsx.amazonaws.com/*
+            Effect: Allow
+            Sid: FSxS3PoliciesAttach
+          - Action:
+              - s3:Get*
+              - s3:List*
+              - s3:PutObject
+            Resource: !Split
+              - ","
+              - !If
+                - UseAllBucketsForFSxS3
+                - "*"
+                - !Sub ["${FsxS3Buckets},${FsxS3BucketsObjects}", FsxS3BucketsObjects: !Join ["/*,", !Split [",", !Sub "${FsxS3Buckets}/*"]]]
+            Effect: Allow
+            Sid: EnableFSxS3Access
+      Roles:
+        - !Ref ParallelClusterUserRole
 
   ParallelClusterClusterPolicy:
     Type: AWS::IAM::ManagedPolicy
@@ -491,6 +546,7 @@ Resources:
               - ec2:AttachNetworkInterface
               - ec2:AuthorizeSecurityGroupEgress
               - ec2:AuthorizeSecurityGroupIngress
+              - ec2:CreateFleet
               - ec2:CreateLaunchTemplate
               - ec2:CreateLaunchTemplateVersion
               - ec2:CreateNetworkInterface
@@ -530,6 +586,7 @@ Resources:
               - dynamodb:DeleteTable
               - dynamodb:GetItem
               - dynamodb:PutItem
+              - dynamodb:UpdateItem
               - dynamodb:Query
               - dynamodb:TagResource
             Resource: !Sub arn:${AWS::Partition}:dynamodb:${Region}:${AWS::AccountId}:table/parallelcluster-*
@@ -676,6 +733,8 @@ Resources:
               - logs:PutRetentionPolicy
               - logs:DescribeLogGroups
               - logs:CreateLogGroup
+              - logs:TagResource
+              - logs:UntagResource
             Resource: '*'
             Effect: Allow
             Condition: !If
@@ -685,7 +744,13 @@ Resources:
                   aws:RequestedRegion:
                     - !Ref Region
             Sid: CloudWatchLogs
-
+          - Action:
+              - resource-groups:ListGroupResources
+              - resource-groups:GetGroupConfiguration
+            Resource: '*'
+            Effect: Allow
+            Sid: ResourceGroupRead
+            
   ### IMAGE ACTIONS POLICIES
 
   ParallelClusterBuildImageManagedPolicy:
@@ -732,6 +797,8 @@ Resources:
             Effect: Allow
             Action:
               - logs:CreateLogGroup
+              - logs:TagResource
+              - logs:UntagResource            
             Resource:
               - !Sub 'arn:${AWS::Partition}:logs:${Region}:${AWS::AccountId}:log-group:/aws/lambda/ParallelClusterImage-*'
           - Sid: CloudFormation
@@ -1076,11 +1143,15 @@ Resources:
     Type: AWS::SNS::Topic
     Properties:
       DisplayName: "ParallelCluster ECR Image Builder SNS topic"
+      KmsMasterKeyId: alias/aws/sns 
 
   UpdateParallelClusterLambda:
     Condition: DoNotUseCustomEcrImageUri
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub
+        - UpdateParallelClusterLambda-${StackIdSuffix}
+        - { StackIdSuffix: !Select [2, !Split ['/', !Ref 'AWS::StackId']] }    
       MemorySize: 128
       InlineCode: |
         import boto3
@@ -1104,7 +1175,7 @@ Resources:
                     client.update_function_code(FunctionName=function_to_update, ImageUri=uri, Publish=True)
 
       Handler: index.handler
-      Runtime: python3.7
+      Runtime: python3.9
       Role: !GetAtt UpdateParallelClusterLambdaRole.Arn
       Environment:
         Variables:
@@ -1119,7 +1190,9 @@ Resources:
     Condition: DoNotUseCustomEcrImageUri
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub /aws/lambda/${UpdateParallelClusterLambda}
+      LogGroupName: !Sub
+        - /aws/lambda/UpdateParallelClusterLambda-${StackIdSuffix}
+        - { StackIdSuffix: !Select [2, !Split ['/', !Ref 'AWS::StackId']] }
 
   UpdateParallelClusterLambdaRole:
     Condition: DoNotUseCustomEcrImageUri
@@ -1142,7 +1215,9 @@ Resources:
                 Action:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                Resource: !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/ParallelClusterApi-UpdateParallelClusterLambda-*
+                Resource: !Sub
+                  - arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/UpdateParallelClusterLambda-${StackIdSuffix}:*
+                  - { StackIdSuffix: !Select [2, !Split ['/', !Ref 'AWS::StackId']] }
         - PolicyName: UpdateParallelClusterLambdaPolicy
           PolicyDocument:
             Version: 2012-10-17
@@ -1227,7 +1302,7 @@ Resources:
               cfnresponse.send(event, context, response_status, response_data, physical_resource_id, reason)
 
       Handler: index.handler
-      Runtime: python3.7
+      Runtime: python3.9
       Role: !GetAtt EcrImageDeletionLambdaRole.Arn
 
   EcrImageDeletionLambdaLogGroup:
@@ -1270,7 +1345,9 @@ Resources:
               - Effect: Allow
                 Action:
                   - imagebuilder:ListImagePipelineImages
-                Resource: !Ref EcrImagePipeline
+                Resource: !Sub
+                  - arn:${AWS::Partition}:imagebuilder:${Region}:${AWS::AccountId}:image-pipeline/ecrimagepipeline-*${StackIdSuffix}*
+                  - { StackIdSuffix: !Select [2, !Split ['/', !Ref 'AWS::StackId']] }
               - Effect: Allow
                 Action:
                   - imagebuilder:DeleteImage
