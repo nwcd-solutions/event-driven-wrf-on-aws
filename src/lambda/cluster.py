@@ -78,7 +78,7 @@ def main(event, context):
           print(res.json())
           out={"clusterStatus":"failed"}
           out['failed_message']=res.json()
-          OUT['clusterName']=cluster_name
+          out['clusterName']=cluster_name
         return out
       elif (event['type']=='spot'):
         with open("hpc6a.yaml", "r") as cf:
@@ -114,7 +114,7 @@ def main(event, context):
           print(res.json())
           out={"clusterStatus":"failed"}
           out['failed_message']=res.json()
-          OUT['clusterName']=cluster_name
+          out['clusterName']=cluster_name
         return out
     elif (event['action']=='status'):
       print('query status of the cluster')
