@@ -129,7 +129,11 @@ def main(event, context):
       print(code)
       if (code >=200 and code <400):
         out=res.json()
-        out['action']='status'
+        print(out)
+        if (out['clusterStatus']=='CREATE_IN_PROGRESS'):
+            out['action']='status'
+        else:
+            out['action']='destroy'
       else:
         out={"CheckclusterStatus":"failed"}
       return out
