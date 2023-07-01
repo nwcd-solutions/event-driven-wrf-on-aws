@@ -12,7 +12,7 @@ import requests
 #region = os.getenv("AWS_REGION")
 ip = "127.0.0.1"
 bucket = os.getenv("BUCKET_NAME")
-job_num=os.getenv("DOMAINS_NUM")
+job_num= int(os.getenv("DOMAINS_NUM"))
 
 template = {
     "job": {
@@ -135,17 +135,14 @@ def post(pid):
 def main(event, context):
 
     global ip
-
+    global job_num
     print(event)
-    subject = event['Records'][0]['Sns']['Subject']
-    ip = event['Records'][0]['Sns']['Message']
-    if subject != "Parallel Cluster Post Install - SUCCESS":
-        return 1
-
+    ip=event['headNode']['privateIpAddress']
+    print(ip)
     pids=[]
     jids=[]
-    for i in range(1,job_num):
+    for i in range(1,job_num+1):
         n='domain_'+str(i)
-        pids[i]=preproc(n)
-        jids[i]=run_wrf(n,pids[i])
-    fini(jids)
+        pids.append(preproc(n))
+        jids.append(run_wrf(n,pids[i-1]))
+    #fini(jids)
