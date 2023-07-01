@@ -140,6 +140,7 @@ def main(event, context):
             out['ftime']=ftime
         else:
             out['action']='destroy'
+            out['ftime']=ftime
       else:
         out={"CheckclusterStatus":"failed"}
       return out
