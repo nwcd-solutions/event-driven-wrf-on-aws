@@ -5,13 +5,13 @@ set -ex
 shared_folder=/fsx
 
 region=$1
-sns=$2
+#sns=$2
 ftime=$3
 jwt=$4
 bucket=$5
 domains_num=$6
-#forecast_days=$7
-forecast_days='2'
+forecast_days=$2
+#forecast_days='2'
 
 # Set ulimits according to WRF needs
 cat >>/tmp/limits.conf << EOF
@@ -169,9 +169,9 @@ EOF
 
 fini() {
   local region=$1
-  local sns=$2
-  local ftime=$3
-  local jwt=$4
+  #local sns=$4
+  local ftime=$2
+  local jwt=$3
   local y=${ftime:0:4}
   local m=${ftime:5:2}
   local d=${ftime:8:2}
@@ -190,11 +190,11 @@ fini() {
 	  --secret-id "$jwt" \
 	  --secret-string \$(/opt/slurm/bin/scontrol token lifespan=21600 | cut -f 2 -d = )
 	export ip=$(curl -q -s http://169.254.169.254/latest/meta-data/local-ipv4)
-	aws sns publish \
-	  --region ${region} \
-	  --subject "Parallel Cluster Post Install - FINISHED" \
-	  --message "\$ip" \
-	  --topic-arn $sns
+	#aws sns publish \
+	#  --region ${region} \
+	#  --subject "Parallel Cluster Post Install - FINISHED" \
+	#  --message "\$ip" \
+	#  --topic-arn $sns
 EOF
   chmod 755 /tmp/jwt.sh
   chown ec2-user:ec2-user /tmp/jwt.sh
@@ -317,7 +317,7 @@ case ${cfn_node_type} in
 		build_dir $ftime $bucket $domains_num $forecast_days
                 systemd_units
                 slurm_db $region
-                fini $region $sns $ftime $jwt
+                fini $region $ftime $jwt
                 
         ;;
         ComputeFleet)
