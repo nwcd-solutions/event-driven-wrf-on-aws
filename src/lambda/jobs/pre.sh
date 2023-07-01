@@ -65,8 +65,8 @@ log "INFO - ungrib.exe Completed"
 rm -f met_em*
 
 log "INFO - Starting metgrid.exe"
-mpirun -np $NP ./metgrid.exe > metgrid.$day.log 2>&1
-#./metgrid.exe > metgrid.$day.log 2>&1
+#mpirun -np $NP ./metgrid.exe > metgrid.$day.log 2>&1
+./metgrid.exe > metgrid.$day.log 2>&1
 if [ $? -ne 0 ]
 then
         log "CRIT - metgrid.exe Completed with errors."
@@ -90,12 +90,14 @@ rm -f wrfout*
 
 
 log "INFO - Starting real.exe"
-mpirun -np 4 ./real.exe  > real.$day.log 2>&1
-#./real.exe >real.$day.log 2>&1
+#mpirun -np 4 ./real.exe  > real.$day.log 2>&1
+./real.exe >real.$day.log 2>&1
 if [ $? -ne 0 ]
 then
         log "CRIT - real.exe Completed with errors."
         exit 1
 fi
 log "INFO - real.exe Completed"
+cd ..
+echo $(pwd)
 #exit 0
