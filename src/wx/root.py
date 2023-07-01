@@ -32,7 +32,7 @@ class Root(Stack):
         slurmdb = SlurmDb(self, "slurmdbd", vpc=vpc.outputs)
         slurmdb.add_dependency(vpc)
 
-        sf = stepfunction(self, "workflow", vpc=vpc.outputs, bucket=bucket_name.value_as_string,domains=domain_num.value_as_string,days=forecast_days.value_as_string)
+        sf = stepfunction(self, "workflow", vpc=vpc.outputs, forecast_lambda=forecast.outputs, bucket=bucket_name.value_as_string,domains=domain_num.value_as_string,days=forecast_days.value_as_string)
         sf.add_dependency(forecast)
         sf.add_dependency(pcluster_api)        
         sf.add_dependency(slurmdb)
