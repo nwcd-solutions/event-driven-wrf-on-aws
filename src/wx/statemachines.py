@@ -371,7 +371,7 @@ class stepfunction (NestedStack):
               },
               "ResultPath":None,                
               "Next": "Submit WRF Job"
-            }
+            },
             "Submit WRF Job": {
               "Type": "Task",
               "Resource": "arn:aws:states:::lambda:invoke",
