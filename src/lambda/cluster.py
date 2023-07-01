@@ -43,6 +43,7 @@ def main(event, context):
     path = f"{baseurl}/v3/clusters"
     global region
     print(event)
+    ftime=event['ftime']
     if (event['action']=='create'):
       if (event['type']=='od'):
         with open("hpc6a.yaml", "r") as cf:
@@ -76,6 +77,7 @@ def main(event, context):
         if (code >=200 and code <400):
           out=res.json()['cluster']
           out['action']='status'
+          out['ftime']=ftime
         else:
           print(res.json())
           out={"clusterStatus":"failed"}
@@ -112,6 +114,7 @@ def main(event, context):
         if (code >=200 and code <400):
           out=res.json()['cluster']
           out['action']='status'
+          out['ftime']=ftime
         else:
           print(res.json())
           out={"clusterStatus":"failed"}
@@ -134,6 +137,7 @@ def main(event, context):
         print(out)
         if (out['clusterStatus']=='CREATE_IN_PROGRESS'):
             out['action']='status'
+            out['ftime']=ftime
         else:
             out['action']='destroy'
       else:
