@@ -21,6 +21,8 @@ class stepfunction (NestedStack):
         bucket_name = kwargs["bucket"]
         vpc = kwargs["vpc"]
         cluster_name = "wx-pcluster001"
+        domains= kwargs["domains"]
+        forecast_days = kwargs["days"]
         purl = Fn.import_value("ParallelClusterApiInvokeUrl")
         hostname = Fn.select(2, Fn.split("/", Fn.select(0, Fn.split('.', purl))))
         parn = f"arn:aws:execute-api:{Aws.REGION}::{hostname}/*/*/*"
@@ -95,6 +97,8 @@ class stepfunction (NestedStack):
                     "SG": sg_rds.security_group_id,
                     "SNS_TOPIC": sns_topic,
                     "SUBNETID": subnet,
+                    "FORECAST_DAYS": forecast_days,
+                    "NUM_DOMAINS": domains,
                 },
                 handler="cluster.main",
                 layers=[layer],
