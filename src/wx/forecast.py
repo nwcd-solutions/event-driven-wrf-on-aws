@@ -22,13 +22,7 @@ class Forecast(NestedStack):
         bucket_name = kwargs["bucket"]
         domains= kwargs["domains"]
         forecast_days = kwargs["days"]
-        self.sns_kms = kms.Key(self, "ForecastSnsKey",
-                alias="wx/sns",
-                description="KMS Key for Forecast SNS Topic",
-                removal_policy=RemovalPolicy.DESTROY)
-        self.wx_sns = sns.Topic(self, "ForecastSns", display_name="Forecast SNS Topic",
-                master_key=self.sns_kms)
-
+        
         policy_doc = iam.PolicyDocument()
         policy_doc.add_statements(iam.PolicyStatement(
             actions=[
@@ -75,10 +69,9 @@ class Forecast(NestedStack):
                 vpc=vpc,
             )
         Tags.of(run).add("Purpose", "Event Driven Weather Forecast", priority=300)
-        run.add_event_source(λ_events.SnsEventSource(self.wx_sns))
-
-        CfnOutput(self, "ForecastSnsArn", value=self.wx_sns.topic_arn,
-                export_name="ForecastSnsArn")
+        
+        CfnOutput(self, "ForecastLambdaArn", value=run.function_arn,
+                export_name="ForecastLambdaArn")
 
     @property
     def outputs(self):
