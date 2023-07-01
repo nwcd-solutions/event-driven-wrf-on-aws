@@ -69,10 +69,8 @@ class Forecast(NestedStack):
                 vpc=vpc,
             )
         Tags.of(run).add("Purpose", "Event Driven Weather Forecast", priority=300)
-        
-        CfnOutput(self, "ForecastLambdaArn", value=run.function_arn,
-                export_name="ForecastLambdaArn")
+        self.lambda_arn=run.function_arn
 
     @property
     def outputs(self):
-        return self.wx_sns
+        return self.lambda_arn
