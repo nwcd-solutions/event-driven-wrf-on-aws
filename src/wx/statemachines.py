@@ -23,6 +23,7 @@ class stepfunction (NestedStack):
         cluster_name = "wx-pcluster001"
         domains= kwargs["domains"]
         forecast_days = kwargs["days"]
+        forecast_lambda = kwargs["forecast_lambda"]
         purl = Fn.import_value("ParallelClusterApiInvokeUrl")
         hostname = Fn.select(2, Fn.split("/", Fn.select(0, Fn.split('.', purl))))
         parn = f"arn:aws:execute-api:{Aws.REGION}::{hostname}/*/*/*"
@@ -195,10 +196,6 @@ class stepfunction (NestedStack):
             },
             "Fail": {
               "Type": "Fail"
-            },
-            "Pass": {
-              "Type": "Pass",
-              "Next": "destroy cluster"
             },
             "destroy cluster": {
               "Type": "Task",
@@ -373,7 +370,30 @@ class stepfunction (NestedStack):
                 "TopicArn": sf_topic.topic_arn
               },
               "ResultPath":None,                
-              "Next": "Pass"
+              "Next": "Submit WRF Job"
+            }
+            "Submit WRF Job": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "OutputPath": "$.Payload",
+              "Parameters": {
+                "Payload.$": "$",
+                "FunctionName": forecast_lambda
+              },
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "Lambda.ServiceException",
+                    "Lambda.AWSLambdaException",
+                    "Lambda.SdkClientException",
+                    "Lambda.TooManyRequestsException"
+                  ],
+                  "IntervalSeconds": 2,
+                  "MaxAttempts": 6,
+                  "BackoffRate": 2
+                }
+              ],
+              "Next": "Success"
             }
           }
         }
