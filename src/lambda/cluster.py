@@ -63,7 +63,7 @@ def main(event, context):
         config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Args"][2] = ftime
         config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Args"][3] = os.getenv("JWTKEY")
         config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Args"][4] = os.getenv("BUCKET_NAME")
-        config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Args"][5] = '2'
+        config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Args"][5] = os.getenv("NUM_DOMAINS")
         url=path
         method = "POST"
         data = json.dumps({"clusterConfiguration": yaml.dump(config_data, default_flow_style=False),
