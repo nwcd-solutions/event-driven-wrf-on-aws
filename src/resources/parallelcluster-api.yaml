@@ -643,6 +643,13 @@ Resources:
             Effect: Allow
             Sid: IamRead
           - Action:
+              - iam:AttachRolePolicy
+              - iam:DetachRolePolicy
+            Resource:
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/parallelcluster/*
+            Effect: Allow
+            Sid: IamAttach
+          - Action:
               - iam:CreateInstanceProfile
               - iam:DeleteInstanceProfile
               - iam:AddRoleToInstanceProfile
