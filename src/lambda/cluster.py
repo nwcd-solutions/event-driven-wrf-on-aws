@@ -55,9 +55,11 @@ def main(event, context):
         config_data["HeadNode"]["Networking"]["AdditionalSecurityGroups"][0] = os.getenv("SG")
         config_data["Scheduling"]["SlurmQueues"][0]["Networking"]["SubnetIds"][0] = os.getenv("SUBNETID")
         config_data["Scheduling"]["SlurmQueues"][0]["Iam"]["S3Access"][0]["BucketName"] = os.getenv("BUCKET_NAME")
-        config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Script"] = "https://raw.githubusercontent.com/nwcd-solutions/wrf-on-aws/master/pc_setup_scripts/post_install_amd.sh"
+        config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Script"] = os.getenv("S3_URL_POST_INSTALL_HEADNODE")
+        #config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Script"] = "https://raw.githubusercontent.com/nwcd-solutions/wrf-on-aws/master/pc_setup_scripts/post_install_amd.sh"
         config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Args"][0] = region
-        config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Args"][1] = os.getenv("SNS_TOPIC")
+        config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Args"][1] = os.getenv("FORECAST_DAYS")
+        #config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Args"][1] = os.getenv("SNS_TOPIC")
         config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Args"][2] = ftime
         config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Args"][3] = os.getenv("JWTKEY")
         config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Args"][4] = os.getenv("BUCKET_NAME")
