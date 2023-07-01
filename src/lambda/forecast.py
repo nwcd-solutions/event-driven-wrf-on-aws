@@ -143,6 +143,7 @@ def main(event, context):
     jids=[]
     for i in range(1,job_num+1):
         n='domain_'+str(i)
-        pids.append(preproc(n))
-        jids.append(run_wrf(n,pids[i-1]))
+        job_id=preproc(n)
+        pids.append(job_id)
+        jids.append(run_wrf(n,job_id))
     #fini(jids)
