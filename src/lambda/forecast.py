@@ -13,7 +13,7 @@ import requests
 ip = "127.0.0.1"
 bucket = os.getenv("BUCKET_NAME")
 job_num= int(os.getenv("DOMAINS_NUM"))
-
+ftime = "2023-01-01:12:00:00Z"
 template = {
     "job": {
         "name":"",
@@ -63,6 +63,13 @@ def status(jobid):
     return resp.json()
 
 def fini(ids):
+    global bucket
+    global ftime
+    y=ftime[0:4]
+    m=ftime[5:7]
+    d=ftime[8:10]
+    h=ftime[11:13]
+    output = f"s3://{bucket}/outputs/{y}/{m}/{d}/{h}"    
     with open("jobs/fini.sh", "r") as f:
         script = f.read()
     script += f"\naws s3 cp forecast.done {output}/forecast.done"
@@ -79,18 +86,23 @@ def fini(ids):
     
 def preproc(zone):
     global bucket
-    output = f"s3://{bucket}/outputs/{zone}/${{y}}/${{m}}/${{d}}/${{h}}"
-    with open("jobs/preproc.sh", "r") as f:
+    global ftime
+    y=ftime[0:4]
+    m=ftime[5:7]
+    d=ftime[8:10]
+    h=ftime[11:13]
+    output = f"s3://{bucket}/outputs/{y}/{m}/{d}/{h}/{zone}"
+    with open("jobs/pre.sh", "r") as f:
         script = f.read()
     script += f"\naws s3 cp slurm-${{SLURM_JOB_ID}}.out {output}/logs/\n"
     script += f"\naws s3 cp preproc/geogrid.*.log {output}/logs/\n"
     script += f"\naws s3 cp preproc/ungrib.*.log {output}/logs/\n"
     script += f"\naws s3 cp preproc/metgrid.*.log {output}/logs/\n"
     script += f"\naws s3 cp run/real.*.log {output}/logs/\n"
-    template["job"]["name"] = "pre"
+    template["job"]["name"] = "pre_" + zone
     template["job"]["nodes"] = 1
     template["job"]["cpus_per_task"] = 1
-    template["job"]["tasks_per_node"] = 4
+    template["job"]["tasks_per_node"] = 12
     template["job"]["current_working_directory"] = f"/fsx/{zone}"
     template["script"] = script
     print(template)
@@ -98,12 +110,17 @@ def preproc(zone):
 
 def run_wrf(zone,pid):
     global bucket
-    output = f"s3://{bucket}/outputs/{zone}/${{y}}/${{m}}/${{d}}/${{h}}"
-    with open("jobs/run_wrf.sh", "r") as f:
+    global ftime
+    y=ftime[0:4]
+    m=ftime[5:7]
+    d=ftime[8:10]
+    h=ftime[11:13]
+    output = f"s3://{bucket}/outputs/{y}/{m}/{d}/{h}/{zone}"
+    with open("jobs/run.sh", "r") as f:
         script = f.read()
     script += f"\naws s3 cp ../slurm-${{SLURM_JOB_ID}}.out {output}/logs/\n"
     script += f"\naws s3 cp wrfoutput* {output}/wrfout/\n"
-    template["job"]["name"] = "wrf"
+    template["job"]["name"] = "wrf_" + zone
     template["job"]["nodes"] = 2 
     template["job"]["cpus_per_task"] = 4
     template["job"]["tasks_per_node"] = 24
@@ -136,14 +153,19 @@ def main(event, context):
 
     global ip
     global job_num
+    global ftime
+    
     print(event)
     ip=event['headNode']['privateIpAddress']
+    ftime=event['ftime']
     print(ip)
     pids=[]
     jids=[]
+
     for i in range(1,job_num+1):
         n='domain_'+str(i)
-        job_id=preproc(n)
-        pids.append(job_id)
-        jids.append(run_wrf(n,job_id))
-    #fini(jids)
+        pids.append(preproc(n))
+    for i in range(1,job_num+1):
+        n='domain_'+str(i)
+        jids.append(run_wrf(n,pids[i-1]))
+    fini(jids)
