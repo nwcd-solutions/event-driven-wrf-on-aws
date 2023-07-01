@@ -3,7 +3,19 @@
 
 A fully automated cloud-native event driven weather forecasting.
 
-
+## Prerequisites
+Create S3 bucket to host input files of each domain that necessary for WRF running and the output files ,the structure should like belowing:
+```
+---my-bucket-name
+    |---inputs
+    |       |---domain_1
+    |       |       |---namelist.wps
+    |       |       |---namelist.input
+    |       |---domain_2
+    |               |---namelist.wps
+    |               |---namelist.input
+    |---outputs
+```  
 ## Installation
 
 Install the AWS CDK application and the python library.
@@ -24,8 +36,6 @@ pip install -r requirements.txt -t python/
 zip -r ../layer.zip python
 cd ..
 ```
-
-
 
 Then deploy the CDK stack. Note: you must specify a bucket where you want the
 forecast output uploaded to, in the following example I am using
