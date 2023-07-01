@@ -19,8 +19,8 @@ pip install -r requirements.txt
 
 Create a lambda layer that contains `requests` and `pyyaml`.
 ```
-mkdir layer && cd $_
-pip install requests pyyaml -t python/
+cd layer
+pip install -r requirements.txt -t python/
 zip -r ../layer.zip python
 cd ..
 ```
