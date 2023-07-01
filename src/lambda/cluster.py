@@ -48,7 +48,7 @@ def main(event, context):
       if (event['type']=='od'):
         with open("hpc6a.yaml", "r") as cf:
           config_data = yaml.safe_load(cf)
-        ftime = '2023-01-05:12:00:00Z'
+        #ftime = '2023-01-05:12:00:00Z'
         cluster_name=f"{cluster_name}-od"
         print(cluster_name)
         config_data["Region"] = region
