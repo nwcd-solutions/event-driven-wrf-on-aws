@@ -30,7 +30,7 @@ class stepfunction (NestedStack):
         post_head_amd64 = assets.Asset(self, "PostComputeFileAsset",
                 path="scripts/post_install_amd64.sh")
         jwt_key = Fn.import_value("JWTKey")
-        sns_topic = Fn.import_value("ForecastSnsArn")
+        #sns_topic = Fn.import_value("ForecastSnsArn")
         
                 
         sg_rds = ec2.SecurityGroup(
@@ -96,7 +96,6 @@ class stepfunction (NestedStack):
                     "REGION": Aws.REGION,
                     "S3_URL_POST_INSTALL_HEADNODE": f"{post_head_amd64.s3_object_url}",
                     "SG": sg_rds.security_group_id,
-                    "SNS_TOPIC": sns_topic,
                     "SUBNETID": subnet,
                     "FORECAST_DAYS": forecast_days,
                     "NUM_DOMAINS": domains,
