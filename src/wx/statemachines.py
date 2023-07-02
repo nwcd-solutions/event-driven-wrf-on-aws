@@ -400,6 +400,76 @@ class stepfunction (NestedStack):
             definition_string=json.dumps(sf_def),
             role_arn = main_sf_role.role_arn )
         self.main_sf=main_sf.attr_arn
+
+        trigger_policy_doc = iam.PolicyDocument(statements=[
+            iam.PolicyStatement(
+                actions=["execute-api:Invoke", "execute-api:ManageConnections"],
+                resources=["arn:aws:execute-api:*:*:*"],
+                effect=iam.Effect.ALLOW),
+            iam.PolicyStatement(
+                actions=["states:*"],
+                resources=["*"],
+                effect=iam.Effect.ALLOW),
+            iam.PolicyStatement(
+                actions=["iam:*"],
+                resources=["*"],
+                effect=iam.Effect.ALLOW),
+            iam.PolicyStatement(
+                actions=["cloudformation:*"],
+                resources=["*"],
+                effect=iam.Effect.ALLOW),
+        ])
+        trigger_lambda_role = iam.Role(self, "Role",
+                assumed_by=iam.CompositePrincipal(
+                    iam.ServicePrincipal("lambda.amazonaws.com"),
+                    iam.ServicePrincipal("sts.amazonaws.com"),
+                ),
+                description="CreateAPILambdaRole",
+                managed_policies=[
+                    iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole"),
+                    iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaVPCAccessExecutionRole"),
+                    ],
+                inline_policies={"cluster_lambda": trigger_policy_doc},
+        )
+
+        trigger_create = λ.Function(self, "lambda_func_create",
+                code=λ.Code.from_asset("./lambda"),
+                environment={
+                    "SM_ARN": mainy_sf.attr_arn,
+                },
+                handler="trigger.main",
+                layers=[layer],
+                log_retention=logs.RetentionDays.ONE_DAY,
+                role=trigger_lambda_role,
+                runtime=λ.Runtime.PYTHON_3_9,
+                timeout=Duration.seconds(60)
+            )
+        Tags.of(trigger_create).add("Purpose", "Event Driven Weather Forecast", priority=300)
+        gfs = sns.Topic.from_topic_arn(self, "NOAAGFS", "arn:aws:sns:us-east-1:123901341784:NewGFSObject")
+        trigger_create.add_event_source(λ_events.SnsEventSource(gfs))
+        
+        trigger_destroy = λ.Function(self, "lambda_func_destroy",
+                code=λ.Code.from_asset("./lambda"),
+                environment={
+                    "CLUSTER_NAME": cluster_name,
+                    "PCLUSTER_API_URL": purl,
+                    "REGION": Aws.REGION,
+                    "SF_ARN":destroy_sf.attr_arn
+                },
+                handler="trigger.destroy",
+                layers=[layer],
+                log_retention=logs.RetentionDays.ONE_DAY,
+                role=trigger_lambda_role,
+                runtime=λ.Runtime.PYTHON_3_9,
+                timeout=Duration.seconds(60)
+            )
+        Tags.of(trigger_destroy).add("Purpose", "Event Driven Weather Forecast", priority=300)
+        
+        outputs = aws_s3_notifications.LambdaDestination(trigger_destroy)
+        bucket = s3.Bucket.from_bucket_name(self, "nwp-bucket", bucket_name)
+        bucket.add_event_notification(s3.EventType.OBJECT_CREATED, outputs,
+                s3.NotificationKeyFilter(prefix="outputs/", suffix="done"))
+
         CfnOutput(self, "StateMachineArn", value=main_sf.attr_arn,
             export_name="StateMachineArn")
 
