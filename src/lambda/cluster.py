@@ -167,6 +167,7 @@ def main(event, context):
       if (code >=200 and code <400):
         out=res.json()
         out['action']='destroystatus'
+        out['ftime']=ftime
       else:
         print(res.json())
         out={"CheckclusterStatus":"deleted failed"}
@@ -180,6 +181,7 @@ def main(event, context):
       res = client.describe_stacks( StackName=cf_arn )
       out={}
       out['action']='destroystatus'
+      out['ftime']=ftime
       out['cluster']={
         "cloudformationStackArn":cf_arn,
         "clusterStatus":res['Stacks'][0]['StackStatus']
