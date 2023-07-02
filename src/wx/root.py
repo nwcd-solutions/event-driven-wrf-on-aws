@@ -37,7 +37,7 @@ class Root(Stack):
         sf.add_dependency(pcluster_api)        
         sf.add_dependency(slurmdb)
         sf.add_dependency(vpc)
-        trigger = Trigger(self, "trigger", sf=sf.outputs)
+        #trigger = Trigger(self, "trigger", sf=sf.outputs)
        
         
 
