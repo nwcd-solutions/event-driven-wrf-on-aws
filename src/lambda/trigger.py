@@ -26,12 +26,16 @@ def main(event, context):
 
     sfn = boto3.client('stepfunctions')
     sfn.start_execution(
-        stateMachineArn=os.getenv("SM_ARN")
+        stateMachineArn=os.getenv("SM_ARN"),
+        input = "{\"action\" : \"create\",\"type\" : \"od\",\"ftime\":\"" + ftime + "\"}"
     )
 
 def destroy(event, context):
     print(event)
+    clustername=os.getenv('CLUSTER_NAME')
+    region=os.getenv('REGION')
     sfn = boto3.client('stepfunctions')
     sfn.start_execution(
-        stateMachineArn=os.getenv("SM_ARN")
+        stateMachineArn=os.getenv("SM_ARN"),
+        input = "{\"action\" : \"destroy\",\"clusterName\":\""+clustername+ "\",\"region\":\""+region+"\",\"ftime\":\" \"}"
     )
