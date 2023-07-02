@@ -569,7 +569,7 @@ class stepfunction (NestedStack):
         trigger_create = λ.Function(self, "lambda_func_create",
                 code=λ.Code.from_asset("./lambda"),
                 environment={
-                    "SM_ARN": mainy_sf.attr_arn,
+                    "SM_ARN": main_sf.attr_arn,
                 },
                 handler="trigger.main",
                 layers=[layer],
