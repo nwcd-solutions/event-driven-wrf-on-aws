@@ -132,7 +132,7 @@ class stepfunction (NestedStack):
                 resources=["*"],
                 effect=iam.Effect.ALLOW),            
         ])    
-        main_sf_role = iam.Role(self, "Main SF Role",
+        sf_role = iam.Role(self, "Main SF Role",
                 assumed_by=iam.CompositePrincipal(
                     iam.ServicePrincipal("states.amazonaws.com"),
                     iam.ServicePrincipal("sts.amazonaws.com"),
@@ -143,7 +143,7 @@ class stepfunction (NestedStack):
                     ],
                 inline_policies={"main_sf_policy": main_sf_policy},
         )
-        sf_def={
+        main_sf_def={
           "Comment": "state machine to manager lifecycle of cluster",
           "StartAt": "Create cluster",
           "States": {
@@ -397,10 +397,144 @@ class stepfunction (NestedStack):
           }
         }
         main_sf = sfn.CfnStateMachine(self, "WX_mainStateMachine",
-            definition_string=json.dumps(sf_def),
-            role_arn = main_sf_role.role_arn )
+            definition_string=json.dumps(main_sf_def),
+            role_arn = sf_role.role_arn )
         self.main_sf=main_sf.attr_arn
 
+        destroy_sf_def={
+          "Comment": "state machine to manager lifecycle of cluster",
+          "StartAt": "Publish Job Finished Notification",
+          "States": {
+            "Publish Job Finished Notification": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::sns:publish",
+              "Parameters": {
+                "Message.$": "$",
+                "TopicArn":sf_topic.topic_arn
+              },
+              "ResultPath":None,
+              "Next": "destroy cluster"
+            },
+            "Fail": {
+              "Type": "Fail"
+            },
+            "destroy cluster": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "OutputPath": "$.Payload",
+              "Parameters": {
+                "Payload.$": "$",
+                "FunctionName": cluster_lambda.function_arn
+              },
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "Lambda.ServiceException",
+                    "Lambda.AWSLambdaException",
+                    "Lambda.SdkClientException",
+                    "Lambda.TooManyRequestsException"
+                  ],
+                  "IntervalSeconds": 2,
+                  "MaxAttempts": 6,
+                  "BackoffRate": 2
+                }
+              ],
+              "Next": "Choice"
+            },
+            "Choice": {
+              "Type": "Choice",
+              "Choices": [
+                {
+                  "Variable": "$.cluster.clusterStatus",
+                  "StringEquals": "DELETE_IN_PROGRESS",
+                  "Next": "Wait for cluster deleting"
+                }
+              ],
+              "Default": "Destroy failed notification (1)"
+            },
+            "Destroy failed notification (1)": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::sns:publish",
+              "Parameters": {
+                "Message.$": "$",
+                "TopicArn": sf_topic.topic_arn
+              },
+              "ResultPath":None,
+              "Next": "Fail"
+            },
+            "Wait for cluster deleting": {
+              "Type": "Wait",
+              "Seconds": 60,
+              "Next": "Monitor deleting status"
+            },
+            "Monitor deleting status": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "OutputPath": "$.Payload",
+              "Parameters": {
+                "Payload.$": "$",
+                "FunctionName": cluster_lambda.function_arn
+              },
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "Lambda.ServiceException",
+                    "Lambda.AWSLambdaException",
+                    "Lambda.SdkClientException",
+                    "Lambda.TooManyRequestsException"
+                  ],
+                  "IntervalSeconds": 2,
+                  "MaxAttempts": 6,
+                  "BackoffRate": 2
+                }
+              ],
+              "Next": "Whether Success Deleted"
+            },
+            "Whether Success Deleted": {
+              "Type": "Choice",
+              "Choices": [
+                {
+                  "Variable": "$.cluster.clusterStatus",
+                  "StringEquals": "DELETE_COMPLETE",
+                  "Next": "Destroy complete notification"
+                },
+                {
+                  "Variable": "$.cluster.clusterStatus",
+                  "StringEquals": "DELETE_IN_PROGRESS",
+                  "Next": "Wait for cluster deleting"
+                }
+              ],
+              "Default": "Destroy failed notification (2)"
+            },
+            "Destroy complete notification": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::sns:publish",
+              "Parameters": {
+                "Message.$": "$",
+                "TopicArn": sf_topic.topic_arn
+              },
+              "ResultPath":None,
+              "Next": "Success"
+            },
+            "Destroy failed notification (2)": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::sns:publish",
+              "Parameters": {
+                "Message.$": "$",
+                "TopicArn": sf_topic.topic_arn
+              },
+              "ResultPath":None,                
+              "Next": "Fail"
+            },
+            "Success": {
+              "Type": "Succeed"
+            },
+          }
+        }
+        destroy_sf = sfn.CfnStateMachine(self, "WX_destroyStateMachine",
+            definition_string=json.dumps(destroy_sf_def),
+            role_arn = sf_role.role_arn )
+        
         trigger_policy_doc = iam.PolicyDocument(statements=[
             iam.PolicyStatement(
                 actions=["execute-api:Invoke", "execute-api:ManageConnections"],
