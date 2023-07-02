@@ -49,7 +49,7 @@ def main(event, context):
         with open("hpc6a.yaml", "r") as cf:
           config_data = yaml.safe_load(cf)
         #ftime = '2023-01-05:12:00:00Z'
-        cluster_name=f"{cluster_name}-od"
+        #cluster_name=f"{cluster_name}-od"
         print(cluster_name)
         config_data["Region"] = region
         config_data["HeadNode"]["Networking"]["SubnetId"] = os.getenv("SUBNETID")
@@ -88,7 +88,7 @@ def main(event, context):
         with open("hpc6a.yaml", "r") as cf:
           config_data = yaml.safe_load(cf)
         ftime = '2023-01-05:12:00:00Z'
-        cluster_name=f"{cluster_name}-spot"
+        #cluster_name=f"{cluster_name}-spot"
         print(cluster_name)
         config_data["Region"] = region
         config_data["HeadNode"]["Networking"]["SubnetId"] = os.getenv("SUBNETID")
