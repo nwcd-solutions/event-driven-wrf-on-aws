@@ -553,7 +553,7 @@ class stepfunction (NestedStack):
                 resources=["*"],
                 effect=iam.Effect.ALLOW),
         ])
-        trigger_lambda_role = iam.Role(self, "Role",
+        trigger_lambda_role = iam.Role(self, "TriggerRole",
                 assumed_by=iam.CompositePrincipal(
                     iam.ServicePrincipal("lambda.amazonaws.com"),
                     iam.ServicePrincipal("sts.amazonaws.com"),
