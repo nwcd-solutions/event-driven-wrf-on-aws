@@ -45,22 +45,7 @@ forecast output uploaded to, in the following example I am using
 cdk bootstrap
 cdk deploy --parameters BucketName=my-bucket-name
 ```
-add inline policy to the role that contains "ParallelClusterUserRole"
-```
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Action": [
-               "iam:AttachRolePolicy",
-               "iam:DetachRolePolicy"
-            ],
-            "Effect": "Allow",
-            "Resource": "arn:aws:iam::<account-id>:role/parallelcluster/*"
-        }
-    ]
-}
-```
+
 ## Cleanup
 
 To completely tear down all infrastructure when it is not needed.
