@@ -27,3 +27,9 @@ def main(event, context):
         stateMachineArn=os.getenv("SM_ARN")
     )
 
+def destroy(event, context):
+    print(event)
+    sfn = boto3.client('stepfunctions')
+    sfn.start_execution(
+        stateMachineArn=os.getenv("SM_ARN")
+    )
