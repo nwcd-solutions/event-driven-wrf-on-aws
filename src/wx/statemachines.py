@@ -588,7 +588,7 @@ class stepfunction (NestedStack):
                     "CLUSTER_NAME": cluster_name,
                     "PCLUSTER_API_URL": purl,
                     "REGION": Aws.REGION,
-                    "SF_ARN":destroy_sf.attr_arn
+                    "SM_ARN":destroy_sf.attr_arn
                 },
                 handler="trigger.destroy",
                 layers=[layer],
