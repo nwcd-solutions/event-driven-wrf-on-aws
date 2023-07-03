@@ -48,7 +48,10 @@ forecast output uploaded to, in the following example I am using
 cdk bootstrap
 cdk deploy --parameters BucketName=my-bucket-name
 ```
-
+default forecast domains and default forecast days are both 2, if you need change the setting, please deploy the CDK stack with optional parameters
+```
+cdk deploy --parameters BucketName=my-bucket-name Domain_num=1 Forecast_days=1 
+```
 ## Cleanup
 
 To completely tear down all infrastructure when it is not needed.
