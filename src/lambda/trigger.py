@@ -14,7 +14,7 @@ def main(event, context):
                  (?P<d>\d{2})              # Day
                  /(?P<h>\d{2})             # Hour
                  /atmos                    # Atmospheric components
-                 /gfs.t(?P=h)z.pgrb2.0p50.f096   # Filename
+                 /gfs.t(?P=h)z.pgrb2.0p50.f096$   # Filename
                  """,
                  re.VERBOSE)
     m = p.match(key)
