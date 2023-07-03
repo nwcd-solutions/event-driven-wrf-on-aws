@@ -234,15 +234,13 @@ build_dir(){
   m=${ftime:5:2}
   d=${ftime:8:2}
   h=${ftime:11:2}
-  #jobdir=$ftime
-  #jobdir=$y-$m-$d-$h
-  #job_array=("shandong" "xinjiang" "neimeng" "gansu")
+
   start_date=$y-$m-$d 
   start_date=$(date -d ${start_date}"+1 day")
   start_date=$(date -d "${start_date}" +%Y-%m-%d)
-  y=${start_date:0:4}
-  m=${start_date:5:2}
-  d=${start_date:8:2}
+  s_y=${start_date:0:4}
+  s_m=${start_date:5:2}
+  s_d=${start_date:8:2}
   h='00'
   end_date=$(date -d ${start_date}"+${forecast_days} day") 
   end_date=$(date -d "${end_date}" +%Y-%m-%d)
@@ -282,9 +280,9 @@ build_dir(){
      rm $jobdir/run/tc.exe
      rm $jobdir/run/ndown.exe
      aws s3 cp s3://${bucket_name}/input/$jobdir/namelist.input $jobdir/run/
-     sed -i 's/START_YEAR/'"${y}"'/g' $jobdir/run/namelist.input
-     sed -i 's/START_MONTH/'"${m}"'/g' $jobdir/run/namelist.input
-     sed -i 's/START_DAY/'"${d}"'/g' $jobdir/run/namelist.input
+     sed -i 's/START_YEAR/'"${s_y}"'/g' $jobdir/run/namelist.input
+     sed -i 's/START_MONTH/'"${s_m}"'/g' $jobdir/run/namelist.input
+     sed -i 's/START_DAY/'"${s_d}"'/g' $jobdir/run/namelist.input
      sed -i 's/START_HOUR/'"${h}"'/g' $jobdir/run/namelist.input
      sed -i 's/END_YEAR/'"${e_y}"'/g' $jobdir/run/namelist.input
      sed -i 's/END_MONTH/'"${e_m}"'/g' $jobdir/run/namelist.input
