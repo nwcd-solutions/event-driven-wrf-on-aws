@@ -2,9 +2,11 @@
 ![Overview image](./img/arch.png)
 
 A fully automated cloud-native event driven weather forecasting.
+For HPC6a instance only available in us-east-2, you should deploy the solution in this region.
 
 ## Prerequisites
-Create S3 bucket to host input files of each domain that necessary for WRF running and the output files ,the structure should like belowing:
+1. Create an EC2 Key pair with name us-east-2.
+2. Create S3 bucket to host input files of each domain that necessary for WRF running and the output files ,the structure should like belowing:
 ```
 ---my-bucket-name
     |---inputs
