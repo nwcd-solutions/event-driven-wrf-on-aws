@@ -2,6 +2,7 @@
 ![Overview image](./img/arch.png)
 
 A fully automated cloud-native event driven weather forecasting.
+
 For HPC6a instance only available in us-east-2, you should deploy the solution in this region.
 
 ## Prerequisites
