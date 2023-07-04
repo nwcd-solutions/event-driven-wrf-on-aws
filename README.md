@@ -50,7 +50,7 @@ cdk deploy --parameters BucketName=my-bucket-name
 ```
 default forecast domains and default forecast days are both 2, if you need change the setting, please deploy the CDK stack with optional parameters. the number of domains need to be consistent with contents of S3 bucket' inputs folder.
 ```
-cdk deploy --parameters BucketName=my-bucket-name Domain_num=1 Forecast_days=1 
+cdk deploy --parameters BucketName=my-bucket-name --parameters DomainNum=1 --parameters ForecastDays=1 
 ```
 ## Cleanup
 
