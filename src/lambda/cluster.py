@@ -31,7 +31,7 @@ def gateway(url, method, data):
     botocore.auth.SigV4Auth(session.get_credentials(), "execute-api", region).add_auth(request)
     boto_request = request.prepare()
     boto_request.headers["content-type"] = "application/json"
-    response = req_call(url, data=data, headers=boto_request.headers, timeout=30)
+    response = req_call(url, data=data, headers=boto_request.headers, timeout=300)
     #code = response.status_code
     #print(f"Response code: {code}")
     #return response.json()
