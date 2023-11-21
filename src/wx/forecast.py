@@ -54,7 +54,7 @@ class Forecast(NestedStack):
                 description="WX Lambda Layer",
             )
 
-        run = λ.Function(self, "lambda_func_run",
+        run = λ.Function(self, "run_forecast",
                 code=λ.Code.from_asset("./lambda/forecast"),
                 environment={
                     "BUCKET_NAME": bucket_name,
