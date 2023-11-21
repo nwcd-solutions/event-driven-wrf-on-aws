@@ -26,7 +26,7 @@ class stepfunction (NestedStack):
         cluster_name = "wx-pcluster001"
         #domains= kwargs["domains"]
         #forecast_days = kwargs["days"]
-        forecast_lambda = kwargs["forecast_lambda"]
+        #forecast_lambda = kwargs["forecast_lambda"]
         purl = Fn.import_value("ParallelClusterApiInvokeUrl")
         hostname = Fn.select(2, Fn.split("/", Fn.select(0, Fn.split('.', purl))))
         parn = f"arn:aws:execute-api:{Aws.REGION}::{hostname}/*/*/*"
@@ -53,12 +53,12 @@ class stepfunction (NestedStack):
         # Create SSM parameter store to store parameters
         #-------------------------------------------------
         fcst_days_ssm = ssm.StringParameter(
-            self, "MyParameter",
+            self, "fcst_days_ssm",
             parameter_name="/event-driven-wrf/fcst_days",
             string_value="2"
         )
         key_str_ssm = ssm.StringParameter(
-            self, "MyParameter",
+            self, "key_str_ssm",
             parameter_name="/event-driven-wrf/key_string",
             string_value=r"gfs.t(?P=h)z.pgrb2.0p50.f096"
         )
