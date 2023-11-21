@@ -183,6 +183,60 @@ class stepfunction (NestedStack):
                 timeout=Duration.seconds(60)
             )
         Tags.of(cluster_lambda).add("Purpose", "Event Driven Weather Forecast", priority=300)    
+        #-----------------------------------------------------------------------------
+        # Create lambda function to submit fcst job
+        #----------------------------------------------------------------------------- 
+        run_policy_doc = iam.PolicyDocument()
+        run_policy_doc.add_statements(iam.PolicyStatement(
+            actions=[
+                "secretsmanager:GetResourcePolicy",
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:DescribeSecret",
+                "secretsmanager:ListSecretVersionIds",
+                "secretsmanager:ListSecrets",
+            ],
+            resources=["*"],
+            effect=iam.Effect.ALLOW))
+        run_policy_doc.add_statements(iam.PolicyStatement(
+            actions=[
+                "dynamodb:*",  
+                "ssm:GetParameter",
+                "ssm:GetParameters",
+                "ssm:GetParametersByPath"
+            ],
+            resources=["*"],
+            effect=iam.Effect.ALLOW))
+        run_role = iam.Role(self, "Role",
+                assumed_by=iam.CompositePrincipal(
+                    iam.ServicePrincipal("lambda.amazonaws.com"),
+                    iam.ServicePrincipal("sts.amazonaws.com"),
+                ),
+                description="CreateForecastLambdaRole",
+                managed_policies=[
+                    iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole"),
+                    iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaVPCAccessExecutionRole"),
+                    ],
+                inline_policies={"secretsmanager": run_policy_doc},
+        )
+
+        run = λ.Function(self, "run_forecast",
+                code=λ.Code.from_asset("./lambda/forecast"),
+                environment={
+                    "BUCKET_NAME": bucket_name,
+                    #"DOMAINS_NUM": domains,
+                    "FORECAST_DAYS":fcst_days.parameter_name,
+                    "PARA_DB":para_db.table_name,
+                    "EXEC_DB":exec_db.table_name,
+                },
+                handler="forecast.main",
+                layers=[layer],
+                role=run_role,
+                runtime=λ.Runtime.PYTHON_3_9,
+                timeout=Duration.seconds(60),
+                vpc=vpc,
+            )
+        Tags.of(run).add("Purpose", "Event Driven Weather Forecast", priority=300)
+        
         #-------------------------------------------------
         # Create IAM policy for step function
         #-------------------------------------------------
@@ -698,60 +752,7 @@ class stepfunction (NestedStack):
                 timeout=Duration.seconds(60)
             )
         Tags.of(trigger_destroy).add("Purpose", "Event Driven Weather Forecast", priority=300)
-        #-----------------------------------------------------------------------------
-        # Create lambda function to submit fcst job
-        #----------------------------------------------------------------------------- 
-        run_policy_doc = iam.PolicyDocument()
-        run_policy_doc.add_statements(iam.PolicyStatement(
-            actions=[
-                "secretsmanager:GetResourcePolicy",
-                "secretsmanager:GetSecretValue",
-                "secretsmanager:DescribeSecret",
-                "secretsmanager:ListSecretVersionIds",
-                "secretsmanager:ListSecrets",
-            ],
-            resources=["*"],
-            effect=iam.Effect.ALLOW))
-        run_policy_doc.add_statements(iam.PolicyStatement(
-            actions=[
-                "dynamodb:*",  
-                "ssm:GetParameter",
-                "ssm:GetParameters",
-                "ssm:GetParametersByPath"
-            ],
-            resources=["*"],
-            effect=iam.Effect.ALLOW))
-        run_role = iam.Role(self, "Role",
-                assumed_by=iam.CompositePrincipal(
-                    iam.ServicePrincipal("lambda.amazonaws.com"),
-                    iam.ServicePrincipal("sts.amazonaws.com"),
-                ),
-                description="CreateForecastLambdaRole",
-                managed_policies=[
-                    iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole"),
-                    iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaVPCAccessExecutionRole"),
-                    ],
-                inline_policies={"secretsmanager": run_policy_doc},
-        )
 
-        run = λ.Function(self, "run_forecast",
-                code=λ.Code.from_asset("./lambda/forecast"),
-                environment={
-                    "BUCKET_NAME": bucket_name,
-                    #"DOMAINS_NUM": domains,
-                    "FORECAST_DAYS":fcst_days.parameter_name,
-                    "PARA_DB":para_db.table_name,
-                    "EXEC_DB":exec_db.table_name,
-                },
-                handler="forecast.main",
-                layers=[layer],
-                role=run_role,
-                runtime=λ.Runtime.PYTHON_3_9,
-                timeout=Duration.seconds(60),
-                vpc=vpc,
-            )
-        Tags.of(run).add("Purpose", "Event Driven Weather Forecast", priority=300)
-        
         outputs = aws_s3_notifications.LambdaDestination(trigger_destroy)
         bucket = s3.Bucket.from_bucket_name(self, "nwp-bucket", bucket_name)
         bucket.add_event_notification(s3.EventType.OBJECT_CREATED, outputs,
