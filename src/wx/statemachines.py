@@ -611,6 +611,13 @@ class stepfunction (NestedStack):
                 actions=["cloudformation:*"],
                 resources=["*"],
                 effect=iam.Effect.ALLOW),
+            iam.PolicyStatement(
+                actions=[
+                    "dynamodb:Get*",
+                    "dynamodb:Query"                       
+                ],
+                resources=[para_db.table_arn],
+                effect=iam.Effect.ALLOW),
         ])
         trigger_lambda_role = iam.Role(self, "TriggerRole",
                 assumed_by=iam.CompositePrincipal(
