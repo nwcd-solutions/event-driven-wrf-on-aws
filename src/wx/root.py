@@ -4,6 +4,7 @@
 from aws_cdk import (
     Aws, CfnOutput, CfnParameter, Duration, Fn, NestedStack, Stack, Tags
 )
+
 from constructs import Construct
 from wx.forecast import Forecast
 from wx.network import Vpc
@@ -20,7 +21,10 @@ class Root(Stack):
             description="The name of the Amazon S3 bucket where the forecast files will be stored.")
         domain_num = CfnParameter(self, "DomainNum", type="String", default="2",description="number of domains for WRF")
         forecast_days= CfnParameter(self, "ForecastDays",type="String", default="2",description="number of forecast days")
-        
+        jwt = secretsmanager.Secret(self, "JWTCreds",
+                secret_name="JWTKey",
+                description="JSON Web Token for SLURM"
+              )
         vpc = Vpc(self, "vpc")
 
         forecast = Forecast(self, "forecast", vpc=vpc.outputs, bucket=bucket_name.value_as_string,domains=domain_num.value_as_string,days=forecast_days.value_as_string)
