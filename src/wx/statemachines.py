@@ -57,7 +57,7 @@ class stepfunction (NestedStack):
                     name="para_name",
                     type=dynamodb.AttributeType.STRING
                 ),
-                removal_policy=core.RemovalPolicy.DESTROY
+                #removal_policy=core.RemovalPolicy.DESTROY
             )
 
         #-------------------------------------------------
@@ -73,10 +73,10 @@ class stepfunction (NestedStack):
             ]
         )
 
-        kms_all_policy = iam.Policy(
+        kms_all_policy = iam.ManagedPolicy(
             self,
             "kms_all",
-            policy_name="kms_all",
+            managed_policy_name="kms_all",
             document=kms_all_policy_doc
         )
         #-------------------------------------------------
