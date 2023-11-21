@@ -23,10 +23,7 @@ class Root(Stack):
         domain_num = CfnParameter(self, "DomainNum", type="String", default="2",description="number of domains for WRF")
         forecast_days= CfnParameter(self, "ForecastDays",type="String", default="2",description="number of forecast days")
         slurm_acct= CfnParameter(self, "SlurmAcct",type="String", default="false",description="whether slurm account is neccessary")
-        jwt = secretsmanager.Secret(self, "JWTCreds",
-                secret_name="JWTKey",
-                description="JSON Web Token for SLURM"
-              )
+
         vpc = Vpc(self, "vpc")
 
         forecast = Forecast(self, "forecast", vpc=vpc.outputs, bucket=bucket_name.value_as_string,domains=domain_num.value_as_string,days=forecast_days.value_as_string)
