@@ -54,7 +54,7 @@ class stepfunction (NestedStack):
         para_db = dynamodb.Table(
                 self, "Parameters_Table",
                 partition_key=dynamodb.Attribute(
-                    name=para_name,
+                    name="para_name",
                     type=dynamodb.AttributeType.STRING
                 ),
                 removal_policy=core.RemovalPolicy.DESTROY
