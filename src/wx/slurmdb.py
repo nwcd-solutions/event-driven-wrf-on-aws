@@ -53,18 +53,10 @@ class SlurmDb(NestedStack):
             vpc=vpc,
             vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PUBLIC)
         )
-
-        self.jwt = secretsmanager.Secret(self, "JWTCreds",
-                secret_name="JWTKey",
-                description="JSON Web Token for SLURM"
-                )
-
+        
         CfnOutput(self, "hostname", value=self.db.db_instance_endpoint_address)
         CfnOutput(self, "DBSecretArn", value=self.secret.secret_full_arn,
                 export_name="DBSecretArn")
-        CfnOutput(self, "JWTKeyArn", value=self.jwt.secret_full_arn,
-                export_name="JWTKeyArn")
-        CfnOutput(self, "JWTKey", value="JWTKey", export_name="JWTKey")
 
     @property
     def outputs(self):
