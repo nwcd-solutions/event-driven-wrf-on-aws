@@ -39,7 +39,7 @@ class Forecast(NestedStack):
                 "dynamodb:Get*",
                 "dynamodb:Query"                       
                 ],
-            resources=[para_db.table_arn],
+            resources=["*"],
             effect=iam.Effect.ALLOW))
         role = iam.Role(self, "Role",
                 assumed_by=iam.CompositePrincipal(
