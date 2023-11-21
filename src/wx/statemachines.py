@@ -10,6 +10,7 @@ from aws_cdk import (
     aws_sns as sns,
     aws_stepfunctions as sfn,
     aws_stepfunctions_tasks as tasks,
+    aws_secretsmanager as secretsmanager,
     Aws, CfnOutput, Duration, Fn, NestedStack, Tags
 )
 from constructs import Construct
@@ -29,6 +30,11 @@ class stepfunction (NestedStack):
         parn = f"arn:aws:execute-api:{Aws.REGION}::{hostname}/*/*/*"
         post_head_amd64 = assets.Asset(self, "PostComputeFileAsset",
                 path="scripts/post_install_amd64.sh")
+
+        jwt = secretsmanager.Secret(self, "JWTCreds",
+                secret_name="JWTKey",
+                description="JSON Web Token for SLURM"
+              )
         jwt_key = Fn.import_value("JWTKey")
         #sns_topic = Fn.import_value("ForecastSnsArn")
 
