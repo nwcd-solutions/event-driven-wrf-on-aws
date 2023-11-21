@@ -601,7 +601,7 @@ class stepfunction (NestedStack):
         #-----------------------------------------------------------------------------
         # Create lambda function to subscribe notification of GFS Open data change
         #-----------------------------------------------------------------------------
-        trigger_create = λ.Function(self, "lambda_func_create",
+        trigger_create = λ.Function(self, "start_stepfuction",
                 code=λ.Code.from_asset("./lambda/trigger"),
                 environment={
                     "SM_ARN": main_sf.attr_arn,
@@ -619,7 +619,7 @@ class stepfunction (NestedStack):
         #-----------------------------------------------------------------------------
         # Create lambda function to response for s3 receiving fcst.done file
         #-----------------------------------------------------------------------------        
-        trigger_destroy = λ.Function(self, "lambda_func_destroy",
+        trigger_destroy = λ.Function(self, "destroy_cluster",
                 code=λ.Code.from_asset("./lambda/trigger"),
                 environment={
                     "CLUSTER_NAME": cluster_name,
