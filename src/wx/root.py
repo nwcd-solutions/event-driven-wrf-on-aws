@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: MIT-0
 
 from aws_cdk import (
-    aws_secretsmanager as secretsmanager,
     Aws, CfnOutput, CfnParameter, Duration, Fn, NestedStack, Stack, Tags
 )
 
