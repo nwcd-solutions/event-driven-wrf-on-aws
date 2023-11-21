@@ -33,8 +33,9 @@ class Root(Stack):
 
         sf = stepfunction(self, "workflow", vpc=vpc.outputs, forecast_lambda=forecast.outputs, bucket=bucket_name.value_as_string,domains=domain_num.value_as_string,days=forecast_days.value_as_string)
         sf.add_dependency(forecast)
-        sf.add_dependency(pcluster_api)        
-        sf.add_dependency(slurmdb)
+        sf.add_dependency(pcluster_api)  
+        if (slurm_acct == "true") :
+            sf.add_dependency(slurmdb)
         sf.add_dependency(vpc)
        
         
