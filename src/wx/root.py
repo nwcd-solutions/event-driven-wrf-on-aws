@@ -22,6 +22,7 @@ class Root(Stack):
             description="The name of the Amazon S3 bucket where the forecast files will be stored.")
         domain_num = CfnParameter(self, "DomainNum", type="String", default="2",description="number of domains for WRF")
         forecast_days= CfnParameter(self, "ForecastDays",type="String", default="2",description="number of forecast days")
+        slurm_acct= CfnParameter(self, "SlurmAcct",type="String", default="false",description="whether slurm account is neccessary")
         jwt = secretsmanager.Secret(self, "JWTCreds",
                 secret_name="JWTKey",
                 description="JSON Web Token for SLURM"
@@ -30,9 +31,9 @@ class Root(Stack):
 
         forecast = Forecast(self, "forecast", vpc=vpc.outputs, bucket=bucket_name.value_as_string,domains=domain_num.value_as_string,days=forecast_days.value_as_string)
         pcluster_api = ParallelClusterApi(self, "parallel-cluster-api")
-
-        slurmdb = SlurmDb(self, "slurmdbd", vpc=vpc.outputs)
-        slurmdb.add_dependency(vpc)
+        if (slurm_acct == "true") :
+            slurmdb = SlurmDb(self, "slurmdbd", vpc=vpc.outputs)
+            slurmdb.add_dependency(vpc)
 
         sf = stepfunction(self, "workflow", vpc=vpc.outputs, forecast_lambda=forecast.outputs, bucket=bucket_name.value_as_string,domains=domain_num.value_as_string,days=forecast_days.value_as_string)
         sf.add_dependency(forecast)
