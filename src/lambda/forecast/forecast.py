@@ -161,7 +161,17 @@ def main(event, context):
     print(ip)
     pids=[]
     jids=[]
-
+    job_num=0
+    dynamodb = boto3.resource('dynamodb')
+    table = dynamodb.Table(os.getenv('DYNAMODB'))
+    response = table.query(
+        KeyConditionExpression=Key('para_name').eq('domain')
+    )
+    items = response['Items']
+    print(items)
+    job_num=len(items)
+    print("domains:")
+    print(job_num)
     for i in range(1,job_num+1):
         n='domain_'+str(i)
         pids.append(preproc(n))
