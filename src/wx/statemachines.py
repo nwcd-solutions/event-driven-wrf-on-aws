@@ -32,11 +32,11 @@ class stepfunction (NestedStack):
         post_head_amd64 = assets.Asset(self, "PostComputeFileAsset",
                 path="scripts/post_install_amd64.sh")
 
+        jwt_key = "JWTKey"
         jwt = secretsmanager.Secret(self, "JWTCreds",
-                secret_name="JWTKey",
+                secret_name=jwt_key,
                 description="JSON Web Token for SLURM"
-              )
-        jwt_key = Fn.import_value("JWTKey")
+              )       
                 
         sg_rds = ec2.SecurityGroup(
                 self,
