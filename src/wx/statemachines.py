@@ -631,6 +631,7 @@ class stepfunction (NestedStack):
                 code=λ.Code.from_asset("./lambda/trigger"),
                 environment={
                     "SM_ARN": main_sf.attr_arn,
+                    "DYNAMODB": para_db.table_name,
                 },
                 handler="trigger.main",
                 layers=[layer],
