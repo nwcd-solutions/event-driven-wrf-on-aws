@@ -13,12 +13,12 @@ HeadNode:
       - {SLURM: ''}
   Iam:
     AdditionalIamPolicies:
+      - {KMS_POLICY:''}
       - Policy: arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
       - Policy: arn:aws:iam::aws:policy/AmazonS3FullAccess
       - Policy: arn:aws:iam::aws:policy/AmazonFSxFullAccess
       - Policy: arn:aws:iam::aws:policy/SecretsManagerReadWrite
       - Policy: arn:aws:iam::aws:policy/AmazonSNSFullAccess
-      - Policy: arn:aws:iam::880755836258:policy/KMSALL
   Ssh:
     KeyName: us-east-2
   LocalStorage:
