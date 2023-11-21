@@ -103,14 +103,14 @@ EOF
 slurm_db() {
   local region=$1
   #yum install -y mysql
-  aws secretsmanager get-secret-value \
+  #aws secretsmanager get-secret-value \
     --secret-id SlurmDbCreds \
     --query 'SecretString' \
     --region $region \
     --output text > /tmp/dbcreds
-  export DBHOST=$(jq -r '.host' /tmp/dbcreds)
-  export DBPASSWD=$(jq -r '.password' /tmp/dbcreds)
-  rm /tmp/dbcreds
+  #export DBHOST=$(jq -r '.host' /tmp/dbcreds)
+  #export DBPASSWD=$(jq -r '.password' /tmp/dbcreds)
+  #rm /tmp/dbcreds
 
   cat > /opt/slurm/etc/slurmdbd.conf <<- EOF
 	ArchiveEvents=yes
