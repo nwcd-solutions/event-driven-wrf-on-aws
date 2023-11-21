@@ -1,5 +1,6 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: MIT-0
+# Create lambda function and cresponding role/policy to subscribe the notiication of GFS Open data change and trigger the execution of step function
 
 from aws_cdk import (
     aws_ec2 as ec2,
