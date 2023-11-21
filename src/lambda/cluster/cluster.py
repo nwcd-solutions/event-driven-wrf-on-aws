@@ -46,7 +46,7 @@ def main(event, context):
         config_data["Scheduling"]["SlurmQueues"][0]["Networking"]["SubnetIds"][0] = os.getenv("SUBNETID")
         config_data["Scheduling"]["SlurmQueues"][0]["Iam"]["S3Access"][0]["BucketName"] = os.getenv("BUCKET_NAME")
         config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Script"] = os.getenv("S3_URL_POST_INSTALL_HEADNODE")
-        
+        config_data["HeadNode"]["Iam"]["AdditionalIamPolicies"][0] = os.getenv("KMS_POLICY")
         config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Args"][0] = region
         config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Args"][1] = os.getenv("FORECAST_DAYS")
         config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Args"][2] = ftime
