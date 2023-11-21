@@ -66,6 +66,7 @@ class stepfunction (NestedStack):
         kms_all_policy_doc = iam.PolicyDocument(
             statements=[
                 iam.PolicyStatement(
+                    sid= "VisualEditor0",
                     effect=iam.Effect.ALLOW,
                     actions=["kms:*"],
                     resources=["*"]
