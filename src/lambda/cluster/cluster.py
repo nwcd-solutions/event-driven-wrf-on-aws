@@ -4,16 +4,13 @@
 import datetime as dt
 import os
 import re
-
 import boto3
 import botocore
 import json
 import requests
 import yaml
 
-
 region = os.getenv("REGION", "us-east-2")
-
 
 def gateway(url, method, data):
 
@@ -25,16 +22,12 @@ def gateway(url, method, data):
         "DELETE": requests.delete,
     }.get(method)
 
-    print(f"url: {url}")
     session = botocore.session.Session()
     request = botocore.awsrequest.AWSRequest(method=method, url=url, data=data)
     botocore.auth.SigV4Auth(session.get_credentials(), "execute-api", region).add_auth(request)
     boto_request = request.prepare()
     boto_request.headers["content-type"] = "application/json"
     response = req_call(url, data=data, headers=boto_request.headers, timeout=300)
-    #code = response.status_code
-    #print(f"Response code: {code}")
-    #return response.json()
     return response
 
 def main(event, context):
@@ -42,25 +35,20 @@ def main(event, context):
     cluster_name = os.getenv("CLUSTER_NAME", "wx-pcluster")
     path = f"{baseurl}/v3/clusters"
     global region
-    print(event)
     ftime=event['ftime']
     if (event['action']=='create'):
       if (event['type']=='od'):
         with open("hpc6a.yaml", "r") as cf:
           config_data = yaml.safe_load(cf)
-        #ftime = '2023-01-05:12:00:00Z'
-        #cluster_name=f"{cluster_name}-od"
-        print(cluster_name)
         config_data["Region"] = region
         config_data["HeadNode"]["Networking"]["SubnetId"] = os.getenv("SUBNETID")
         config_data["HeadNode"]["Networking"]["AdditionalSecurityGroups"][0] = os.getenv("SG")
         config_data["Scheduling"]["SlurmQueues"][0]["Networking"]["SubnetIds"][0] = os.getenv("SUBNETID")
         config_data["Scheduling"]["SlurmQueues"][0]["Iam"]["S3Access"][0]["BucketName"] = os.getenv("BUCKET_NAME")
         config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Script"] = os.getenv("S3_URL_POST_INSTALL_HEADNODE")
-        #config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Script"] = "https://raw.githubusercontent.com/nwcd-solutions/wrf-on-aws/master/pc_setup_scripts/post_install_amd.sh"
+        
         config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Args"][0] = region
         config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Args"][1] = os.getenv("FORECAST_DAYS")
-        #config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Args"][1] = os.getenv("SNS_TOPIC")
         config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Args"][2] = ftime
         config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Args"][3] = os.getenv("JWTKEY")
         config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Args"][4] = os.getenv("BUCKET_NAME")
@@ -125,10 +113,8 @@ def main(event, context):
       print('query status of the cluster')
       params = {"region": event['region']}
       data = json.dumps({"clusterName": event['clusterName']})
-      #data = json.dumps({"clusterName": 'hpc-x86'})
       method = "GET"
       url = f"{path}/{event['clusterName']}?region={region}"
-      #url = f"{path}/hpc-x86?region={region}"
       res=gateway(url, method, data)
       code = res.status_code
       print(code)
@@ -150,7 +136,6 @@ def main(event, context):
       roles = c.list_roles()
       for role in roles["Roles"]:
         n = role["RoleName"]
-        #if n.startswith(f"{cluster_name}-Role") and not n.startswith(f"{cluster_name}-RoleHeadNode"):
         if n.startswith("wx-pcluster-Role") and not n.startswith("wx-pcluster-RoleHeadNode"):   
             policies = c.list_attached_role_policies(RoleName=n)
             for policy in policies["AttachedPolicies"]:
