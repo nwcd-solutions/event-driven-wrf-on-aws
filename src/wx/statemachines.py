@@ -46,7 +46,7 @@ class stepfunction (NestedStack):
         #-------------------------------------------------
         # Create IAM policy for KMS ALL
         #-------------------------------------------------
-        kms_all_policy = iam.PolicyDocument(
+        kms_all_policy_doc = iam.PolicyDocument(
             statements=[
                 iam.PolicyStatement(
                     effect=iam.Effect.ALLOW,
@@ -56,11 +56,11 @@ class stepfunction (NestedStack):
             ]
         )
 
-        iam.Policy(
+        kms_all_policy = iam.Policy(
             self,
             "kms_all",
             policy_name="kms_all",
-            document=kms_all_policy
+            document=kms_all_policy_doc
         )
         #-------------------------------------------------
         # Create IAM role and policy for lambda function
@@ -123,6 +123,7 @@ class stepfunction (NestedStack):
                     "SUBNETID": subnet,
                     "FORECAST_DAYS": forecast_days,
                     "NUM_DOMAINS": domains,
+                    "KMS_POLICY": f"Policy:{kms_all_policy.policy_arn}",
                 },
                 handler="cluster.main",
                 layers=[layer],
