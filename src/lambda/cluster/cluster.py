@@ -48,11 +48,11 @@ def main(event, context):
         config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Script"] = {"Policy":os.getenv("S3_URL_POST_INSTALL_HEADNODE")}
         config_data["HeadNode"]["Iam"]["AdditionalIamPolicies"][0] = os.getenv("KMS_POLICY")
         config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Args"][0] = region
-        config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Args"][1] = os.getenv("FORECAST_DAYS")
+        config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Args"][1] = event['fcst_days']    #os.getenv("FORECAST_DAYS")
         config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Args"][2] = ftime
         config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Args"][3] = os.getenv("JWTKEY")
         config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Args"][4] = os.getenv("BUCKET_NAME")
-        config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Args"][5] = os.getenv("NUM_DOMAINS")
+        config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Args"][5] = event['domains_num']        #os.getenv("NUM_DOMAINS")
         url=path
         method = "POST"
         data = json.dumps({"clusterConfiguration": yaml.dump(config_data, default_flow_style=False),
