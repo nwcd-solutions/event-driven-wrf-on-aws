@@ -4,6 +4,26 @@ import os
 import re
 
 def main(event, context):
+    msg = json.loads(event["Records"][0]["Sns"]["Message"])
+    key = msg["Records"][0]["s3"]["object"]["key"]
+    key_str=r"gfs.t(?P=h)z.pgrb2.0p50.f096"
+    prefix_str=r"""
+                gfs.                      # GFS prefix
+                (?P<y>\d{4})              # Year
+                (?P<m>\d{2})              # Month
+                (?P<d>\d{2})              # Day
+                /(?P<h>\d{2})             # Hour
+                /atmos/
+                """
+    
+    p = re.compile(r"{}$".format(prefix_str+key_str),re.VERBOSE)
+    m = p.match(key)
+    if not m:
+        return
+    print(event)
+    print(msg)
+    print(key)
+    ftime = f"{m.group('y')}-{m.group('m')}-{m.group('d')}T{m.group('h')}:00:00Z"
     dynamodb = boto3.resource('dynamodb')
     table = dynamodb.Table(os.getenv('DYNAMODB'))
     response = table.scan()
@@ -11,7 +31,7 @@ def main(event, context):
     domains_num = 0
     fcst_days = 0
     auto_mode = False
-    key_str=r"gfs.t(?P=h)z.pgrb2.0p50.f096"
+    
     print(items)
     for item in items:
         if item['para_name'] == 'domain':
@@ -32,27 +52,6 @@ def main(event, context):
     if domains_num==0 or auto_mode==False or fcst_days==0:
         print("stop working")
         return
-
-    msg = json.loads(event["Records"][0]["Sns"]["Message"])
-    key = msg["Records"][0]["s3"]["object"]["key"]
-    prefix_str=r"""
-                gfs.                      # GFS prefix
-                (?P<y>\d{4})              # Year
-                (?P<m>\d{2})              # Month
-                (?P<d>\d{2})              # Day
-                /(?P<h>\d{2})             # Hour
-                /atmos/
-                """
-    
-    p = re.compile(r"{}$".format(prefix_str+key_str),re.VERBOSE)
-    m = p.match(key)
-    if not m:
-        return
-    print(event)
-    print(msg)
-    print(key)
-    ftime = f"{m.group('y')}-{m.group('m')}-{m.group('d')}T{m.group('h')}:00:00Z"
-
     sfn = boto3.client('stepfunctions')
     sfn.start_execution(
         stateMachineArn=os.getenv("SM_ARN"),
