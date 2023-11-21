@@ -55,7 +55,7 @@ class Forecast(NestedStack):
             )
 
         run = λ.Function(self, "lambda_func_run",
-                code=λ.Code.from_asset("./lambda"),
+                code=λ.Code.from_asset("./lambda/forecast"),
                 environment={
                     "BUCKET_NAME": bucket_name,
                     "DOMAINS_NUM": domains,
