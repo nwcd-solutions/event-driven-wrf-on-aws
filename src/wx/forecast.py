@@ -34,6 +34,13 @@ class Forecast(NestedStack):
                 ],
             resources=["*"],
             effect=iam.Effect.ALLOW))
+        policy_doc.add_statements(iam.PolicyStatement(
+            actions=[
+                "dynamodb:Get*",
+                "dynamodb:Query"                       
+                ],
+            resources=[para_db.table_arn],
+            effect=iam.Effect.ALLOW))
         role = iam.Role(self, "Role",
                 assumed_by=iam.CompositePrincipal(
                     iam.ServicePrincipal("lambda.amazonaws.com"),
