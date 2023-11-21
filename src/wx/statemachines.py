@@ -37,9 +37,6 @@ class stepfunction (NestedStack):
                 description="JSON Web Token for SLURM"
               )
         jwt_key = Fn.import_value("JWTKey")
-        #sns_topic = Fn.import_value("ForecastSnsArn")
-
-        
                 
         sg_rds = ec2.SecurityGroup(
                 self,
