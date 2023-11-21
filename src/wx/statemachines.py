@@ -31,6 +31,7 @@ class stepfunction (NestedStack):
                 path="scripts/post_install_amd64.sh")
         jwt_key = Fn.import_value("JWTKey")
         #sns_topic = Fn.import_value("ForecastSnsArn")
+
         
                 
         sg_rds = ec2.SecurityGroup(
@@ -43,6 +44,18 @@ class stepfunction (NestedStack):
             peer=ec2.Peer.ipv4(vpc.vpc_cidr_block),
             connection=ec2.Port.tcp(8080)
         )
+        #-------------------------------------------------
+        # Create a DynamoDB table to store parameters
+        #-------------------------------------------------
+        para_db = dynamodb.Table(
+                self, "Parameters_Table",
+                partition_key=dynamodb.Attribute(
+                    name=para_name,
+                    type=dynamodb.AttributeType.STRING
+                ),
+                removal_policy=core.RemovalPolicy.DESTROY
+            )
+
         #-------------------------------------------------
         # Create IAM policy for KMS ALL
         #-------------------------------------------------
