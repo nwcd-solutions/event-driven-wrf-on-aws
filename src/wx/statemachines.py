@@ -123,7 +123,10 @@ class stepfunction (NestedStack):
                 effect=iam.Effect.ALLOW),
             iam.PolicyStatement(
                 actions=[
-                    "dynamodb:*"                      
+                    "dynamodb:*",
+                    "ssm:GetParameter",
+                    "ssm:GetParameters",
+                    "ssm:GetParametersByPath"
                 ],
                 resources=["*"],
                 effect=iam.Effect.ALLOW),
@@ -634,7 +637,10 @@ class stepfunction (NestedStack):
                 effect=iam.Effect.ALLOW),
             iam.PolicyStatement(
                 actions=[
-                    "dynamodb:*"                      
+                    "dynamodb:*",
+                    "ssm:GetParameter",
+                    "ssm:GetParameters",
+                    "ssm:GetParametersByPath"
                 ],
                 resources=[para_db.table_arn],
                 effect=iam.Effect.ALLOW),
@@ -703,13 +709,16 @@ class stepfunction (NestedStack):
                 "secretsmanager:DescribeSecret",
                 "secretsmanager:ListSecretVersionIds",
                 "secretsmanager:ListSecrets",
-                ],
+            ],
             resources=["*"],
             effect=iam.Effect.ALLOW))
         run_policy_doc.add_statements(iam.PolicyStatement(
             actions=[
-                "dynamodb:*",                      
-                ],
+                "dynamodb:*",  
+                "ssm:GetParameter",
+                "ssm:GetParameters",
+                "ssm:GetParametersByPath"
+            ],
             resources=["*"],
             effect=iam.Effect.ALLOW))
         run_role = iam.Role(self, "Role",
