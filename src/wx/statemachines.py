@@ -99,6 +99,13 @@ class stepfunction (NestedStack):
                 actions=["cloudformation:*"],
                 resources=["*"],
                 effect=iam.Effect.ALLOW),
+            iam.PolicyStatement(
+                actions=[
+                    "dynamodb:Get*",
+                    "dynamodb:Query"                       
+                ],
+                resources=[para_db.table_arn],
+                effect=iam.Effect.ALLOW),
         ])
         lambda_role = iam.Role(self, "Role",
                 assumed_by=iam.CompositePrincipal(
@@ -141,6 +148,7 @@ class stepfunction (NestedStack):
                     "FORECAST_DAYS": forecast_days,
                     "NUM_DOMAINS": domains,
                     "KMS_POLICY": f"Policy:{kms_all_policy.policy_arn}",
+                    "DYNAMODB": para_db.table_name,
                 },
                 handler="cluster.main",
                 layers=[layer],
