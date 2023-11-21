@@ -202,7 +202,7 @@ class stepfunction (NestedStack):
                 effect=iam.Effect.ALLOW),
             iam.PolicyStatement(
                 actions=["lambda:InvokeFunction"],
-                resources=[cluster_lambda.function_arn,forecast_lambda],
+                resources=[cluster_lambda.function_arn,run.function_arn],
                 effect=iam.Effect.ALLOW),
             iam.PolicyStatement(
                 actions=["xray:PutTraceSegments", "xray:PutTelemetryRecords", "xray:GetSamplingRules", "xray:GetSamplingTargets"],
