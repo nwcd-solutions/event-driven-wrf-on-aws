@@ -147,7 +147,7 @@ class stepfunction (NestedStack):
                     "SUBNETID": subnet,
                     "FORECAST_DAYS": forecast_days,
                     "NUM_DOMAINS": domains,
-                    "KMS_POLICY": f"Policy:{kms_all_policy.policy_arn}",
+                    "KMS_POLICY": f"Policy:arn:aws:iam::{Aws.ACCOUNT}:{kms_all_policy.policy_name}",
                     "DYNAMODB": para_db.table_name,
                 },
                 handler="cluster.main",
