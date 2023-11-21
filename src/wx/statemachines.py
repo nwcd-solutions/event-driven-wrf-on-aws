@@ -43,6 +43,28 @@ class stepfunction (NestedStack):
             peer=ec2.Peer.ipv4(vpc.vpc_cidr_block),
             connection=ec2.Port.tcp(8080)
         )
+        #-------------------------------------------------
+        # Create IAM policy for KMS ALL
+        #-------------------------------------------------
+        kms_all_policy = iam.PolicyDocument(
+            statements=[
+                iam.PolicyStatement(
+                    effect=iam.Effect.ALLOW,
+                    actions=["kms:*"],
+                    resources=["*"]
+                )
+            ]
+        )
+
+        iam.Policy(
+            self,
+            "kms_all",
+            policy_name="kms_all",
+            document=kms_all_policy
+        )
+        #-------------------------------------------------
+        # Create IAM role and policy for lambda function
+        #-------------------------------------------------  
         policy_doc = iam.PolicyDocument(statements=[
             iam.PolicyStatement(
                 actions=["execute-api:Invoke", "execute-api:ManageConnections"],
@@ -85,9 +107,11 @@ class stepfunction (NestedStack):
                 layer_version_name="wx_layer",
                 description="WX Lambda Layer",
             )
-
-        cluster_lambda = λ.Function(self, "lambda_func_cluster",
-                code=λ.Code.from_asset("./lambda"),
+        #---------------------------------------------------
+        # Create Lambda function to create parallel-cluster
+        #---------------------------------------------------
+        cluster_lambda = λ.Function(self, "create_cluster",
+                code=λ.Code.from_asset("./lambda/cluster"),
                 environment={
                     "BUCKET_NAME": bucket_name,
                     "CLUSTER_NAME": cluster_name,
@@ -108,7 +132,9 @@ class stepfunction (NestedStack):
                 timeout=Duration.seconds(60)
             )
         Tags.of(cluster_lambda).add("Purpose", "Event Driven Weather Forecast", priority=300)    
-
+        #-------------------------------------------------
+        # Create IAM policy for step function
+        #-------------------------------------------------
         sf_topic = sns.Topic(self, "WRF_workflow")
         main_sf_policy = iam.PolicyDocument(statements=[
             iam.PolicyStatement(
@@ -143,6 +169,9 @@ class stepfunction (NestedStack):
                     ],
                 inline_policies={"main_sf_policy": main_sf_policy},
         )
+        #-------------------------------------------------
+        # Main Step function definition
+        #-------------------------------------------------    
         main_sf_def={
           "Comment": "state machine to manager lifecycle of cluster",
           "StartAt": "Create cluster",
@@ -531,6 +560,9 @@ class stepfunction (NestedStack):
             },
           }
         }
+        #-------------------------------------------------
+        # Destroy Step Function definition
+        #-------------------------------------------------        
         destroy_sf = sfn.CfnStateMachine(self, "WX_destroyStateMachine",
             definition_string=json.dumps(destroy_sf_def),
             role_arn = sf_role.role_arn )
@@ -565,9 +597,11 @@ class stepfunction (NestedStack):
                     ],
                 inline_policies={"cluster_lambda": trigger_policy_doc},
         )
-
+        #-----------------------------------------------------------------------------
+        # Create lambda function to subscribe notification of GFS Open data change
+        #-----------------------------------------------------------------------------
         trigger_create = λ.Function(self, "lambda_func_create",
-                code=λ.Code.from_asset("./lambda"),
+                code=λ.Code.from_asset("./lambda/trigger"),
                 environment={
                     "SM_ARN": main_sf.attr_arn,
                 },
@@ -581,9 +615,11 @@ class stepfunction (NestedStack):
         Tags.of(trigger_create).add("Purpose", "Event Driven Weather Forecast", priority=300)
         gfs = sns.Topic.from_topic_arn(self, "NOAAGFS", "arn:aws:sns:us-east-1:123901341784:NewGFSObject")
         trigger_create.add_event_source(λ_events.SnsEventSource(gfs))
-        
+        #-----------------------------------------------------------------------------
+        # Create lambda function to response for s3 receiving fcst.done file
+        #-----------------------------------------------------------------------------        
         trigger_destroy = λ.Function(self, "lambda_func_destroy",
-                code=λ.Code.from_asset("./lambda"),
+                code=λ.Code.from_asset("./lambda/trigger"),
                 environment={
                     "CLUSTER_NAME": cluster_name,
                     "PCLUSTER_API_URL": purl,
