@@ -11,6 +11,7 @@ from aws_cdk import (
     aws_stepfunctions as sfn,
     aws_stepfunctions_tasks as tasks,
     aws_secretsmanager as secretsmanager,
+    aws_dynamodb as dynamodb,
     Aws, CfnOutput, Duration, Fn, NestedStack, Tags
 )
 from constructs import Construct
