@@ -12,6 +12,7 @@ from aws_cdk import (
     aws_stepfunctions_tasks as tasks,
     aws_secretsmanager as secretsmanager,
     aws_dynamodb as dynamodb,
+    aws_ssm as ssm,
     Aws, CfnOutput, Duration, Fn, NestedStack, Tags
 )
 from constructs import Construct
@@ -23,8 +24,8 @@ class stepfunction (NestedStack):
         bucket_name = kwargs["bucket"]
         vpc = kwargs["vpc"]
         cluster_name = "wx-pcluster001"
-        domains= kwargs["domains"]
-        forecast_days = kwargs["days"]
+        #domains= kwargs["domains"]
+        #forecast_days = kwargs["days"]
         forecast_lambda = kwargs["forecast_lambda"]
         purl = Fn.import_value("ParallelClusterApiInvokeUrl")
         hostname = Fn.select(2, Fn.split("/", Fn.select(0, Fn.split('.', purl))))
@@ -49,8 +50,21 @@ class stepfunction (NestedStack):
             connection=ec2.Port.tcp(8080)
         )
         #-------------------------------------------------
-        # Create a DynamoDB table to store parameters
+        # Create SSM parameter store to store parameters
         #-------------------------------------------------
+        fcst_days_ssm = ssm.StringParameter(
+            self, "MyParameter",
+            parameter_name="/event-driven-wrf/fcst_days",
+            string_value="2"
+        )
+        key_str_ssm = ssm.StringParameter(
+            self, "MyParameter",
+            parameter_name="/event-driven-wrf/key_string",
+            string_value=r"gfs.t(?P=h)z.pgrb2.0p50.f096"
+        )
+        #----------------------------------------------------------------------------------------------
+        # Create a DynamoDB table to store parameters of Domain and Step function execution record
+        #----------------------------------------------------------------------------------------------
         para_db = dynamodb.Table(
                 self, "Parameters_Table",
                 partition_key=dynamodb.Attribute(
@@ -59,7 +73,14 @@ class stepfunction (NestedStack):
                 ),
                 #removal_policy=core.RemovalPolicy.DESTROY
             )
-
+        exec_db = dynamodb.Table(
+                self, "execution_Table",
+                partition_key=dynamodb.Attribute(
+                    name="ftime",
+                    type=dynamodb.AttributeType.STRING
+                ),
+                #removal_policy=core.RemovalPolicy.DESTROY
+            )
         #-------------------------------------------------
         # Create IAM policy for KMS ALL
         #-------------------------------------------------
@@ -83,7 +104,7 @@ class stepfunction (NestedStack):
         #-------------------------------------------------
         # Create IAM role and policy for lambda function
         #-------------------------------------------------  
-        policy_doc = iam.PolicyDocument(statements=[
+        create_policy_doc = iam.PolicyDocument(statements=[
             iam.PolicyStatement(
                 actions=["execute-api:Invoke", "execute-api:ManageConnections"],
                 resources=["arn:aws:execute-api:*:*:*"],
@@ -102,13 +123,12 @@ class stepfunction (NestedStack):
                 effect=iam.Effect.ALLOW),
             iam.PolicyStatement(
                 actions=[
-                    "dynamodb:Get*",
-                    "dynamodb:Query"                       
+                    "dynamodb:*"                      
                 ],
-                resources=[para_db.table_arn],
+                resources=["*"],
                 effect=iam.Effect.ALLOW),
         ])
-        lambda_role = iam.Role(self, "Role",
+        create_lambda_role = iam.Role(self, "Role",
                 assumed_by=iam.CompositePrincipal(
                     iam.ServicePrincipal("lambda.amazonaws.com"),
                     iam.ServicePrincipal("sts.amazonaws.com"),
@@ -118,7 +138,7 @@ class stepfunction (NestedStack):
                     iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole"),
                     iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaVPCAccessExecutionRole"),
                     ],
-                inline_policies={"cluster_lambda": policy_doc},
+                inline_policies={"cluster_lambda": create_policy_doc},
         )
 
         subnet = vpc.public_subnets[1].subnet_id
@@ -146,15 +166,16 @@ class stepfunction (NestedStack):
                     "S3_URL_POST_INSTALL_HEADNODE": f"{post_head_amd64.s3_object_url}",
                     "SG": sg_rds.security_group_id,
                     "SUBNETID": subnet,
-                    "FORECAST_DAYS": forecast_days,
-                    "NUM_DOMAINS": domains,
+                    "FORECAST_DAYS": fcst_days_ssm.parameter_name,
+                    #"NUM_DOMAINS": domains,                    
                     "KMS_POLICY": kms_all_policy.managed_policy_arn,
-                    "DYNAMODB": para_db.table_name,
+                    "PARA_DB": para_db.table_name,
+                    "EXEC_DB": exec_db.table_name,
                 },
                 handler="cluster.main",
                 layers=[layer],
                 log_retention=logs.RetentionDays.ONE_DAY,
-                role=lambda_role,
+                role=create_lambda_role,
                 runtime=λ.Runtime.PYTHON_3_9,
                 timeout=Duration.seconds(60)
             )
@@ -613,8 +634,7 @@ class stepfunction (NestedStack):
                 effect=iam.Effect.ALLOW),
             iam.PolicyStatement(
                 actions=[
-                    "dynamodb:Get*",
-                    "dynamodb:Query"                       
+                    "dynamodb:*"                      
                 ],
                 resources=[para_db.table_arn],
                 effect=iam.Effect.ALLOW),
@@ -638,7 +658,9 @@ class stepfunction (NestedStack):
                 code=λ.Code.from_asset("./lambda/trigger"),
                 environment={
                     "SM_ARN": main_sf.attr_arn,
-                    "DYNAMODB": para_db.table_name,
+                    "PARA_DB": para_db.table_name,
+                    "EXEC_DB": exec_db.table_name,
+                    "KEY_STR": key_str.parameter_name,                    
                 },
                 handler="trigger.main",
                 layers=[layer],
@@ -659,7 +681,8 @@ class stepfunction (NestedStack):
                     "CLUSTER_NAME": cluster_name,
                     "PCLUSTER_API_URL": purl,
                     "REGION": Aws.REGION,
-                    "SM_ARN":destroy_sf.attr_arn
+                    "SM_ARN":destroy_sf.attr_arn,
+                    "EXEC_DB":exec_db.table_name,
                 },
                 handler="trigger.destroy",
                 layers=[layer],
@@ -669,6 +692,56 @@ class stepfunction (NestedStack):
                 timeout=Duration.seconds(60)
             )
         Tags.of(trigger_destroy).add("Purpose", "Event Driven Weather Forecast", priority=300)
+        #-----------------------------------------------------------------------------
+        # Create lambda function to submit fcst job
+        #----------------------------------------------------------------------------- 
+        run_policy_doc = iam.PolicyDocument()
+        run_policy_doc.add_statements(iam.PolicyStatement(
+            actions=[
+                "secretsmanager:GetResourcePolicy",
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:DescribeSecret",
+                "secretsmanager:ListSecretVersionIds",
+                "secretsmanager:ListSecrets",
+                ],
+            resources=["*"],
+            effect=iam.Effect.ALLOW))
+        run_policy_doc.add_statements(iam.PolicyStatement(
+            actions=[
+                "dynamodb:*",                      
+                ],
+            resources=["*"],
+            effect=iam.Effect.ALLOW))
+        run_role = iam.Role(self, "Role",
+                assumed_by=iam.CompositePrincipal(
+                    iam.ServicePrincipal("lambda.amazonaws.com"),
+                    iam.ServicePrincipal("sts.amazonaws.com"),
+                ),
+                description="CreateForecastLambdaRole",
+                managed_policies=[
+                    iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole"),
+                    iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaVPCAccessExecutionRole"),
+                    ],
+                inline_policies={"secretsmanager": run_policy_doc},
+        )
+
+        run = λ.Function(self, "run_forecast",
+                code=λ.Code.from_asset("./lambda/forecast"),
+                environment={
+                    "BUCKET_NAME": bucket_name,
+                    #"DOMAINS_NUM": domains,
+                    "FORECAST_DAYS":fcst_days.parameter_name,
+                    "PARA_DB":para_db.table_name,
+                    "EXEC_DB":exec_db.table_name,
+                },
+                handler="forecast.main",
+                layers=[layer],
+                role=run_role,
+                runtime=λ.Runtime.PYTHON_3_9,
+                timeout=Duration.seconds(60),
+                vpc=vpc,
+            )
+        Tags.of(run).add("Purpose", "Event Driven Weather Forecast", priority=300)
         
         outputs = aws_s3_notifications.LambdaDestination(trigger_destroy)
         bucket = s3.Bucket.from_bucket_name(self, "nwp-bucket", bucket_name)
