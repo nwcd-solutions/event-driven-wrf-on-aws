@@ -56,7 +56,7 @@ def main(event, context):
     sfn = boto3.client('stepfunctions')
     sfn.start_execution(
         stateMachineArn=os.getenv("SM_ARN"),
-        input = "{\"action\" : \"create\",\"type\" : \"od\",\"ftime\":\"" + ftime + "\",\"fcst_days\":\""+fcst_days+"\"}"
+        input = "{\"action\" : \"create\",\"type\" : \"od\",\"ftime\":\"" + ftime + "\",\"fcst_days\":\""+fcst_days+"\",\"domains_num\":\""+domains_num+"\"}"
     )
 
 def destroy(event, context):
