@@ -50,6 +50,24 @@ class Cluster(NestedStack):
             connection=ec2.Port.tcp(8080)
         )
 
+        kms_all_policy = iam.PolicyDocument(
+            statements=[
+                iam.PolicyStatement(
+                    effect=iam.Effect.ALLOW,
+                    actions=["kms:*"],
+                    resources=["*"]
+                )
+            ]
+        )
+
+        iam.Policy(
+            self,
+            "kms_all",
+            policy_name="kms_all",
+            document=kms_all_policy
+        )
+
+        
         policy_doc = iam.PolicyDocument(statements=[
             iam.PolicyStatement(
                 actions=["execute-api:Invoke", "execute-api:ManageConnections"],
