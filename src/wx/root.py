@@ -5,9 +5,6 @@ from aws_cdk import (
     Aws, CfnOutput, CfnParameter, Duration, Fn, NestedStack, Stack, Tags
 )
 from constructs import Construct
-
-from wx.bucket import S3
-from wx.gfs_trigger import Trigger
 from wx.forecast import Forecast
 from wx.network import Vpc
 from wx.pclusterapi import ParallelClusterApi
@@ -37,7 +34,6 @@ class Root(Stack):
         sf.add_dependency(pcluster_api)        
         sf.add_dependency(slurmdb)
         sf.add_dependency(vpc)
-        #trigger = Trigger(self, "trigger", sf=sf.outputs)
        
         
 
