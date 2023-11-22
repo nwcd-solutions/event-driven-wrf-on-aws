@@ -43,7 +43,7 @@ def main(event, context):
     auto_mode = response['Parameter']['Value']    
     response = ssm.get_parameter(Name=os.getenv('FCST_DAYS'))
     fcst_days = response['Parameter']['Value']    
-    if domains_num==0 or auto_mode=="False" or fcst_days==0:
+    if domains_num==0 or auto_mode=="False" or fcst_days=="0":
         print("stop working")
         exec_table.update_item(
             Key={
