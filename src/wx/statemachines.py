@@ -131,7 +131,7 @@ class stepfunction (NestedStack):
                 resources=["*"],
                 effect=iam.Effect.ALLOW),
         ])
-        create_lambda_role = iam.Role(self, "Role",
+        create_lambda_role = iam.Role(self, "Create_Lambda_Role",
                 assumed_by=iam.CompositePrincipal(
                     iam.ServicePrincipal("lambda.amazonaws.com"),
                     iam.ServicePrincipal("sts.amazonaws.com"),
@@ -206,7 +206,7 @@ class stepfunction (NestedStack):
             ],
             resources=["*"],
             effect=iam.Effect.ALLOW))
-        run_role = iam.Role(self, "Role",
+        run_role = iam.Role(self, "Run_Role",
                 assumed_by=iam.CompositePrincipal(
                     iam.ServicePrincipal("lambda.amazonaws.com"),
                     iam.ServicePrincipal("sts.amazonaws.com"),
@@ -224,7 +224,7 @@ class stepfunction (NestedStack):
                 environment={
                     "BUCKET_NAME": bucket_name,
                     #"DOMAINS_NUM": domains,
-                    "FORECAST_DAYS":fcst_days.parameter_name,
+                    "FORECAST_DAYS":fcst_days_ssm.parameter_name,
                     "PARA_DB":para_db.table_name,
                     "EXEC_DB":exec_db.table_name,
                 },
