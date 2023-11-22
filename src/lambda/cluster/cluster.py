@@ -36,6 +36,7 @@ def main(event, context):
     path = f"{baseurl}/v3/clusters"
     global region
     ftime=event['ftime']
+    id = event['id']
     if (event['action']=='create'):
       if (event['type']=='od'):
         with open("hpc6a.yaml", "r") as cf:
@@ -66,11 +67,13 @@ def main(event, context):
           out=res.json()['cluster']
           out['action']='status'
           out['ftime']=ftime
+          out['id']=id
         else:
           print(res.json())
           out={"clusterStatus":"failed"}
           out['failed_message']=res.json()
           out['clusterName']=cluster_name
+          out['id']=id
         return out
       elif (event['type']=='spot'):
         with open("hpc6a.yaml", "r") as cf:
@@ -124,9 +127,11 @@ def main(event, context):
         if (out['clusterStatus']=='CREATE_IN_PROGRESS'):
             out['action']='status'
             out['ftime']=ftime
+            out['id']=id
         else:
             out['action']='destroy'
             out['ftime']=ftime
+            out['id']=id
       else:
         out={"CheckclusterStatus":"failed"}
       return out
@@ -153,6 +158,7 @@ def main(event, context):
         out=res.json()
         out['action']='destroystatus'
         out['ftime']=ftime
+        out['id']=id
       else:
         print(res.json())
         out={"CheckclusterStatus":"deleted failed"}
@@ -167,6 +173,7 @@ def main(event, context):
       out={}
       out['action']='destroystatus'
       out['ftime']=ftime
+      out['id']=id
       out['cluster']={
         "cloudformationStackArn":cf_arn,
         "clusterStatus":res['Stacks'][0]['StackStatus']
