@@ -12,7 +12,7 @@ import requests
 #region = os.getenv("AWS_REGION")
 ip = "127.0.0.1"
 bucket = os.getenv("BUCKET_NAME")
-job_num= int(os.getenv("DOMAINS_NUM"))
+#job_num= int(os.getenv("DOMAINS_NUM"))
 ftime = "2023-01-01:12:00:00Z"
 template = {
     "job": {
@@ -108,7 +108,7 @@ def preproc(zone):
     print(template)
     return submit(template)
 
-def run_wrf(zone,pid):
+def run_wrf(zone,pid,nodes):
     global bucket
     global ftime
     y=ftime[0:4]
@@ -116,12 +116,13 @@ def run_wrf(zone,pid):
     d=ftime[8:10]
     h=ftime[11:13]
     output = f"s3://{bucket}/outputs/{y}/{m}/{d}/{h}/{zone}"
+    nodes =  int(nodes) 
     with open("jobs/run.sh", "r") as f:
         script = f.read()
     script += f"\naws s3 cp ../slurm-${{SLURM_JOB_ID}}.out {output}/logs/\n"
     script += f"\naws s3 cp . {output}/wrfout/ --recursive --exclude \"*\" --include \"wrfout_*\"\n"
     template["job"]["name"] = "wrf_" + zone
-    template["job"]["nodes"] = 2 
+    template["job"]["nodes"] = nodes 
     template["job"]["cpus_per_task"] = 4
     template["job"]["tasks_per_node"] = 24
     template["job"]["current_working_directory"] = f"/fsx/{zone}"
@@ -152,29 +153,30 @@ def post(pid):
 def main(event, context):
 
     global ip
-    global job_num
     global ftime
     
     print(event)
     ip=event['headNode']['privateIpAddress']
     ftime=event['ftime']
+    job_num = 0
     print(ip)
     pids=[]
     jids=[]
     job_num=0
     dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table(os.getenv('DYNAMODB'))
-    response = table.query(
-        KeyConditionExpression=Key('para_name').eq('domain')
-    )
+    para_table = dynamodb.Table(os.getenv('PARA_DB'))
+    response = para_table.scan()
     items = response['Items']
+    job_num = len(items)
     print(items)
-    job_num=len(items)
     print("domains:")
     print(job_num)
     for i in range(1,job_num+1):
         n='domain_'+str(i)
         pids.append(preproc(n))
+    for item in items
+        n='domain_'+item['id']
+        jids.append(run_wrf(n,pids[i-1],item['nodes']))
     for i in range(1,job_num+1):
         n='domain_'+str(i)
         jids.append(run_wrf(n,pids[i-1]))
