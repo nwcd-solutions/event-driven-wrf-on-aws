@@ -4,8 +4,11 @@ import os
 import re
 
 def main(event, context):
-    msg = json.loads(event["Records"][0]["Sns"]["Message"])
-    key = msg["Records"][0]["s3"]["object"]["key"]
+    if (event["Records"]=="test"):
+        key=r"gfs.20231122/00/atmos/gfs.t00z.pgrb2.0p50.f096"
+    else:
+        msg = json.loads(event["Records"][0]["Sns"]["Message"])
+        key = msg["Records"][0]["s3"]["object"]["key"]
     key_str=r"gfs.t(?P=h)z.pgrb2.0p50.f096"
     prefix_str=r"""
                 gfs.                      # GFS prefix
@@ -21,7 +24,6 @@ def main(event, context):
     if not m:
         return
     print(event)
-    print(msg)
     print(key)
     ftime = f"{m.group('y')}-{m.group('m')}-{m.group('d')}T{m.group('h')}:00:00Z"
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
