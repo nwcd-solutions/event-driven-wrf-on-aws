@@ -63,7 +63,16 @@ def main(event, context):
         stateMachineArn=os.getenv("SM_ARN"),
         input = "{\"action\" : \"create\",\"type\" : \"od\",\"ftime\":\"" + ftime + "\",\"fcst_days\":\""+fcst_days+"\",\"domains_num\":\""+domains_num+"\",\"id\":\""+current_timestamp+"\"}"
     )
-
+    exec_table.update_item(
+        Key={
+            'ftime':ftime,
+            'id': current_timestamp
+        },
+        UpdateExpression = 'SET start_time = :start_time',
+            ExpressionAttributeValues = {
+                ':start_time':current_time
+            }
+    )
 def destroy(event, context):
     print(event)
     clustername=os.getenv('CLUSTER_NAME')
