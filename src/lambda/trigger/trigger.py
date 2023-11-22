@@ -24,33 +24,38 @@ def main(event, context):
     print(msg)
     print(key)
     ftime = f"{m.group('y')}-{m.group('m')}-{m.group('d')}T{m.group('h')}:00:00Z"
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    current_timestamp = int(datetime.now().timestamp())
+    
     dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table(os.getenv('DYNAMODB'))
+    exec_table = dynamodb.Table(os.getenv('EXEC_DB'))
+    exec_table.put_item(Item={'ftime': ftime, 'receive_time': current_time,'id':current_timestamp})
+    para_table = dynamodb.Table(os.getenv('PARA_DB'))
     response = table.scan()
     items = response['Items']
     domains_num = 0
     fcst_days = 0
     auto_mode = False
     
-    print(items)
-    for item in items:
-        if item['para_name'] == 'domain':
-            domains_num = len(item['value'])
-            print("domains:")
-            print(domains_num)
-        if item['para_name'] == 'auto_mode':
-            auto_mode = item['value']
-            print("mode")
-            print(auto_mode)
-        if item['para_name'] =='fcst_days':
-            fcst_days = item['value']
-            print("fcst days:")
-            print(fcst_days)
-        if item['para_name'] == 'key_str':
-            key_str == item['value']
-            print(key_str)
-    if domains_num==0 or auto_mode==False or fcst_days==0:
+    domains_num=len(items)
+    ssm = boto3.client('ssm')
+    response = ssm.get_parameter(Name=os.getenv('AUTO_MODE'))
+    auto_mode = response['Parameter']['Value']    
+    response = ssm.get_parameter(Name=os.getenv('FCST_DAYS'))
+    fcst_days = response['Parameter']['Value']    
+    if domains_num==0 or auto_mode=="False" or fcst_days==0:
         print("stop working")
+        exec_table.update_item(
+            Key={
+                'ftime':ftime
+            },
+            UpdateExpression = 'SET end_time = :end_time, exec_status = :exec_status, reason = :reason',
+            ExpressionAttributeValues = {
+                ':end_time':current_time,
+                ':exec_status':'failed',
+                ':reason':r'condition not satisfied,domains number is {},auto mode is {}, fcst days is {}'.format(domains_num,auto_mode,fcst_days)
+            }
+        )
         return
     sfn = boto3.client('stepfunctions')
     sfn.start_execution(
