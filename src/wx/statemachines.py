@@ -84,6 +84,10 @@ class stepfunction (NestedStack):
                     name="id",
                     type=dynamodb.AttributeType.STRING
                 ),
+                sort_key=dynamodb.Attribute(
+                    name="ftime",
+                    type=dynamodb.AttributeType.STRING
+                ),
                 #removal_policy=core.RemovalPolicy.DESTROY
             )
         #-------------------------------------------------
