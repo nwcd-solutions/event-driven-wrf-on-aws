@@ -2,6 +2,7 @@ import json
 import boto3
 import os
 import re
+from datetime import datetime
 
 def main(event, context):
     if (event["Records"]=="test"):
