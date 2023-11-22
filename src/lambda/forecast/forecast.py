@@ -174,7 +174,7 @@ def main(event, context):
     for item in items:
         n='domain_'+ item['id']
         pids.append(preproc(n))
-    for item in items
+    for item in items:
         n='domain_'+item['id']
         jids.append(run_wrf(n,pids[int(item['id'])-1],item['nodes']))
     #for i in range(1,job_num+1):
