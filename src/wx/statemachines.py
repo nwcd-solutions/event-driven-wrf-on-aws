@@ -511,7 +511,7 @@ class stepfunction (NestedStack):
               "OutputPath": "$.Payload",
               "Parameters": {
                 "Payload.$": "$",
-                "FunctionName": forecast_lambda
+                "FunctionName": run.function_arn
               },
               "Retry": [
                 {
