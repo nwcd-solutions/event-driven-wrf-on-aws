@@ -129,6 +129,19 @@ def main(event, context):
             out['ftime']=ftime
             out['id']=id
         else:
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            dynamodb = boto3.resource('dynamodb')
+            exec_table = dynamodb.Table(os.getenv('EXEC_DB'))
+            exec_table.update_item(
+              Key={
+                'ftime':ftime,
+                'id': id
+              },
+              UpdateExpression = 'SET cluster_create_completed_time = :cluster_create_completed_time',
+              ExpressionAttributeValues = {
+                ':cluster_create_completed_time':current_time,
+              }
+            )            
             out['action']='destroy'
             out['ftime']=ftime
             out['id']=id
