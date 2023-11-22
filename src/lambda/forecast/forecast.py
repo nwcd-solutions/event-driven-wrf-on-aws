@@ -171,13 +171,13 @@ def main(event, context):
     print(items)
     print("domains:")
     print(job_num)
-    for i in range(1,job_num+1):
-        n='domain_'+str(i)
+    for item in items:
+        n='domain_'+ item['id']
         pids.append(preproc(n))
     for item in items
         n='domain_'+item['id']
-        jids.append(run_wrf(n,pids[i-1],item['nodes']))
-    for i in range(1,job_num+1):
-        n='domain_'+str(i)
-        jids.append(run_wrf(n,pids[i-1]))
+        jids.append(run_wrf(n,pids[int(item['id'])-1],item['nodes']))
+    #for i in range(1,job_num+1):
+    #    n='domain_'+str(i)
+    #    jids.append(run_wrf(n,pids[i-1]))
     fini(jids)
