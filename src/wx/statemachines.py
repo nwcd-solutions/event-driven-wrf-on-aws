@@ -692,12 +692,17 @@ class stepfunction (NestedStack):
             iam.PolicyStatement(
                 actions=[
                     "dynamodb:*",
-                    "ssm:GetParameter",
-                    "ssm:GetParameters",
-                    "ssm:GetParametersByPath"
                 ],
                 resources=[para_db.table_arn],
                 effect=iam.Effect.ALLOW),
+            iam.PolicyStatement(
+                actions=[
+                    "ssm:GetParameter",
+                    "ssm:GetParameters",
+                    "ssm:GetParametersByPath",
+                ],
+                resources=["*"],
+                effect=iam.Effect.ALLOW),            
         ])
         trigger_lambda_role = iam.Role(self, "TriggerRole",
                 assumed_by=iam.CompositePrincipal(
