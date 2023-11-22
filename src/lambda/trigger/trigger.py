@@ -25,25 +25,25 @@ def main(event, context):
     print(key)
     ftime = f"{m.group('y')}-{m.group('m')}-{m.group('d')}T{m.group('h')}:00:00Z"
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    current_timestamp = int(datetime.now().timestamp())
+    current_timestamp = str(int(datetime.now().timestamp()))
     
     dynamodb = boto3.resource('dynamodb')
     exec_table = dynamodb.Table(os.getenv('EXEC_DB'))
     exec_table.put_item(Item={'ftime': ftime, 'receive_time': current_time,'id':current_timestamp})
     para_table = dynamodb.Table(os.getenv('PARA_DB'))
-    response = table.scan()
+    response = para_table.scan()
     items = response['Items']
-    domains_num = 0
-    fcst_days = 0
-    auto_mode = False
+    domains_num = "0"
+    fcst_days = "0"
+    auto_mode = "False"
     
-    domains_num=len(items)
+    domains_num=str(len(items))
     ssm = boto3.client('ssm')
     response = ssm.get_parameter(Name=os.getenv('AUTO_MODE'))
     auto_mode = response['Parameter']['Value']    
     response = ssm.get_parameter(Name=os.getenv('FCST_DAYS'))
     fcst_days = response['Parameter']['Value']    
-    if domains_num==0 or auto_mode=="False" or fcst_days=="0":
+    if domains_num=="0" or auto_mode=="False" or fcst_days=="0":
         print("stop working")
         exec_table.update_item(
             Key={
@@ -61,7 +61,7 @@ def main(event, context):
     sfn = boto3.client('stepfunctions')
     sfn.start_execution(
         stateMachineArn=os.getenv("SM_ARN"),
-        input = "{\"action\" : \"create\",\"type\" : \"od\",\"ftime\":\"" + ftime + "\",\"fcst_days\":\""+fcst_days+"\",\"domains_num\":\""+domains_num+"\",\"id\":\""+current_timestamp+"\"}"
+        input = "{\"action\" : \"create\",\"type\" : \"od\",\"ftime\":\"" + ftime + "\",\"fcst_days\":\""+fcst_days+"\",\"domains_num\":\""+domains_num+"\",\"id\":\""+current_timestamp+"\",\"id\":\""+current_timestamp+"\"}"
     )
     exec_table.update_item(
         Key={
