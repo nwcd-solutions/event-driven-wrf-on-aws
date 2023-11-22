@@ -62,13 +62,18 @@ class stepfunction (NestedStack):
             parameter_name="/event-driven-wrf/key_string",
             string_value=r"gfs.t(?P=h)z.pgrb2.0p50.f096"
         )
+        auto_mode_ssm = ssm.StringParameter(
+            self, "auto_mode_ssm",
+            parameter_name="/event-driven-wrf/auto_mode",
+            string_value="False"
+        )
         #----------------------------------------------------------------------------------------------
         # Create a DynamoDB table to store parameters of Domain and Step function execution record
         #----------------------------------------------------------------------------------------------
         para_db = dynamodb.Table(
                 self, "Parameters_Table",
                 partition_key=dynamodb.Attribute(
-                    name="para_name",
+                    name="id",
                     type=dynamodb.AttributeType.STRING
                 ),
                 #removal_policy=core.RemovalPolicy.DESTROY
@@ -76,7 +81,7 @@ class stepfunction (NestedStack):
         exec_db = dynamodb.Table(
                 self, "execution_Table",
                 partition_key=dynamodb.Attribute(
-                    name="ftime",
+                    name="id",
                     type=dynamodb.AttributeType.STRING
                 ),
                 #removal_policy=core.RemovalPolicy.DESTROY
@@ -693,7 +698,10 @@ class stepfunction (NestedStack):
                 actions=[
                     "dynamodb:*",
                 ],
-                resources=[para_db.table_arn],
+                resources=[
+                    para_db.table_arn,
+                    exec_db.table_arn
+                ],
                 effect=iam.Effect.ALLOW),
             iam.PolicyStatement(
                 actions=[
@@ -725,7 +733,9 @@ class stepfunction (NestedStack):
                     "SM_ARN": main_sf.attr_arn,
                     "PARA_DB": para_db.table_name,
                     "EXEC_DB": exec_db.table_name,
-                    "KEY_STR": key_str_ssm.parameter_name,                    
+                    "KEY_STR": key_str_ssm.parameter_name,
+                    "FCST_DAYS": fcst_days_ssm.parameter_name,
+                    "AUTO_MODE": auto_mode_ssm.parameter_name,
                 },
                 handler="trigger.main",
                 layers=[layer],
