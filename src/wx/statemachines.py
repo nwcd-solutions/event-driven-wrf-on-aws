@@ -720,7 +720,7 @@ class stepfunction (NestedStack):
                     "SM_ARN": main_sf.attr_arn,
                     "PARA_DB": para_db.table_name,
                     "EXEC_DB": exec_db.table_name,
-                    "KEY_STR": key_str.parameter_name,                    
+                    "KEY_STR": key_str_ssm.parameter_name,                    
                 },
                 handler="trigger.main",
                 layers=[layer],
