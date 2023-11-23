@@ -611,7 +611,40 @@ class stepfunction (NestedStack):
               "Seconds": 18000,
               "Next": "check stack exist"
             },
-            
+            "check stack exist": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "OutputPath": "$.Payload",
+              "Parameters": {
+                "Payload.$": "$",
+                "FunctionName": timeout_func.function_arn
+              },
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "Lambda.ServiceException",
+                    "Lambda.AWSLambdaException",
+                    "Lambda.SdkClientException",
+                    "Lambda.TooManyRequestsException"
+                  ],
+                  "IntervalSeconds": 1,
+                  "MaxAttempts": 3,
+                  "BackoffRate": 2
+                }
+              ],
+              "Next": "whether job timeout"
+            },
+            "whether job timeout": {
+              "Type": "Choice",
+              "Choices": [
+                {
+                  "Variable": "$.stack_status",
+                  "StringEquals": "stack exist",
+                  "Next": "destroy cluster"
+                }
+              ],
+              "Default": "Success"
+            }
           }
         }
         main_sf = sfn.CfnStateMachine(self, "WX_mainStateMachine",
