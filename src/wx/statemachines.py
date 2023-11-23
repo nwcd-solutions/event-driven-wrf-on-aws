@@ -230,11 +230,19 @@ class stepfunction (NestedStack):
         run_policy_doc.add_statements(iam.PolicyStatement(
             actions=[
                 "dynamodb:*",  
-                "ssm:GetParameter",
-                "ssm:GetParameters",
-                "ssm:GetParametersByPath"
             ],
-            resources=["*"],
+            resources=[
+                para_db.table_arn,
+                exec_db.table_arn              
+            ],
+            effect=iam.Effect.ALLOW))
+        run_policy_doc.add_statements(iam.PolicyStatement(
+            actions=[
+                "ssm:*",  
+            ],
+            resources=[
+                "*"             
+            ],
             effect=iam.Effect.ALLOW))
         run_role = iam.Role(self, "Run_Role",
                 assumed_by=iam.CompositePrincipal(
@@ -706,22 +714,6 @@ class stepfunction (NestedStack):
         
         trigger_policy_doc = iam.PolicyDocument(statements=[
             iam.PolicyStatement(
-                actions=["execute-api:Invoke", "execute-api:ManageConnections"],
-                resources=["arn:aws:execute-api:*:*:*"],
-                effect=iam.Effect.ALLOW),
-            iam.PolicyStatement(
-                actions=["states:*"],
-                resources=["*"],
-                effect=iam.Effect.ALLOW),
-            iam.PolicyStatement(
-                actions=["iam:*"],
-                resources=["*"],
-                effect=iam.Effect.ALLOW),
-            iam.PolicyStatement(
-                actions=["cloudformation:*"],
-                resources=["*"],
-                effect=iam.Effect.ALLOW),
-            iam.PolicyStatement(
                 actions=[
                     "dynamodb:*",
                 ],
@@ -732,9 +724,7 @@ class stepfunction (NestedStack):
                 effect=iam.Effect.ALLOW),
             iam.PolicyStatement(
                 actions=[
-                    "ssm:GetParameter",
-                    "ssm:GetParameters",
-                    "ssm:GetParametersByPath",
+                    "ssm:*",
                 ],
                 resources=["*"],
                 effect=iam.Effect.ALLOW),            
