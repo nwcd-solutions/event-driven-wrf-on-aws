@@ -30,7 +30,7 @@ def gateway(url, method, data):
     response = req_call(url, data=data, headers=boto_request.headers, timeout=300)
     return response
 
-def main(event, context):
+def handler(event, context):
     baseurl = os.getenv("PCLUSTER_API_URL")
     cluster_name = os.getenv("CLUSTER_NAME", "wx-pcluster")
     path = f"{baseurl}/v3/clusters"
@@ -183,6 +183,20 @@ def main(event, context):
       cf_arn=event['cluster']['cloudformationStackArn']
       print(cf_arn)
       res = client.describe_stacks( StackName=cf_arn )
+      if res['Stacks'][0]['StackStatus']=="DELETE_COMPLETE":
+          current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+          dynamodb = boto3.resource('dynamodb')
+          exec_table = dynamodb.Table(os.getenv('EXEC_DB'))
+          exec_table.update_item(
+              Key={
+                'ftime':ftime,
+                'id': id
+              },
+              UpdateExpression = 'SET cluster_delete_completed_time = :cluster_delete_completed_time',
+              ExpressionAttributeValues = {
+                ':cluster_delete_completed_time':current_time,
+              }
+          )          
       out={}
       out['action']='destroystatus'
       out['ftime']=ftime
