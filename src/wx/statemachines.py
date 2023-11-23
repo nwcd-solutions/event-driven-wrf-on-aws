@@ -67,6 +67,16 @@ class stepfunction (NestedStack):
             parameter_name="/event-driven-wrf/auto_mode",
             string_value="False"
         )
+        ftime_ssm = ssm.StringParameter(
+            self, "ftime_ssm",
+            parameter_name="/event-driven-wrf/ftime",
+            string_value="False"
+        )
+        exec_id_ssm = ssm.StringParameter(
+            self, "exec_id_ssm",
+            parameter_name="/event-driven-wrf/id",
+            string_value="False"
+        )
         #----------------------------------------------------------------------------------------------
         # Create a DynamoDB table to store parameters of Domain and Step function execution record
         #----------------------------------------------------------------------------------------------
@@ -90,9 +100,9 @@ class stepfunction (NestedStack):
                 ),
                 #removal_policy=core.RemovalPolicy.DESTROY
             )
-        #-------------------------------------------------
+        #--------------------------------------------------------------------------------------------
         # Create IAM policy for KMS ALL
-        #-------------------------------------------------
+        #--------------------------------------------------------------------------------------------
         kms_all_policy_doc = iam.PolicyDocument(
             statements=[
                 iam.PolicyStatement(
@@ -110,9 +120,25 @@ class stepfunction (NestedStack):
             managed_policy_name="kms_all",
             document=kms_all_policy_doc
         )
-        #-------------------------------------------------
-        # Create IAM role and policy for lambda function
-        #-------------------------------------------------  
+        #-------------------------------------------------------------------------------------------
+        # Create Lambda Layer and Subnet
+        #-------------------------------------------------------------------------------------------
+
+        subnet = vpc.public_subnets[1].subnet_id
+        for net in vpc.public_subnets:
+            if net.availability_zone == "us-east-2b":
+                subnet = net
+
+        layer = λ.LayerVersion(self, "lambda_layer",
+                compatible_runtimes=[λ.Runtime.PYTHON_3_9],
+                code=λ.Code.from_asset("./layer.zip"),
+                layer_version_name="wx_layer",
+                description="WX Lambda Layer",
+            )
+        
+        #-----------------------------------------------------------------------------------------------------------------------------
+        # Create Lambda function to create parallel-cluster
+        #-----------------------------------------------------------------------------------------------------------------------------
         create_policy_doc = iam.PolicyDocument(statements=[
             iam.PolicyStatement(
                 actions=["execute-api:Invoke", "execute-api:ManageConnections"],
@@ -151,22 +177,7 @@ class stepfunction (NestedStack):
                     iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaVPCAccessExecutionRole"),
                     ],
                 inline_policies={"cluster_lambda": create_policy_doc},
-        )
-
-        subnet = vpc.public_subnets[1].subnet_id
-        for net in vpc.public_subnets:
-            if net.availability_zone == "us-east-2b":
-                subnet = net
-
-        layer = λ.LayerVersion(self, "lambda_layer",
-                compatible_runtimes=[λ.Runtime.PYTHON_3_9],
-                code=λ.Code.from_asset("./layer.zip"),
-                layer_version_name="wx_layer",
-                description="WX Lambda Layer",
-            )
-        #---------------------------------------------------
-        # Create Lambda function to create parallel-cluster
-        #---------------------------------------------------
+        )        
         cluster_lambda = λ.Function(self, "create_cluster",
                 code=λ.Code.from_asset("./lambda/cluster"),
                 environment={
@@ -184,7 +195,7 @@ class stepfunction (NestedStack):
                     "PARA_DB": para_db.table_name,
                     "EXEC_DB": exec_db.table_name,
                 },
-                handler="cluster.main",
+                handler="index.handler",
                 layers=[layer],
                 log_retention=logs.RetentionDays.ONE_DAY,
                 role=create_lambda_role,
@@ -237,7 +248,7 @@ class stepfunction (NestedStack):
                     "PARA_DB":para_db.table_name,
                     "EXEC_DB":exec_db.table_name,
                 },
-                handler="forecast.main",
+                handler="index.handler",
                 layers=[layer],
                 role=run_role,
                 runtime=λ.Runtime.PYTHON_3_9,
@@ -741,7 +752,7 @@ class stepfunction (NestedStack):
                     "FCST_DAYS": fcst_days_ssm.parameter_name,
                     "AUTO_MODE": auto_mode_ssm.parameter_name,
                 },
-                handler="trigger.main",
+                handler="index.handler",
                 layers=[layer],
                 log_retention=logs.RetentionDays.ONE_DAY,
                 role=trigger_lambda_role,
@@ -763,7 +774,7 @@ class stepfunction (NestedStack):
                     "SM_ARN":destroy_sf.attr_arn,
                     "EXEC_DB":exec_db.table_name,
                 },
-                handler="trigger.destroy",
+                handler="index.handler",
                 layers=[layer],
                 log_retention=logs.RetentionDays.ONE_DAY,
                 role=trigger_lambda_role,
