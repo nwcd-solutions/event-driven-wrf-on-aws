@@ -9,6 +9,7 @@ import botocore
 import json
 import requests
 
+ssm = boto3.client('ssm')
 #region = os.getenv("AWS_REGION")
 ip = "127.0.0.1"
 bucket = os.getenv("BUCKET_NAME")
@@ -150,7 +151,7 @@ def post(pid):
 
 
 
-def main(event, context):
+def handler(event, context):
 
     global ip
     global ftime
@@ -158,6 +159,7 @@ def main(event, context):
     print(event)
     ip=event['headNode']['privateIpAddress']
     ftime=event['ftime']
+    id=event['id']
     job_num = 0
     print(ip)
     pids=[]
@@ -177,7 +179,18 @@ def main(event, context):
     for item in items:
         n='domain_'+item['id']
         jids.append(run_wrf(n,pids[int(item['id'])-1],item['nodes']))
-    #for i in range(1,job_num+1):
-    #    n='domain_'+str(i)
-    #    jids.append(run_wrf(n,pids[i-1]))
+
     fini(jids)
+
+    ssm.put_parameter(
+        Name=os.getenv('FTIME'),
+        Value= ftime,
+        Type='String',
+        Overwrite=True
+    )
+    ssm.put_parameter(
+        Name=os.getenv('EXEC_ID'),
+        Value= id,
+        Type='String',
+        Overwrite=True
+    )
