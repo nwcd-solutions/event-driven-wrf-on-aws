@@ -4,7 +4,10 @@ import os
 import re
 from datetime import datetime
 
-def main(event, context):
+ssm = boto3.client('ssm')
+dynamodb = boto3.resource('dynamodb')
+
+def handler(event, context):
     if (event["Records"]=="test"):
         key=r"gfs.20231122/00/atmos/gfs.t00z.pgrb2.0p50.f096"
     else:
@@ -29,8 +32,7 @@ def main(event, context):
     ftime = f"{m.group('y')}-{m.group('m')}-{m.group('d')}T{m.group('h')}:00:00Z"
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     current_timestamp = str(int(datetime.now().timestamp()))
-    
-    dynamodb = boto3.resource('dynamodb')
+
     exec_table = dynamodb.Table(os.getenv('EXEC_DB'))
     exec_table.put_item(Item={'ftime': ftime, 'receive_time': current_time,'id':current_timestamp})
     para_table = dynamodb.Table(os.getenv('PARA_DB'))
@@ -41,7 +43,6 @@ def main(event, context):
     auto_mode = "False"
     
     domains_num=str(len(items))
-    ssm = boto3.client('ssm')
     response = ssm.get_parameter(Name=os.getenv('AUTO_MODE'))
     auto_mode = response['Parameter']['Value']    
     response = ssm.get_parameter(Name=os.getenv('FCST_DAYS'))
@@ -76,12 +77,4 @@ def main(event, context):
                 ':start_time':current_time
             }
     )
-def destroy(event, context):
-    print(event)
-    clustername=os.getenv('CLUSTER_NAME')
-    region=os.getenv('REGION')
-    sfn = boto3.client('stepfunctions')
-    sfn.start_execution(
-        stateMachineArn=os.getenv("SM_ARN"),
-        input = "{\"action\" : \"destroy\",\"clusterName\":\""+clustername+ "\",\"region\":\""+region+"\",\"ftime\":\" \"}"
-    )
+
