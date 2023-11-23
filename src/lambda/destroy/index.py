@@ -30,6 +30,6 @@ def handler(event, context):
         UpdateExpression = 'SET job_finished_time = :job_finished_time , , exec_status = :exec_status',
         ExpressionAttributeValues = {
             ':job_finished_time':current_time,
-            ':exec_status':'success'
+            ':exec_status':"success"
         }
     )   
