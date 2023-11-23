@@ -88,6 +88,16 @@ class stepfunction (NestedStack):
                 ),
                 #removal_policy=core.RemovalPolicy.DESTROY
             )
+        para_db.add_attribute(
+            name="name",
+            type=dynamodb.AttributeType.STRING
+        )
+
+        para_db.add_attribute(
+            name="nodes",
+            type=dynamodb.AttributeType.STRING
+        )
+        
         exec_db = dynamodb.Table(
                 self, "execution_Table",
                 partition_key=dynamodb.Attribute(
@@ -244,9 +254,11 @@ class stepfunction (NestedStack):
                 environment={
                     "BUCKET_NAME": bucket_name,
                     #"DOMAINS_NUM": domains,
-                    "FORECAST_DAYS":fcst_days_ssm.parameter_name,
+                    #"FORECAST_DAYS":fcst_days_ssm.parameter_name,
                     "PARA_DB":para_db.table_name,
-                    "EXEC_DB":exec_db.table_name,
+                    #"EXEC_DB":exec_db.table_name,
+                    "FTIME":ftime_ssm.parameter_name ,
+                    "EXEC_ID": exec_id_ssm.parameter_name
                 },
                 handler="index.handler",
                 layers=[layer],
@@ -769,10 +781,12 @@ class stepfunction (NestedStack):
                 code=λ.Code.from_asset("./lambda/trigger"),
                 environment={
                     "CLUSTER_NAME": cluster_name,
-                    "PCLUSTER_API_URL": purl,
+                    #"PCLUSTER_API_URL": purl,
                     "REGION": Aws.REGION,
                     "SM_ARN":destroy_sf.attr_arn,
                     "EXEC_DB":exec_db.table_name,
+                    "FTIME": ftime_ssm.parameter_name,
+                    "EXEC_ID": exec_id_ssm.parameter_name
                 },
                 handler="index.handler",
                 layers=[layer],
