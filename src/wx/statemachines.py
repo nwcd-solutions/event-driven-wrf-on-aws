@@ -719,7 +719,11 @@ class stepfunction (NestedStack):
                     "ssm:*",
                 ],
                 resources=["*"],
-                effect=iam.Effect.ALLOW),            
+                effect=iam.Effect.ALLOW),   
+            iam.PolicyStatement(
+                actions=["states:*"],
+                resources=["*"],
+                effect=iam.Effect.ALLOW),
         ])
         trigger_lambda_role = iam.Role(self, "TriggerRole",
                 assumed_by=iam.CompositePrincipal(
