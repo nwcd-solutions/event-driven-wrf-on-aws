@@ -604,8 +604,14 @@ class stepfunction (NestedStack):
                   "BackoffRate": 2
                 }
               ],
-              "Next": "Success"
-            }
+              "Next": "Wait for timeout"
+            },
+            "Wait for timeout": {
+              "Type": "Wait",
+              "Seconds": 18000,
+              "Next": "check stack exist"
+            },
+            
           }
         }
         main_sf = sfn.CfnStateMachine(self, "WX_mainStateMachine",
