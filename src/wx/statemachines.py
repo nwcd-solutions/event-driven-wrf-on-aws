@@ -290,7 +290,7 @@ class stepfunction (NestedStack):
                 "*"             
             ],
             effect=iam.Effect.ALLOW))
-        timeout_role = iam.Role(self, "Run_Role",
+        timeout_role = iam.Role(self, "timeout_Role",
                 assumed_by=iam.CompositePrincipal(
                     iam.ServicePrincipal("lambda.amazonaws.com"),
                     iam.ServicePrincipal("sts.amazonaws.com"),
