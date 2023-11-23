@@ -764,7 +764,7 @@ class stepfunction (NestedStack):
         # Create lambda function to response for s3 receiving fcst.done file
         #-----------------------------------------------------------------------------        
         trigger_destroy = λ.Function(self, "destroy_cluster",
-                code=λ.Code.from_asset("./lambda/trigger"),
+                code=λ.Code.from_asset("./lambda/destroy"),
                 environment={
                     "CLUSTER_NAME": cluster_name,
                     #"PCLUSTER_API_URL": purl,
