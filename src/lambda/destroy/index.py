@@ -29,6 +29,6 @@ def handler(event, context):
         },
         UpdateExpression = 'SET job_finished_time = :job_finished_time',
         ExpressionAttributeValues = {
-            :job_finished_time':current_time,
+            ':job_finished_time':current_time,
         }
     )   
