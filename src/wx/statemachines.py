@@ -88,15 +88,7 @@ class stepfunction (NestedStack):
                 ),
                 #removal_policy=core.RemovalPolicy.DESTROY
             )
-        para_db.add_attribute(
-            name="name",
-            type=dynamodb.AttributeType.STRING
-        )
 
-        para_db.add_attribute(
-            name="nodes",
-            type=dynamodb.AttributeType.STRING
-        )
         
         exec_db = dynamodb.Table(
                 self, "execution_Table",
