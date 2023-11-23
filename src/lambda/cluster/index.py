@@ -161,6 +161,7 @@ def handler(event, context):
                 c.detach_role_policy(RoleName=n, PolicyArn=policy["PolicyArn"])
       cluster_name=event['clusterName']
       region=event['region']
+      job_status=event['status']
       params = {"region": region}
       data = json.dumps({"clusterName": cluster_name})
       method = "DELETE"
@@ -173,6 +174,7 @@ def handler(event, context):
         out['action']='destroystatus'
         out['ftime']=ftime
         out['id']=id
+        out['status']=job_status
       else:
         print(res.json())
         out={"CheckclusterStatus":"deleted failed"}
@@ -182,27 +184,42 @@ def handler(event, context):
       print('query status of the cluster deleting')
       client = boto3.client('cloudformation')
       cf_arn=event['cluster']['cloudformationStackArn']
+      job_status=event['status']
       print(cf_arn)
       res = client.describe_stacks( StackName=cf_arn )
       if res['Stacks'][0]['StackStatus']=="DELETE_COMPLETE":
           current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
           dynamodb = boto3.resource('dynamodb')
           exec_table = dynamodb.Table(os.getenv('EXEC_DB'))
-          exec_table.update_item(
-              Key={
-                'ftime':ftime,
-                'id': id
-              },
-              UpdateExpression = 'SET cluster_delete_completed_time = :cluster_delete_completed_time , exec_status = :exec_status',
-              ExpressionAttributeValues = {
-                ':cluster_delete_completed_time':current_time,
-                ':exec_status': "in progress"
-              }
-          )          
+          if job_status=="in progress":
+              exec_table.update_item(
+                  Key={
+                      'ftime':ftime,
+                      'id': id
+                  },
+                  UpdateExpression = 'SET cluster_delete_completed_time = :cluster_delete_completed_time , exec_status = :exec_status',
+                  ExpressionAttributeValues = {
+                      ':cluster_delete_completed_time':current_time,
+                      ':exec_status': "success"
+                  }
+              )
+          else:
+              exec_table.update_item(
+                  Key={
+                      'ftime':ftime,
+                      'id': id
+                  },
+                  UpdateExpression = 'SET cluster_delete_completed_time = :cluster_delete_completed_time , exec_status = :exec_status',
+                  ExpressionAttributeValues = {
+                      ':cluster_delete_completed_time':current_time,
+                      ':exec_status': "timeout error"
+                  }
+              )
       out={}
       out['action']='destroystatus'
       out['ftime']=ftime
       out['id']=id
+      out['status']=job_status
       out['cluster']={
         "cloudformationStackArn":cf_arn,
         "clusterStatus":res['Stacks'][0]['StackStatus']
