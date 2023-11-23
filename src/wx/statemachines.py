@@ -268,7 +268,53 @@ class stepfunction (NestedStack):
                 vpc=vpc,
             )
         Tags.of(run).add("Purpose", "Event Driven Weather Forecast", priority=300)
-        
+
+        #-----------------------------------------------------------------------------
+        # Create lambda function to submit fcst job
+        #----------------------------------------------------------------------------- 
+        timeout_policy_doc = iam.PolicyDocument()
+        timeout_policy_doc.add_statements(iam.PolicyStatement(
+            actions=[
+                "dynamodb:*",  
+            ],
+            resources=[
+                para_db.table_arn,
+                exec_db.table_arn              
+            ],
+            effect=iam.Effect.ALLOW))
+        timeout_policy_doc.add_statements(iam.PolicyStatement(
+            actions=[
+                "cloudformation:*",  
+            ],
+            resources=[
+                "*"             
+            ],
+            effect=iam.Effect.ALLOW))
+        timeout_role = iam.Role(self, "Run_Role",
+                assumed_by=iam.CompositePrincipal(
+                    iam.ServicePrincipal("lambda.amazonaws.com"),
+                    iam.ServicePrincipal("sts.amazonaws.com"),
+                ),
+                description="CreateForecastLambdaRole",
+                managed_policies=[
+                    iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole"),
+                    iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaVPCAccessExecutionRole"),
+                    ],
+                inline_policies={"secretsmanager": timeout_policy_doc},
+        )
+
+        timeout_func = λ.Function(self, "timeout_func",
+                code=λ.Code.from_asset("./lambda/timeout"),
+                environment={
+                    "EXEC_DB":exec_db.table_name,
+                },
+                handler="index.handler",
+                layers=[layer],
+                role=timeout_role,
+                runtime=λ.Runtime.PYTHON_3_9,
+                timeout=Duration.seconds(60),
+                vpc=vpc,
+            )
         #-------------------------------------------------
         # Create IAM policy for step function
         #-------------------------------------------------
