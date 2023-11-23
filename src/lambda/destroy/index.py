@@ -27,7 +27,7 @@ def handler(event, context):
             'ftime':ftime,
             'id': id
         },
-        UpdateExpression = 'SET job_finished_time = :job_finished_time , , exec_status = :exec_status',
+        UpdateExpression = 'SET job_finished_time = :job_finished_time  , exec_status = :exec_status',
         ExpressionAttributeValues = {
             ':job_finished_time':current_time,
             ':exec_status':"success"
