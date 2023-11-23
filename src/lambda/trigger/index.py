@@ -72,9 +72,10 @@ def handler(event, context):
             'ftime':ftime,
             'id': current_timestamp
         },
-        UpdateExpression = 'SET start_time = :start_time',
+        UpdateExpression = 'SET start_time = :start_time, exec_status = :exec_status',
             ExpressionAttributeValues = {
-                ':start_time':current_time
+                ':start_time':current_time,
+                ':exec_status'="in progress"
             }
     )
 
