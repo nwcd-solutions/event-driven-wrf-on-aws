@@ -160,6 +160,8 @@ def handler(event, context):
     ip=event['headNode']['privateIpAddress']
     ftime=event['ftime']
     id=event['id']
+    region=event['region']
+    cluster_name=event['clusterName']
     job_num = 0
     print(ip)
     pids=[]
@@ -194,3 +196,10 @@ def handler(event, context):
         Type='String',
         Overwrite=True
     )
+    out={
+        "ftime":ftime,
+        "id":id,
+        "region":region,
+        "clustername":cluster_name
+    }
+    return out
