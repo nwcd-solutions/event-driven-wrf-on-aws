@@ -137,9 +137,10 @@ def handler(event, context):
                 'ftime':ftime,
                 'id': id
               },
-              UpdateExpression = 'SET cluster_create_completed_time = :cluster_create_completed_time',
+              UpdateExpression = 'SET cluster_create_completed_time = :cluster_create_completed_time , exec_status = :exec_status',
               ExpressionAttributeValues = {
                 ':cluster_create_completed_time':current_time,
+                ':exec_status': "in progress"
               }
             )            
             out['action']='destroy'
@@ -192,9 +193,10 @@ def handler(event, context):
                 'ftime':ftime,
                 'id': id
               },
-              UpdateExpression = 'SET cluster_delete_completed_time = :cluster_delete_completed_time',
+              UpdateExpression = 'SET cluster_delete_completed_time = :cluster_delete_completed_time , exec_status = :exec_status',
               ExpressionAttributeValues = {
                 ':cluster_delete_completed_time':current_time,
+                ':exec_status': "in progress"
               }
           )          
       out={}
