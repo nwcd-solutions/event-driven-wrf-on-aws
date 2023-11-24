@@ -31,7 +31,7 @@ def handler(event, context):
             }
         )        
         out={
-            "stack_staus":"exist",
+            "stack_status":"exist",
             "action":"destroy",
             "status":"error",
             "ftime":ftime,
