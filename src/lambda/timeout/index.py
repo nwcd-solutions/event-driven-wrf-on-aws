@@ -1,7 +1,7 @@
 import json
 import boto3
 
-def lambda_handler(event, context):
+def handler(event, context):
     stack_name = event['clustername']
     ftime=event['ftime']
     id=event['id']
