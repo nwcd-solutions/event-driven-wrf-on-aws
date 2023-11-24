@@ -62,8 +62,8 @@ class ApiGateway(NestedStack):
         # Create an API Gateway
         api = apigw.RestApi(
             self,
-            "APIGateway",
-            rest_api_name="MyAPIGateway",
+            "WrfAPIGateway",
+            rest_api_name="WrfAPIGateway",
             default_cors_preflight_options=apigw.CorsOptions(
                 allow_origins=apigw.Cors.ALL_ORIGINS,
                 allow_methods=apigw.Cors.ALL_METHODS,
@@ -84,6 +84,6 @@ class ApiGateway(NestedStack):
         # Create a Method
         method = resource.add_method(
             "GET",
-            apigw.LambdaIntegration(handler),
+            apigw.LambdaIntegration(para_db_handler),
             authorizer=authorizer,
         )
