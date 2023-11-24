@@ -1,5 +1,7 @@
 import json
 import boto3
+from datetime import datetime
+import os
 
 def handler(event, context):
     stack_name = event['clustername']
@@ -8,8 +10,11 @@ def handler(event, context):
     region=event['region']
    
     cfn = boto3.client('cloudformation')
-    try:
-        cfn.describe_stacks(StackName=stack_name)
+    res = cfn.describe_stacks(StackName=stack_name)
+    if res['Stacks'][0]['StackStatus']=="DELETE_COMPLETE":
+        print(f"Stack {stack_name} does not exist")
+        return {"stack_staus":"not exist"}    
+    else:
         print(f"Stack {stack_name} exists")
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         dynamodb = boto3.resource('dynamodb')
@@ -32,9 +37,9 @@ def handler(event, context):
             "ftime":ftime,
             "id":id,
             "region":region,
-            "clusterName":cluster_name
+            "clusterName":stack_name
         }
         return out
-    except cfn.exceptions.StackNotFoundException:
-        print(f"Stack {stack_name} does not exist")
-        return {"stack_staus":"not exist"}
+
+
+
