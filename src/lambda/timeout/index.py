@@ -28,7 +28,7 @@ def lambda_handler(event, context):
         out={
             "stack_staus":"exist",
             "action":"destroy",
-            "status":"error"
+            "status":"error",
             "ftime":ftime,
             "id":id,
             "region":region,
