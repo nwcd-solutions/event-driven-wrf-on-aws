@@ -176,12 +176,13 @@ def handler(event, context):
     print("domains:")
     print(job_num)
     for item in items:
-        n='domain_'+ item['id']
+        n='domain_'+ item['name']
         pids.append(preproc(n))
+    i=1
     for item in items:
-        n='domain_'+item['id']
-        jids.append(run_wrf(n,pids[int(item['id'])-1],item['nodes']))
-
+        n='domain_'+item['name']
+        jids.append(run_wrf(n,pids[i-1],item['nodes']))
+        i=i+1
     fini(jids)
 
     ssm.put_parameter(
