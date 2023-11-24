@@ -161,7 +161,7 @@ def handler(event, context):
     ftime=event['ftime']
     id=event['id']
     region=event['region']
-    cluster_name=event['clusterName']
+    cluster_name=event['cloudformationStackArn']
     job_num = 0
     print(ip)
     pids=[]
