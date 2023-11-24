@@ -15,6 +15,7 @@ from aws_cdk import (
     aws_ssm as ssm,
     Aws, CfnOutput, Duration, Fn, NestedStack, Tags
 )
+import aws_cdk as core
 from constructs import Construct
 import json
 
@@ -86,7 +87,7 @@ class stepfunction (NestedStack):
                     name="id",
                     type=dynamodb.AttributeType.STRING
                 ),
-                #removal_policy=core.RemovalPolicy.DESTROY
+                removal_policy=core.RemovalPolicy.DESTROY
             )
 
         
@@ -100,7 +101,7 @@ class stepfunction (NestedStack):
                     name="ftime",
                     type=dynamodb.AttributeType.STRING
                 ),
-                #removal_policy=core.RemovalPolicy.DESTROY
+                removal_policy=core.RemovalPolicy.DESTROY
             )
         #--------------------------------------------------------------------------------------------
         # Create IAM policy for KMS ALL
