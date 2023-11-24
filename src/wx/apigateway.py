@@ -9,8 +9,9 @@ from constructs import Construct
 class ApiGateway(NestedStack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id)
-
-
+        bucket_name = kwargs["bucket"]
+        para_db = kwargs["para_db"]
+        exec_db = kwargs["exec_db"]
         # Create a Cognito User Pool
         user_pool = cognito.UserPool(self, "WrfUserPool")
 
