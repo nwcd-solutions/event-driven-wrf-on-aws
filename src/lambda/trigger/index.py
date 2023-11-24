@@ -75,7 +75,7 @@ def handler(event, context):
         UpdateExpression = 'SET start_time = :start_time, exec_status = :exec_status',
             ExpressionAttributeValues = {
                 ':start_time':current_time,
-                ':exec_status'="in progress"
+                ':exec_status':"in progress"
             }
     )
 
