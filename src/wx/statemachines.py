@@ -609,7 +609,7 @@ class stepfunction (NestedStack):
             },
             "Wait for timeout": {
               "Type": "Wait",
-              "Seconds": 18000,
+              "Seconds": 7200,
               "Next": "check stack exist"
             },
             "check stack exist": {
