@@ -73,15 +73,68 @@ Now, our app is ready to start using our AWS services.
 
 ### Using the withAuthenticator component
 
-To add authentication, first import the `AmplifyProvider` and `Authenticator` HOC (Higher Order Component) from `@aws-amplify/ui-react`:
+To add authentication, first import the `Authenticator` HOC (Higher Order Component) from `@aws-amplify/ui-react`, 
+
+Modify __src/App.tsx__ as below:
 
 #### src/App.tsx
 
 ```tsx
+import React from "react";
+import { Amplify } from "aws-amplify";
 import {
-  AmplifyProvider,
-  Authenticator
-} from '@aws-amplify/ui-react'
+  Authenticator,
+  Button,
+  Flex,
+  Image,
+  Text,
+  View,
+} from "@aws-amplify/ui-react";
+import config from "./aws-export";
+
+import "@aws-amplify/ui-react/styles.css";
+import logo from "./logo.svg";
+
+Amplify.configure(config);
+
+const App = () => {
+  return (
+      <Authenticator>
+        {({ signOut, user }) => (
+          <Flex
+            direction="column"
+            justifyContent="flex-start"
+            alignItems="center"
+            alignContent="flex-start"
+            wrap="nowrap"
+            gap="1rem"
+            textAlign="center"
+          >
+            <View width="100%">
+              <Image src={logo} alt="logo" width={240} height={240} />
+            </View>
+
+            {user && (
+              <View width="100%">
+                <Text>Hello {user.username}</Text>
+                <Button onClick={signOut}>
+                  <Text>Sign Out</Text>
+                </Button>
+              </View>
+            )}
+
+            <View width="100%">
+              <Text>
+                Edit <code>src/App.tsx</code> and save to reload.
+              </Text>
+            </View>
+          </Flex>
+        )}
+      </Authenticator>
+  );
+};
+
+export default App;
 ```
 
 
