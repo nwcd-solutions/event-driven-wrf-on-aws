@@ -6,11 +6,12 @@ from aws_cdk import (
 )
 
 from constructs import Construct
-#from wx.forecast import Forecast
 from wx.network import Vpc
 from wx.pclusterapi import ParallelClusterApi
 from wx.slurmdb import SlurmDb
-from wx.statemachines import stepfunction
+from wx.statemachines import StepFunction
+from wx.apigateway import ApiGateway
+from wx.datastore import DataStore
 
 class Root(Stack):
 
@@ -19,26 +20,25 @@ class Root(Stack):
 
         bucket_name = CfnParameter(self, "BucketName", type="String",
             description="The name of the Amazon S3 bucket where the forecast files will be stored.")
-        domain_num = CfnParameter(self, "DomainNum", type="String", default="2",description="number of domains for WRF")
-        forecast_days= CfnParameter(self, "ForecastDays",type="String", default="2",description="number of forecast days")
+
         slurm_acct= CfnParameter(self, "SlurmAcct",type="String", default="false",description="whether slurm account is neccessary")
 
         vpc = Vpc(self, "vpc")
-
-        #forecast = Forecast(self, "forecast", vpc=vpc.outputs, bucket=bucket_name.value_as_string,domains=domain_num.value_as_string,days=forecast_days.value_as_string)
+        datastore = DataStore(self, "datastore")
         pcluster_api = ParallelClusterApi(self, "parallel-cluster-api")
         if (slurm_acct == "true") :
             slurmdb = SlurmDb(self, "slurmdbd", vpc=vpc.outputs)
             slurmdb.add_dependency(vpc)
 
-        sf = stepfunction(self, "workflow", vpc=vpc.outputs, bucket=bucket_name.value_as_string,domains=domain_num.value_as_string,days=forecast_days.value_as_string)
-        #sf.add_dependency(forecast)
+        sf = stepfunction(self, "workflow", vpc=vpc.outputs, bucket=bucket_name.value_as_string, datastore=datastore)
         sf.add_dependency(pcluster_api)  
         if (slurm_acct == "true") :
             sf.add_dependency(slurmdb)
         sf.add_dependency(vpc)
        
-        
+        api = ApiGateway(self,"api",datastore=datastore,bucket=bucket_name.value_as_string)
+        api.add_dependency(sf)
+
 
     @property
     def outputs(self):
