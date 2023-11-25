@@ -47,26 +47,29 @@ class DataStore(NestedStack):
         # Create a DynamoDB table to store parameters of Domain and Step function execution record
         #----------------------------------------------------------------------------------------------
         self.para_db = dynamodb.Table(
-                self, "Parameters_Table",
-                partition_key=dynamodb.Attribute(
-                    name="id",
-                    type=dynamodb.AttributeType.STRING
-                ),
-                removal_policy=core.RemovalPolicy.DESTROY
-            )
-
+            self, "Parameters_Table",
+            partition_key=dynamodb.Attribute(
+                name="name",
+                type=dynamodb.AttributeType.STRING
+            ),
+            removal_policy=core.RemovalPolicy.DESTROY,
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            server_side_encryption=True,  
+        )
         
         self.exec_db = dynamodb.Table(
-                self, "execution_Table",
-                partition_key=dynamodb.Attribute(
-                    name="id",
-                    type=dynamodb.AttributeType.STRING
-                ),
-                sort_key=dynamodb.Attribute(
-                    name="ftime",
-                    type=dynamodb.AttributeType.STRING
-                ),
-                removal_policy=core.RemovalPolicy.DESTROY
+            self, "execution_Table",
+            partition_key=dynamodb.Attribute(
+                name="id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            sort_key=dynamodb.Attribute(
+                name="ftime",
+                type=dynamodb.AttributeType.STRING
+            ),
+            removal_policy=core.RemovalPolicy.DESTROY,
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            server_side_encryption=True,  
             )
         
 
