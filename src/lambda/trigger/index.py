@@ -62,11 +62,11 @@ def handler(event, context):
             }
         )
         return
-    domain_items=json.dump(items)
+    domain_items=json.dumps(items)
     sfn = boto3.client('stepfunctions')
     sfn.start_execution(
         stateMachineArn=os.getenv("SM_ARN"),
-        input = "{\"action\" : \"create\",\"type\" : \"od\",\"ftime\":\"" + ftime + "\",\"fcst_days\":\""+fcst_days+"\",\"domains\":"+domains_items+",\"id\":\""+current_timestamp+"\",\"id\":\""+current_timestamp+"\"}"
+        input = "{\"action\" : \"create\",\"type\" : \"od\",\"ftime\":\"" + ftime + "\",\"fcst_days\":\""+fcst_days+"\",\"domains\":"+domain_items+",\"id\":\""+current_timestamp+"\",\"id\":\""+current_timestamp+"\"}"
     )
     exec_table.update_item(
         Key={
