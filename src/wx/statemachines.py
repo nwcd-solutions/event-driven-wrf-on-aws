@@ -464,7 +464,7 @@ class StepFunction (NestedStack):
                 "TopicArn": sf_topic.topic_arn
               },
               "ResultPath":None,
-              "Next": "Success"
+              "Next": "Fail"
             },
             "Destroy failed notification (2)": {
               "Type": "Task",
