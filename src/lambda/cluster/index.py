@@ -11,6 +11,8 @@ import requests
 import yaml
 
 region = os.getenv("REGION", "us-east-2")
+dynamodb = boto3.resource('dynamodb')
+exec_table = dynamodb.Table(os.getenv('EXEC_DB'))
 
 def gateway(url, method, data):
 
@@ -70,6 +72,19 @@ def handler(event, context):
           out['id']=id
         else:
           print(res.json())
+          current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+          exec_table.update_item(
+            Key={
+                'ftime':ftime,
+                'id': id
+            },
+            UpdateExpression = 'SET end_time = :end_time, exec_status = :exec_status, reason = :reason',
+            ExpressionAttributeValues = {
+                ':end_time':current_time,
+                ':exec_status':'failed',
+                ':reason':res.json()
+            }
+          )
           out={"clusterStatus":"failed"}
           out['failed_message']=res.json()
           out['clusterName']=cluster_name
@@ -130,8 +145,6 @@ def handler(event, context):
             out['id']=id
         else:
             current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            dynamodb = boto3.resource('dynamodb')
-            exec_table = dynamodb.Table(os.getenv('EXEC_DB'))
             exec_table.update_item(
               Key={
                 'ftime':ftime,
@@ -189,8 +202,6 @@ def handler(event, context):
       res = client.describe_stacks( StackName=cf_arn )
       if res['Stacks'][0]['StackStatus']=="DELETE_COMPLETE":
           current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-          dynamodb = boto3.resource('dynamodb')
-          exec_table = dynamodb.Table(os.getenv('EXEC_DB'))
           if job_status=="in progress":
               exec_table.update_item(
                   Key={
