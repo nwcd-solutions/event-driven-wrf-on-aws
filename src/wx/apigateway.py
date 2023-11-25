@@ -96,22 +96,8 @@ class ApiGateway(NestedStack):
 
         # Create a Method
         method = resource.add_method(
-            "GET",
+            "ANY",
             apigw.LambdaIntegration(para_db_handler),
             authorizer=authorizer,
         )
-        method = resource.add_method(
-            "POST",
-            apigw.LambdaIntegration(para_db_handler),
-            authorizer=authorizer,
-        )
-        method = resource.add_method(
-            "PUT",
-            apigw.LambdaIntegration(para_db_handler),
-            authorizer=authorizer,
-        )
-        method = resource.add_method(
-            "DELETE",
-            apigw.LambdaIntegration(para_db_handler),
-            authorizer=authorizer,
-        )
+
