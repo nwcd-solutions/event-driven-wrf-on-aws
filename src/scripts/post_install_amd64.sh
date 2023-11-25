@@ -227,9 +227,10 @@ download_wrf_install_package() {
 build_dir(){
   local ftime=$1
   local bucket_name=$2
-  local domains_num=$3
+  local domains=$3
   local forecast_days=$4
   echo $forecast_days
+  echo $domains
   y=${ftime:0:4}
   m=${ftime:5:2}
   d=${ftime:8:2}
@@ -257,10 +258,14 @@ build_dir(){
   WPS_DIR=${HPC_PREFIX}/${HPC_COMPILER}/${HPC_MPI}/WRF-${WRF_VERSION}/WPS-${WPS_VERSION} 
   WRF_DIR=${HPC_PREFIX}/${HPC_COMPILER}/${HPC_MPI}/WRF-${WRF_VERSION}
   #for i in "${job_array[@]}"
-  for (( i=1; i<=$3; i++ ))
-  do
-     echo $i
-     jobdir="domain_"$i
+  #for (( i=1; i<=$3; i++ ))
+  #do
+  for row in $(echo "${domains}" | jq -r '.[] | @base64'); do
+     _jq() {
+        echo ${row} | base64 --decode | jq -r ${1}
+     }     
+     echo $(_jq '.name')
+     jobdir="domain_"$(_jq '.name')
      echo $jobdir
      mkdir -p $jobdir/run
      mkdir -p $jobdir/preproc
