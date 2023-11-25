@@ -19,20 +19,20 @@ Now change into the new app directory & install the AWS Amplify & AWS Amplify Re
 
 ```bash
 cd my-amplify-app
-npm install --save aws-amplify aws-amplify-react uuid
+npm install --save aws-amplify @aws-amplify/ui-react uuid
 # or
 yarn add aws-amplify aws-amplify-react uuid
 ```
 ### Configuring the React applicaion
 
-Create backend resources & we can start using them!
+Create backend resources & set the parameters in __src/aws-exports.js__(if use Amplify to create backend ,this file will be created automaticaly)
 
 The first thing we need to do is to configure our React application to be aware of our new AWS Amplify project. We can do this by referencing the auto-generated `aws-exports.js` file that is now in our src folder.
 
-To configure the app, open __src/index.js__ and add the following code below the last import:
+To configure the app, open __src/App.tsx__ and add the following code below the last import:
 
-```js
-import Amplify from 'aws-amplify'
+```tsx
+import { Amplify } from 'aws-amplify'
 import config from './aws-exports'
 Amplify.configure(config)
 ```
@@ -45,7 +45,7 @@ To add authentication, we'll go into __src/App.js__ and first import the `withAu
 
 ### src/App.js
 
-```js
+```tsx
 import { withAuthenticator } from 'aws-amplify-react'
 ```
 
