@@ -24,10 +24,9 @@ class stepfunction (NestedStack):
         super().__init__(scope, construct_id)
         bucket_name = kwargs["bucket"]
         vpc = kwargs["vpc"]
+        datastore = kwargs["datastore"]
         cluster_name = "wx-pcluster001"
-        #domains= kwargs["domains"]
-        #forecast_days = kwargs["days"]
-        #forecast_lambda = kwargs["forecast_lambda"]
+       
         purl = Fn.import_value("ParallelClusterApiInvokeUrl")
         hostname = Fn.select(2, Fn.split("/", Fn.select(0, Fn.split('.', purl))))
         parn = f"arn:aws:execute-api:{Aws.REGION}::{hostname}/*/*/*"
@@ -53,56 +52,16 @@ class stepfunction (NestedStack):
         #-------------------------------------------------
         # Create SSM parameter store to store parameters
         #-------------------------------------------------
-        fcst_days_ssm = ssm.StringParameter(
-            self, "fcst_days_ssm",
-            parameter_name="/event-driven-wrf/fcst_days",
-            string_value="2"
-        )
-        key_str_ssm = ssm.StringParameter(
-            self, "key_str_ssm",
-            parameter_name="/event-driven-wrf/key_string",
-            string_value=r"gfs.t(?P=h)z.pgrb2.0p50.f096"
-        )
-        auto_mode_ssm = ssm.StringParameter(
-            self, "auto_mode_ssm",
-            parameter_name="/event-driven-wrf/auto_mode",
-            string_value="False"
-        )
-        ftime_ssm = ssm.StringParameter(
-            self, "ftime_ssm",
-            parameter_name="/event-driven-wrf/ftime",
-            string_value="False"
-        )
-        exec_id_ssm = ssm.StringParameter(
-            self, "exec_id_ssm",
-            parameter_name="/event-driven-wrf/id",
-            string_value="False"
-        )
+        fcst_days_ssm = datastore.fcst_days_ssm
+        key_str_ssm = datastore.key_str_ss
+        auto_mode_ssm = datastore.auto_mode_ssm
+        ftime_ssm = datastore.ftime_ssm
+        exec_id_ssm = datastore.exec_id_ssm
         #----------------------------------------------------------------------------------------------
         # Create a DynamoDB table to store parameters of Domain and Step function execution record
         #----------------------------------------------------------------------------------------------
-        self.para_db = dynamodb.Table(
-                self, "Parameters_Table",
-                partition_key=dynamodb.Attribute(
-                    name="id",
-                    type=dynamodb.AttributeType.STRING
-                ),
-                removal_policy=core.RemovalPolicy.DESTROY
-            )
-
-        
-        exec_db = dynamodb.Table(
-                self, "execution_Table",
-                partition_key=dynamodb.Attribute(
-                    name="id",
-                    type=dynamodb.AttributeType.STRING
-                ),
-                sort_key=dynamodb.Attribute(
-                    name="ftime",
-                    type=dynamodb.AttributeType.STRING
-                ),
-                removal_policy=core.RemovalPolicy.DESTROY
-            )
+        para_db = datastore.para_db      
+        exec_db = datastore.exec_db
         #--------------------------------------------------------------------------------------------
         # Create IAM policy for KMS ALL
         #--------------------------------------------------------------------------------------------
