@@ -53,7 +53,7 @@ class StepFunction (NestedStack):
         # Create SSM parameter store to store parameters
         #-------------------------------------------------
         fcst_days_ssm = datastore.fcst_days_ssm
-        key_str_ssm = datastore.key_str_ss
+        key_str_ssm = datastore.key_str_ssm
         auto_mode_ssm = datastore.auto_mode_ssm
         ftime_ssm = datastore.ftime_ssm
         exec_id_ssm = datastore.exec_id_ssm
