@@ -15,49 +15,62 @@ class DataStore(NestedStack):
     def __init__(self, scope:Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id)
 
-        vpc = kwargs["vpc"]
-        sg_rds = ec2.SecurityGroup(
-                self,
-                id="sg_rds",
-                vpc=vpc,
-                security_group_name="sg_rds"
+        #-------------------------------------------------
+        # Create SSM parameter store to store parameters
+        #-------------------------------------------------
+        self.fcst_days_ssm = ssm.StringParameter(
+            self, "fcst_days_ssm",
+            parameter_name="/event-driven-wrf/fcst_days",
+            string_value="2"
         )
-
-        sg_rds.add_ingress_rule(
-            peer=ec2.Peer.ipv4(vpc.vpc_cidr_block),
-            connection=ec2.Port.tcp(3306)
+        self.key_str_ssm = ssm.StringParameter(
+            self, "key_str_ssm",
+            parameter_name="/event-driven-wrf/key_string",
+            string_value=r"gfs.t(?P=h)z.pgrb2.0p50.f096"
         )
-
-        self.username = "admin"
-        self.secret = secretsmanager.Secret(self, "DBCreds",
-                secret_name="SlurmDbCreds",
-                description="Slurm RDS Credentials",
-                generate_secret_string=secretsmanager.SecretStringGenerator(
-                    exclude_characters ="\"@/\\ '",
-                    generate_string_key="password",
-                    secret_string_template=f'{{"username":"{self.username}"}}')
-                )
-
-        instance_type = ec2.InstanceType.of(ec2.InstanceClass.BURSTABLE4_GRAVITON, ec2.InstanceSize.MEDIUM)
-        engine_version = rds.MysqlEngineVersion.VER_8_0_28
-
-        self.db = rds.DatabaseInstance(self, "RDS",
-            credentials=rds.Credentials.from_secret(self.secret, self.username),
-            database_name="slurmdb",
-            delete_automated_backups=True,
-            deletion_protection=False,
-            engine=rds.DatabaseInstanceEngine.mysql(version=engine_version),
-            instance_type=instance_type,
-            removal_policy=RemovalPolicy.DESTROY,
-            security_groups=[sg_rds],
-            vpc=vpc,
-            vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PUBLIC)
+        self.auto_mode_ssm = ssm.StringParameter(
+            self, "auto_mode_ssm",
+            parameter_name="/event-driven-wrf/auto_mode",
+            string_value="False"
         )
+        self.ftime_ssm = ssm.StringParameter(
+            self, "ftime_ssm",
+            parameter_name="/event-driven-wrf/ftime",
+            string_value="False"
+        )
+        self.exec_id_ssm = ssm.StringParameter(
+            self, "exec_id_ssm",
+            parameter_name="/event-driven-wrf/id",
+            string_value="False"
+        )
+        #----------------------------------------------------------------------------------------------
+        # Create a DynamoDB table to store parameters of Domain and Step function execution record
+        #----------------------------------------------------------------------------------------------
+        self.para_db = dynamodb.Table(
+                self, "Parameters_Table",
+                partition_key=dynamodb.Attribute(
+                    name="id",
+                    type=dynamodb.AttributeType.STRING
+                ),
+                removal_policy=core.RemovalPolicy.DESTROY
+            )
+
         
-        CfnOutput(self, "hostname", value=self.db.db_instance_endpoint_address)
-        CfnOutput(self, "DBSecretArn", value=self.secret.secret_full_arn,
-                export_name="DBSecretArn")
+        self.exec_db = dynamodb.Table(
+                self, "execution_Table",
+                partition_key=dynamodb.Attribute(
+                    name="id",
+                    type=dynamodb.AttributeType.STRING
+                ),
+                sort_key=dynamodb.Attribute(
+                    name="ftime",
+                    type=dynamodb.AttributeType.STRING
+                ),
+                removal_policy=core.RemovalPolicy.DESTROY
+            )
+        
+
 
     @property
     def outputs(self):
-        return self.db
+        return self.exec_db
