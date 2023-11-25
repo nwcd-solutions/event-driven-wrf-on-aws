@@ -25,9 +25,7 @@ yarn add aws-amplify aws-amplify-react uuid
 ```
 ### Configuring the React applicaion
 
-Create backend resources & set the parameters in __src/aws-exports.js__(if use Amplify to create backend ,this file will be created automaticaly)
-
-The first thing we need to do is to configure our React application to be aware of our new AWS Amplify project. We can do this by referencing the auto-generated `aws-exports.js` file that is now in our src folder.
+Create backend resources & set the parameters in __src/aws-exports.js__(if use Amplify to create backend ,this file will be auto-generated)
 
 To configure the app, open __src/App.tsx__ and add the following code below the last import:
 
@@ -41,19 +39,18 @@ Now, our app is ready to start using our AWS services.
 
 ### Using the withAuthenticator component
 
-To add authentication, we'll go into __src/App.js__ and first import the `withAuthenticator` HOC (Higher Order Component) from `aws-amplify-react`:
+To add authentication, first import the `AmplifyProvider` and `Authenticator` HOC (Higher Order Component) from `@aws-amplify/ui-react`:
 
 ### src/App.js
 
 ```tsx
-import { withAuthenticator } from 'aws-amplify-react'
+import {
+  AmplifyProvider,
+  Authenticator
+} from '@aws-amplify/ui-react'
 ```
 
-Next, we'll wrap our default export (the App component) with the `withAuthenticator` HOC:
 
-```js
-export default withAuthenticator(App, { includeGreetings: true })
-```
 
 ```sh
 # run the app
