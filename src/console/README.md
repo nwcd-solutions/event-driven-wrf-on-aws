@@ -139,3 +139,418 @@ function onChange(e) {
   onChange={onChange}
 />
 ```
+We'd also need to have a method that signed up & signed in users. We can use the Auth class to do this. The Auth class has over 30 methods including things like `signUp`, `signIn`, `confirmSignUp`, `confirmSignIn`, & `forgotPassword`. These functions return a promise so they need to be handled asynchronously.
+
+```js
+// import the Auth component
+import { Auth } from 'aws-amplify'
+
+// Class method to sign up a user
+async function signUp() {
+  const { username, password, email } = state
+  try {
+    await Auth.signUp({ username, password, attributes: { email }})
+    console.log('user successfully signed up!')
+  } catch (err) {
+    console.log('error signing up user...', err)
+  }
+}
+
+<button onClick={signUp}>Sign Up</button>
+```
+### Interacting with the new API
+
+Now that the API is created we can start sending requests to it & interacting with it.
+
+Let's request some data from the API:
+
+```js
+// src/App.js
+import React, { useEffect, useState } from 'react'
+import { API } from 'aws-amplify'
+import { withAuthenticator } from 'aws-amplify-react'
+
+function App() {
+  const [coins, updateCoins] = useState([])
+
+  async function getData() {
+    try {
+      // const data = await API.get('cryptoapi', '/coins')
+      const data = await API.get('cryptoapi', '/coins?limit=5&start=100')
+      console.log('data from Lambda REST API: ', data)
+      updateCoins(data.coins)
+    } catch (err) {
+      console.log('error fetching data..', err)
+    }
+  }
+
+  useEffect(() => {
+    getData()
+  }, [])
+
+  return (
+    <div>
+      {
+        coins.map((c, i) => (
+          <div key={i}>
+            <h2>{c.name}</h2>
+            <p>{c.price_usd}</p>
+          </div>
+        ))
+      }
+    </div>
+  )
+}
+
+export default withAuthenticator(App, { includeGreetings: true })
+```
+
+#### Challenge
+
+Refactor the above component to use `useReducer` instead of `useState` to add an additional `loading` parameter to the initial state to indicate that the app is fetching and loading when launched.
+
+## Working with Storage
+
+To add storage, we can use the following command:
+
+```sh
+amplify add storage
+```
+
+> Answer the following questions   
+
+- Please select from one of the below mentioned services __Content (Images, audio, video, etc.)__
+- Please provide a friendly name for your resource that will be used to label this category in the
+ project: __YOURAPINAME__
+- Please provide bucket name: __YOURUNIQUEBUCKETNAME__
+- Who should have access: __Auth users only__
+- What kind of access do you want for Authenticated users __create/update, read, delete__   
+
+
+```sh
+amplify push
+```
+
+Now, storage is configured & ready to use.
+
+What we've done above is created configured an Amazon S3 bucket that we can now start using for storing items.
+
+For example, if we wanted to test it out we could store some text in a file like this:
+
+```js
+import { Storage } from 'aws-amplify'
+
+// create function to work with Storage
+function addToStorage() {
+  await Storage.put('javascript/MyReactComponent.js', `
+    import React from 'react'
+    const App = () => (
+      <p>Hello World</p>
+    )
+    export default App
+  `)
+  console.log('data stored in S3!')
+}
+
+// add click handler
+<button onClick={addToStorage}>Add To Storage</button>
+```
+
+This would create a folder called `javascript` in our S3 bucket & store a file called __MyReactComponent.js__ there with the code we specified in the second argument of `Storage.put`.
+
+> To view the new bucket that was created in S3, go to the dashboard at [https://console.aws.amazon.com/s3](https://console.aws.amazon.com/s3). Also be sure that your region is set correctly.
+
+If we want to read everything from this folder, we can use `Storage.list`:
+
+```js
+readFromStorage() {
+  const data = Storage.list('javascript/')
+  console.log('data from S3: ', data)
+}
+```
+
+If we only want to read the single file, we can use `Storage.get`:
+
+```js
+readFromStorage() {
+  const data = Storage.get('javascript/MyReactComponent.js')
+  console.log('data from S3: ', data)
+}
+```
+
+If we wanted to pull down everything, we can use `Storage.list`:
+
+```js
+function readFromStorage() {
+  const data = Storage.list('')
+  console.log('data from S3: ', data)
+}
+```
+
+### Working with images
+
+Here's how you can store an image:
+
+```js
+function App() {
+  async function onChange(e) {
+    const file = e.target.files[0];
+    await Storage.put('example.png', file)
+    console.log('image successfully stored!')
+  }
+
+  return (
+    <input
+      type="file" accept='image'
+      onChange={(e) => this.onChange(e)}
+    />
+  )
+}
+```
+
+Here's how you can read and display an image:
+
+```js
+import React, { useState } from 'react'
+
+function App() {
+  const [imageUrl, updateImage] = useState('')
+
+  async function fetchImage() {
+    const imagePath = await Storage.get('example.png')
+    updateImage(imagePath)
+  }
+
+  return (
+    <div>
+      <img src={imageUrl} />
+      <button onClick={fetchImage}>Fetch Image</button>
+    </div>
+  )
+}
+```
+
+We can even use the S3Album component, one of a few components in the AWS Amplify React library to create a pre-configured photo picker:
+
+```js
+import { S3Album, withAuthenticator } from 'aws-amplify-react'
+
+function App() {
+  return (
+    <div className="App">
+      <S3Album path={''} picker />
+    </div>
+  );
+}
+```
+
+## Adding Analytics
+
+To add analytics, we can use the following command:
+
+```sh
+amplify add analytics
+```
+
+> Next, we'll be prompted for the following:
+
+- Provide your pinpoint resource name: __amplifyanalytics__   
+- Apps need authorization to send analytics events. Do you want to allow guest/unauthenticated users to send analytics events (recommended when getting started)? __Y__   
+- overwrite YOURFILEPATH-cloudformation-template.yml __Y__
+
+### Recording events
+
+Now that the service has been created we can now begin recording events.
+
+To record analytics events, we need to import the `Analytics` class from Amplify & then call `Analytics.record`:
+
+```js
+import { Analytics } from 'aws-amplify'
+
+state = {username: ''}
+
+async componentDidMount() {
+  try {
+    const user = await Auth.currentAuthenticatedUser()
+    this.setState({ username: user.username })
+  } catch (err) {
+    console.log('error getting user: ', err)
+  }
+}
+
+recordEvent = () => {
+  Analytics.record({
+    name: 'My test event',
+    attributes: {
+      username: this.state.username
+    }
+  })
+}
+
+<button onClick={this.recordEvent}>Record Event</button>
+```
+
+## Working with multiple environments
+
+You can create multiple environments for your application in which to create & test out new features without affecting the main environment which you are working on.
+
+When you create a new environment from an existing environment, you are given a copy of the entire backend application stack from the original project. When you make changes in the new environment, you are then able to test these new changes in the new environment & merge only the changes that have been made since the new environment was created back into the original environment.
+
+Let's take a look at how to create a new environment. In this new environment, we'll re-configure the GraphQL Schema to have another field for the coin rank.
+
+First, we'll initialize a new environment using `amplify env add`:
+
+```sh
+amplify env add
+
+> Do you want to use an existing environment? No
+> Enter a name for the environment: apiupdate
+> Do you want to use an AWS profile? Y
+> Please choose the profile you want to use: amplify-workshop-profile
+```
+
+Once the new environment is initialized, we should be able to see some information about our environment setup by running:
+
+```sh
+amplify env list
+
+| Environments |
+| ------------ |
+| dev          |
+| *apiupdate   |
+```
+
+Now we can update the GraphQL Schema in `amplify/backend/api/CryptoGraphQL/schema.graphql` to the following (adding the `rank` field):
+
+```graphql
+type Coin {
+	id: ID!
+	clientId: ID
+	name: String!
+	symbol: String!
+	price: Float!
+  rank: Int
+}
+```
+
+Now, we can create this new stack by running `amplify push`:
+
+```sh
+amplify push
+```
+
+After we test it out, we can now merge it into our original local environment:
+
+```sh
+amplify env checkout local
+```
+
+Next, run the `status` command:
+
+```sh
+amplify status
+```
+
+You should now see an __Update__ operation:
+
+```sh
+Current Environment: local
+
+| Category | Resource name   | Operation | Provider plugin   |
+| -------- | --------------- | --------- | ----------------- |
+| Api      | CryptoGraphQL   | Update    | awscloudformation |
+| Auth     | cognito75a8ccb4 | No Change | awscloudformation |
+```
+
+To deploy the changes, run the push command:
+
+```sh
+amplify push
+```
+
+- Do you want to update code for your updated GraphQL API? __Y__
+- Do you want to generate GraphQL statements? __Y__
+
+Now, the changes have been deployed & we can delete the apiupdate environment:
+
+```sh
+amplify env remove apiupdate
+
+Do you also want to remove all the resources of the environment from the cloud? Y
+```
+
+Now, we should be able to run the `list` command & see only our main environment:
+
+```sh
+amplify env list
+```
+
+## Deploying via the Amplify Console
+
+For hosting, we can use the [Amplify Console](https://aws.amazon.com/amplify/console/) to deploy the application.
+
+The first thing we need to do is [create a new GitHub repo](https://github.com/new) for this project. Once we've created the repo, we'll copy the URL for the project to the clipboard & initialize git in our local project:
+
+```sh
+git init
+
+git remote add origin git@github.com:username/project-name.git
+
+git add .
+
+git commit -m 'initial commit'
+
+git push origin master
+```
+
+Next we'll visit the Amplify Console in our AWS account at [https://eu-west-1.console.aws.amazon.com/amplify/home](https://eu-west-1.console.aws.amazon.com/amplify/home).
+
+Here, we'll click __Get Started__ to create a new deployment. Next, authorize Github as the repository service.
+
+Next, we'll choose the new repository & branch for the project we just created & click __Next__.
+
+In the next screen, we'll create a new role & use this role to allow the Amplify Console to deploy these resources & click __Next__.
+
+Finally, we can click __Save and Deploy__ to deploy our application!
+
+Now, we can push updates to Master to update our application.
+
+## React Native
+
+AWS Amplify also has framework support for [React Native](https://aws-amplify.github.io/docs/js/start?platform=react-native).
+
+To get started with using AWS Amplify with React Native, we'll need to install the __AWS Amplify React Native__ package & then link the dependencies.
+
+```sh
+npm install aws-amplify-react-native
+
+# If using Expo, you do not need to link these two libraries as they are both part of the Expo SDK.
+react-native link amazon-cognito-identity-js
+react-native link react-native-vector-icons
+```
+
+Implementing features with AWS Amplify in React Native is the same as the features implemented in the other steps of this workshop. The only difference is that you will be working with React Native primitives vs HTML elements.
+
+## Removing Services
+
+If at any time, or at the end of this workshop, you would like to delete a service from your project & your account, you can do this by running the `amplify remove` command:
+
+```sh
+amplify remove auth
+
+amplify push
+```
+
+If you are unsure of what services you have enabled at any time, you can run the `amplify status` command:
+
+```sh
+amplify status
+```
+
+`amplify status` will give you the list of resources that are currently enabled in your app.
+
+## Deleting entire project
+
+```sh
+amplify delete
+```
