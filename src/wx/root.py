@@ -30,7 +30,7 @@ class Root(Stack):
             slurmdb = SlurmDb(self, "slurmdbd", vpc=vpc.outputs)
             slurmdb.add_dependency(vpc)
 
-        sf = stepfunction(self, "workflow", vpc=vpc.outputs, bucket=bucket_name.value_as_string, datastore=datastore)
+        sf = StepFunction(self, "workflow", vpc=vpc.outputs, bucket=bucket_name.value_as_string, datastore=datastore)
         sf.add_dependency(pcluster_api)  
         if (slurm_acct == "true") :
             sf.add_dependency(slurmdb)
