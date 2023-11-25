@@ -22,9 +22,6 @@ class ApiGateway(NestedStack):
             "WrfUserPool",
             sign_in_type=cognito.SignInType.EMAIL,
             auto_verified_attributes=[cognito.UserPoolAttribute.EMAIL],
-            #lambda_triggers={
-            #    'post_confirmation': smartProductCognitoHelperFunction
-            #}
         )
         #---------------------------------------------------------------------------------------------
         # Create a Cognito User Pool Client
