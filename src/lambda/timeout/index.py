@@ -13,7 +13,7 @@ def handler(event, context):
     res = cfn.describe_stacks(StackName=stack_name)
     if res['Stacks'][0]['StackStatus']=="DELETE_COMPLETE":
         print(f"Stack {stack_name} does not exist")
-        return {"stack_staus":"not exist"}    
+        return {"stack_status":"not exist"}    
     else:
         print(f"Stack {stack_name} exists")
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
