@@ -14,14 +14,26 @@ class ApiGateway(NestedStack):
         super().__init__(scope, construct_id)
         bucket_name = kwargs["bucket"]
         para_db = kwargs["para_db"]
+        #---------------------------------------------------------------------------------------------
         # Create a Cognito User Pool
-        user_pool = cognito.UserPool(self, "WrfUserPool")
-
+        #---------------------------------------------------------------------------------------------
+        user_pool = cognito.UserPool(
+            self, 
+            "WrfUserPool",
+            sign_in_type=cognito.SignInType.EMAIL,
+            auto_verified_attributes=[cognito.UserPoolAttribute.EMAIL],
+            #lambda_triggers={
+            #    'post_confirmation': smartProductCognitoHelperFunction
+            #}
+        )
+        #---------------------------------------------------------------------------------------------
         # Create a Cognito User Pool Client
+        #---------------------------------------------------------------------------------------------        
         user_pool_client = cognito.UserPoolClient(
             self,
             "WrfUserPoolClient",
             user_pool=user_pool,
+            user_pool_client_name='wrf-web-app',
             auth_flows=cognito.AuthFlow(
                 user_password=True,
                 user_srp=True,
