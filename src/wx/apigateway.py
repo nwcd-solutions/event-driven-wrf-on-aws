@@ -2,6 +2,9 @@ from aws_cdk import (
     aws_apigateway as apigw,
     aws_cognito as cognito,
     aws_lambda as _lambda,
+    aws_iam as iam,
+    aws_logs as logs,
+    aws_s3 as s3,
     CfnOutput, NestedStack, Tags
 )
 from constructs import Construct
@@ -11,7 +14,6 @@ class ApiGateway(NestedStack):
         super().__init__(scope, construct_id)
         bucket_name = kwargs["bucket"]
         para_db = kwargs["para_db"]
-        exec_db = kwargs["exec_db"]
         # Create a Cognito User Pool
         user_pool = cognito.UserPool(self, "WrfUserPool")
 
@@ -36,6 +38,7 @@ class ApiGateway(NestedStack):
                 actions=["dynamodb:*"],
                 resources=["*"],
                 effect=iam.Effect.ALLOW),
+        ])
         para_db_handler_role = iam.Role(self, "para_db_handler_Role",
             assumed_by=iam.CompositePrincipal(
                 iam.ServicePrincipal("lambda.amazonaws.com"),
@@ -50,13 +53,13 @@ class ApiGateway(NestedStack):
         )
 
         para_db_handler = _lambda.Function(self,"para_db_op",
-            code=_lambda.from_asset("./lambda/cluster"),
+            code=_lambda.Code.from_asset("./service/paradb"),
             environment={
                 "PARA_DB": para_db.table_name,
-            }
+            },
             log_retention=logs.RetentionDays.ONE_DAY,
             role  =para_db_handler_role,
-            runtime = _lambda.Runtime.PYTHON_3_11,
+            runtime = _lambda.Runtime.PYTHON_3_9,
             handler = "index.handler",
         )
 
