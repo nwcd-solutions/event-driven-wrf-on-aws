@@ -19,7 +19,7 @@ import aws_cdk as core
 from constructs import Construct
 import json
 
-class stepfunction (NestedStack):
+class StepFunction (NestedStack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id)
         bucket_name = kwargs["bucket"]
