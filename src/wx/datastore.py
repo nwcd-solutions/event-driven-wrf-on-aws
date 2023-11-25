@@ -3,12 +3,12 @@
 
 import json
 from aws_cdk import (
-    aws_ec2 as ec2,
-    aws_rds as rds,
+    aws_dynamodb as dynamodb,
+    aws_ssm as ssm,
     aws_secretsmanager as secretsmanager,
     App, CfnOutput, Fn, NestedStack, RemovalPolicy
 )
-
+import aws_cdk as core
 from constructs import Construct
 
 class DataStore(NestedStack):
