@@ -85,3 +85,67 @@ class WebApp(cdk.Construct):
                 }]
             }
         }
+
+       # Helper Function Policy
+helperS3Policy = iam.Policy(
+    self,
+    'HelperS3Policy',
+    statements=[
+        iam.PolicyStatement(
+            actions=['s3:PutObject'],
+            resources=[f'{smartProductWebsiteBucket.bucket_arn}/*']
+        ),
+        iam.PolicyStatement(
+            actions=['s3:GetObject'],
+            resources=[f'arn:aws:s3:::{process.env.BUILD_OUTPUT_BUCKET}/*']
+        )
+    ]
+)
+helperS3PolicyResource = helperS3Policy.node.find_child('Resource').as_cfn_resource()
+helperS3PolicyResource.cfn_options.metadata = {
+    'cfn_nag': {
+        'rules_to_suppress': [{
+            'id': 'W12',
+            'reason': f'The * resource allows {props.helperFunctionRole.role_name} to get and put objects to S3.'
+        }]
+    }
+}
+helperS3Policy.attach_to_role(props.helperFunctionRole)
+
+_copyS3Assets = cfn.CustomResource(
+    self,
+    'CopyS3Assets',
+    provider=props.helperFunction,
+    resource_type='Custom::CopyS3Assets',
+    properties={
+        'Region': cdk.Aws.REGION,
+        'ManifestKey': f'smart-product-solution/{props.solutionVersion}/site-manifest.json',
+        'SourceS3Bucket': process.env.BUILD_OUTPUT_BUCKET,
+        'SourceS3key': f'smart-product-solution/{props.solutionVersion}/console',
+        'DestS3Bucket': smartProductWebsiteBucket.bucket_name
+    }
+)
+_copyS3Assets.node.add_dependency(helperS3Policy.node.find_child('Resource').as_cdk_resource())
+
+_putConfig = cfn.CustomResource(
+    self,
+    'UploadWebConfig',
+    provider=props.helperFunction,
+    resource_type='Custom::PutConfigFile',
+    properties={
+        'Region': cdk.Aws.REGION,
+        'CustomAction': 'putConfigFile',
+        'DestS3Bucket': smartProductWebsiteBucket.bucket_name,
+        'DestS3key': 'assets/smart_product_config.js',
+        'ConfigItem': {
+            'aws_user_pools_id': props.user_pool.user_pool_id,
+            'aws_user_pools_web_client_id': props.user_pool_client.user_pool_client_id,
+            'endpoint': props.api_endpoint,
+            'region': cdk.Aws.REGION
+        }
+    }
+})
+_putConfig.node.add_dependency(_copyS3Assets.node.find_child('Default').as_cdk_resource())
+_putConfig.node.add_dependency(helperS3Policy.node.find_child('Resource').as_cdk_resource())
+
+
