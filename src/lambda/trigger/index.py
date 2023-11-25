@@ -38,16 +38,16 @@ def handler(event, context):
     para_table = dynamodb.Table(os.getenv('PARA_DB'))
     response = para_table.scan()
     items = response['Items']
-    domains_num = "0"
+    domains_num = 0
     fcst_days = "0"
     auto_mode = "False"
     
-    domains_num=str(len(items))
+    domains_num=len(items)
     response = ssm.get_parameter(Name=os.getenv('AUTO_MODE'))
     auto_mode = response['Parameter']['Value']    
     response = ssm.get_parameter(Name=os.getenv('FCST_DAYS'))
     fcst_days = response['Parameter']['Value']    
-    if domains_num=="0" or auto_mode=="False" or fcst_days=="0":
+    if domains_num==0 or auto_mode=="False" or fcst_days=="0":
         print("stop working")
         exec_table.update_item(
             Key={
@@ -62,10 +62,11 @@ def handler(event, context):
             }
         )
         return
+    domain_items=json.dump(items)
     sfn = boto3.client('stepfunctions')
     sfn.start_execution(
         stateMachineArn=os.getenv("SM_ARN"),
-        input = "{\"action\" : \"create\",\"type\" : \"od\",\"ftime\":\"" + ftime + "\",\"fcst_days\":\""+fcst_days+"\",\"domains_num\":\""+domains_num+"\",\"id\":\""+current_timestamp+"\",\"id\":\""+current_timestamp+"\"}"
+        input = "{\"action\" : \"create\",\"type\" : \"od\",\"ftime\":\"" + ftime + "\",\"fcst_days\":\""+fcst_days+"\",\"domains\":"+domains_items+",\"id\":\""+current_timestamp+"\",\"id\":\""+current_timestamp+"\"}"
     )
     exec_table.update_item(
         Key={
