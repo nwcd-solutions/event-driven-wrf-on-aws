@@ -73,7 +73,9 @@ Now, our app is ready to start using our AWS services.
 
 ### Using the withAuthenticator component
 
-To add authentication, first import the `Authenticator` HOC (Higher Order Component) from `@aws-amplify/ui-react`, 
+To add authentication, you can import the `Authenticator` component and wrap your application with it. Once an end-user has created an account & signed in, the underlying component is rendered with access to the user.
+
+You can use the Authenticator component directly, or wrap your app in withAuthenticator Higher-Order Component. 
 
 Modify __src/App.tsx__ as below:
 
