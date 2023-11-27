@@ -53,8 +53,7 @@ class DataStore(NestedStack):
                 type=dynamodb.AttributeType.STRING
             ),
             removal_policy=core.RemovalPolicy.DESTROY,
-            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
-            server_side_encryption=True,  
+
         )
         
         self.exec_db = dynamodb.Table(
@@ -68,9 +67,7 @@ class DataStore(NestedStack):
                 type=dynamodb.AttributeType.STRING
             ),
             removal_policy=core.RemovalPolicy.DESTROY,
-            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
-            server_side_encryption=True,  
-            )
+        )
         
 
 
