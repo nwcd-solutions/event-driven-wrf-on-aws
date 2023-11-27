@@ -20,8 +20,8 @@ class ApiGateway(NestedStack):
         user_pool = cognito.UserPool(
             self, 
             "WrfUserPool",
-            sign_in_type=cognito.SignInType.EMAIL,
-            auto_verified_attributes=[cognito.UserPoolAttribute.EMAIL],
+            #sign_in_type=cognito.SignInType.EMAIL,
+            #auto_verified_attributes=[cognito.UserPoolAttribute.EMAIL],
         )
         #---------------------------------------------------------------------------------------------
         # Create a Cognito User Pool Client
