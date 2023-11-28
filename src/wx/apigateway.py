@@ -77,11 +77,11 @@ class ApiGateway(NestedStack):
             self,
             "WrfAPIGateway",
             rest_api_name="WrfAPIGateway",
-            default_cors_preflight_options=apigw.CorsOptions(
-                allow_origins=apigw.Cors.ALL_ORIGINS,
-                allow_methods=apigw.Cors.ALL_METHODS,
-                allow_headers=["*"],
-            ),
+            #default_cors_preflight_options=apigw.CorsOptions(
+            #    allow_origins=apigw.Cors.ALL_ORIGINS,
+            #    allow_methods=apigw.Cors.ALL_METHODS,
+            #    allow_headers=["*"],
+            #),
         )
 
         # Create a Cognito Authorizer
@@ -90,14 +90,62 @@ class ApiGateway(NestedStack):
             "Authorizer",
             cognito_user_pools=[user_pool],
         )
+        api_lambda_exec_role = iam.Role(
+            self,
+            'ApiLambdaExecRole',
+            assumed_by=iam.ServicePrincipal('apigateway.amazonaws.com')
+        )
+        api_lambda_exec_policy = iam.Policy(
+            self,
+            'apiLambdaExecPolicy',
+            statements=[
+                iam.PolicyStatement(
+                    actions=['lambda:InvokeFunction'],
+                    resources=[
+                        para_db_handler.function_arn,
+                    ]
+                )
+            ]
+        )
+        api_lambda_exec_policy.attach_to_role(api_lambda_exec_role)
 
         # Create a Resource
         resource = api.root.add_resource("domain")
 
         # Create a Method
-        method = resource.add_method(
-            "ANY",
+
+        options_method  = resource.add_method(
+            'OPTIONS',
+            apigw.MockIntegration(
+                integration_responses=[{
+                    'statusCode': '200',
+                    'responseParameters': {
+                        'method.response.header.Access-Control-Allow-Headers': "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+                        'method.response.header.Access-Control-Allow-Origin': "'*'",
+                        'method.response.header.Access-Control-Allow-Methods': "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+                    },
+                }],
+                passthrough_behavior=apigw.PassthroughBehavior.WHEN_NO_MATCH,
+                credentials_role=api_lambda_exec_role,
+                request_templates={
+                    "application/json": "{\"statusCode\": 200}"
+                },
+            ),
+            method_responses=[{
+                'statusCode': '200',
+                'responseParameters': {
+                    'method.response.header.Access-Control-Allow-Headers': True,
+                    'method.response.header.Access-Control-Allow-Methods': True,
+                    'method.response.header.Access-Control-Allow-Origin': True
+                },
+            }],
+            request_parameters={'method.request.header.access-control-allow-origin':True}
+         
+        )
+        any_method = resource.add_method(
+            "GET",
             apigw.LambdaIntegration(para_db_handler),
             authorizer=authorizer,
         )
+
 
