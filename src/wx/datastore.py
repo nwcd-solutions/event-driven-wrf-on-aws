@@ -18,6 +18,12 @@ class DataStore(NestedStack):
         #-------------------------------------------------
         # Create SSM parameter store to store parameters
         #-------------------------------------------------
+        self.job_timeout_ssm = ssm.StringParameter(
+            self, "job_timeout_ssm",
+            parameter_name="/event-driven-wrf/job_timeout",
+            string_value="1800"
+        )
+
         self.fcst_days_ssm = ssm.StringParameter(
             self, "fcst_days_ssm",
             parameter_name="/event-driven-wrf/fcst_days",
