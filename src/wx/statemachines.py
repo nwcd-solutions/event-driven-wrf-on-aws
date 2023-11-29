@@ -57,6 +57,8 @@ class StepFunction (NestedStack):
         auto_mode_ssm = datastore.auto_mode_ssm
         ftime_ssm = datastore.ftime_ssm
         exec_id_ssm = datastore.exec_id_ssm
+        job_timeout_ssm = datastore.job_timeout_ssm
+
         #----------------------------------------------------------------------------------------------
         # Create a DynamoDB table to store parameters of Domain and Step function execution record
         #----------------------------------------------------------------------------------------------
@@ -218,7 +220,8 @@ class StepFunction (NestedStack):
                     "PARA_DB":para_db.table_name,
                     #"EXEC_DB":exec_db.table_name,
                     "FTIME":ftime_ssm.parameter_name ,
-                    "EXEC_ID": exec_id_ssm.parameter_name
+                    "EXEC_ID": exec_id_ssm.parameter_name,
+                    "JOB_TIMEOUT": job_timeout_ssm.parameter_name
                 },
                 handler="index.handler",
                 layers=[layer],
@@ -568,7 +571,7 @@ class StepFunction (NestedStack):
             },
             "Wait for timeout": {
               "Type": "Wait",
-              "Seconds": 7200,
+              "SecondsPath": "$.job_timeout",
               "Next": "check stack exist"
             },
             "check stack exist": {
