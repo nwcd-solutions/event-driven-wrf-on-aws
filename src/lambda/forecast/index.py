@@ -197,10 +197,14 @@ def handler(event, context):
         Type='String',
         Overwrite=True
     )
+    timeout_value=ssm.get_parameter(
+        Name=os.getenv('JOB_TIMEOUT'),
+    )
     out={
         "ftime":ftime,
         "id":id,
         "region":region,
-        "clustername":cluster_name
+        "clustername":cluster_name,
+        "job_timeout":timeout_value['Parameter']['Value']
     }
     return out
