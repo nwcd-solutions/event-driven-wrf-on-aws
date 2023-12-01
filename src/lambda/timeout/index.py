@@ -4,18 +4,18 @@ from datetime import datetime
 import os
 
 def handler(event, context):
-    stack_name = event['clustername']
+    stack_arn = event['clustername']
     ftime=event['ftime']
     id=event['id']
     region=event['region']
-   
+    stark_name=stack_arn.split('/')[1]
     cfn = boto3.client('cloudformation')
-    res = cfn.describe_stacks(StackName=stack_name)
+    res = cfn.describe_stacks(StackName=stack_arn)
     if res['Stacks'][0]['StackStatus']=="DELETE_COMPLETE":
-        print(f"Stack {stack_name} does not exist")
+        print(f"Stack {stack_arn} does not exist")
         return {"stack_status":"not exist"}    
     else:
-        print(f"Stack {stack_name} exists")
+        print(f"Stack {stack_arn} exists")
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         dynamodb = boto3.resource('dynamodb')
         exec_table = dynamodb.Table(os.getenv('EXEC_DB'))
@@ -40,6 +40,7 @@ def handler(event, context):
             "clusterName":stack_name
         }
         return out
+
 
 
 
