@@ -69,7 +69,7 @@ class DataStore(NestedStack):
                 type=dynamodb.AttributeType.STRING
             ),
             sort_key=dynamodb.Attribute(
-                name="ftime",
+                name="receive_time",
                 type=dynamodb.AttributeType.STRING
             ),
             removal_policy=core.RemovalPolicy.DESTROY,
