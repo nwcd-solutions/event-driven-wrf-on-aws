@@ -12,6 +12,7 @@ from nwp.statemachines import StepFunction
 from npw.apigateway import ApiGateway
 from npw.datastore import DataStore
 from npw.bucket import Bucket
+from npw.webapp import WebApp
 class Root(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
@@ -42,7 +43,7 @@ class Root(Stack):
        
         api = ApiGateway(self,"api",datastore=datastore ,bucket=bucket.outputs.value_as_string,layer=layer)
         api.add_dependency(sf)
-
+        webapp = WebApp(self,"webapplication")
 
     @property
     def outputs(self):
