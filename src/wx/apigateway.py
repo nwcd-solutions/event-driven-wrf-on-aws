@@ -70,7 +70,7 @@ class ApiGateway(NestedStack):
                 "DEPLOYMENT_TYPE":"production",
                 "PATH":"/opt/node/bin:${PATH}",
                 "PYTHONPATH":"/opt/python/lib",
-                "WRFCLOUD_BUCKET":""
+                "WRFCLOUD_BUCKET":bucket_name
             },
             log_retention=logs.RetentionDays.ONE_DAY,
             role  =domain_service_handler_role,
