@@ -1,0 +1,66 @@
+{
+  "name": "my-amplify-app",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@aws-amplify/geo": "^3.0.6",
+    "@aws-amplify/ui-react": "^6.0.3",
+    "@aws-amplify/ui-react-geo": "^2.0.3",
+    "@aws/amazon-location-utilities-auth-helper": "^1.0.3",
+    "@faker-js/faker": "^8.3.1",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/base-64": "^1.0.2",
+    "@types/gzip-js": "^0.3.5",
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.18.65",
+    "@types/react": "^18.2.38",
+    "@types/react-dom": "^18.2.17",
+    "apexcharts": "^3.44.0",
+    "aws-amplify": "^6.0.5",
+    "base-64": "^1.0.0",
+    "bootstrap": "^5.3.2",
+    "gzip-js": "^0.3.2",
+    "install": "^0.13.0",
+    "maplibre-gl": "^3.6.2",
+    "mini.css": "^3.0.1",
+    "npm": "^10.2.4",
+    "react": "^18.2.0",
+    "react-apexcharts": "^1.4.1",
+    "react-bootstrap": "^2.9.1",
+    "react-dom": "^18.2.0",
+    "react-icons": "^4.12.0",
+    "react-map-gl": "^7.1.6",
+    "react-router-dom": "^6.20.0",
+    "react-scripts": "5.0.1",
+    "typescript": "^4.9.5",
+    "uninstall": "^0.0.0",
+    "uuid": "^9.0.1",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
