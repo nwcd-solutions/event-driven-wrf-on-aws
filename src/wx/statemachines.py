@@ -25,6 +25,7 @@ class StepFunction (NestedStack):
         bucket_name = kwargs["bucket"]
         vpc = kwargs["vpc"]
         datastore = kwargs["datastore"]
+        layer = kwargs["layer"]
         cluster_name = "wx-pcluster001"
        
         purl = Fn.import_value("ParallelClusterApiInvokeUrl")
