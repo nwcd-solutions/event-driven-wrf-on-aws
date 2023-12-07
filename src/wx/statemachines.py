@@ -62,7 +62,7 @@ class StepFunction (NestedStack):
         #----------------------------------------------------------------------------------------------
         # Create a DynamoDB table to store parameters of Domain and Step function execution record
         #----------------------------------------------------------------------------------------------
-        para_db = datastore.para_db      
+        domain_db = datastore.domain_db      
         exec_db = datastore.exec_db
         #--------------------------------------------------------------------------------------------
         # Create IAM policy for KMS ALL
@@ -156,7 +156,7 @@ class StepFunction (NestedStack):
                     "FORECAST_DAYS": fcst_days_ssm.parameter_name,
                     #"NUM_DOMAINS": domains,                    
                     "KMS_POLICY": kms_all_policy.managed_policy_arn,
-                    "PARA_DB": para_db.table_name,
+                    "PARA_DB": domain_db.table_name,
                     "EXEC_DB": exec_db.table_name,
                 },
                 handler="index.handler",
@@ -186,7 +186,7 @@ class StepFunction (NestedStack):
                 "dynamodb:*",  
             ],
             resources=[
-                para_db.table_arn,
+                domain_db.table_arn,
                 exec_db.table_arn              
             ],
             effect=iam.Effect.ALLOW))
@@ -217,7 +217,7 @@ class StepFunction (NestedStack):
                     "BUCKET_NAME": bucket_name,
                     #"DOMAINS_NUM": domains,
                     #"FORECAST_DAYS":fcst_days_ssm.parameter_name,
-                    "PARA_DB":para_db.table_name,
+                    "PARA_DB":domain_db.table_name,
                     #"EXEC_DB":exec_db.table_name,
                     "FTIME":ftime_ssm.parameter_name ,
                     "EXEC_ID": exec_id_ssm.parameter_name,
@@ -241,7 +241,7 @@ class StepFunction (NestedStack):
                 "dynamodb:*",  
             ],
             resources=[
-                para_db.table_arn,
+                domain_db.table_arn,
                 exec_db.table_arn              
             ],
             effect=iam.Effect.ALLOW))
@@ -758,7 +758,7 @@ class StepFunction (NestedStack):
                     "dynamodb:*",
                 ],
                 resources=[
-                    para_db.table_arn,
+                    domain_db.table_arn,
                     exec_db.table_arn
                 ],
                 effect=iam.Effect.ALLOW),
@@ -792,7 +792,7 @@ class StepFunction (NestedStack):
                 code=λ.Code.from_asset("./lambda/trigger"),
                 environment={
                     "SM_ARN": main_sf.attr_arn,
-                    "PARA_DB": para_db.table_name,
+                    "PARA_DB": domain_db.table_name,
                     "EXEC_DB": exec_db.table_name,
                     "KEY_STR": key_str_ssm.parameter_name,
                     "FCST_DAYS": fcst_days_ssm.parameter_name,
