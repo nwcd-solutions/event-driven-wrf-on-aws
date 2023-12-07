@@ -29,14 +29,21 @@ class Root(Stack):
         if (slurm_acct == "true") :
             slurmdb = SlurmDb(self, "slurmdbd", vpc=vpc.outputs)
             slurmdb.add_dependency(vpc)
-
-        sf = StepFunction(self, "workflow", vpc=vpc.outputs, bucket=bucket_name.value_as_string, datastore=datastore)
+            
+        layer = λ.LayerVersion(self, "lambda_layer",
+                compatible_runtimes=[λ.Runtime.PYTHON_3_9],
+                code=λ.Code.from_asset("./layer.zip"),
+                layer_version_name="wx_layer",
+                description="WX Lambda Layer",
+            )
+        
+        sf = StepFunction(self, "workflow", vpc=vpc.outputs, bucket=bucket_name.value_as_string, datastore=datastore,layer=layer)
         sf.add_dependency(pcluster_api)  
         if (slurm_acct == "true") :
             sf.add_dependency(slurmdb)
         sf.add_dependency(vpc)
        
-        api = ApiGateway(self,"api",domain_db=datastore.domain_db,bucket=bucket_name.value_as_string)
+        api = ApiGateway(self,"api",domain_db=datastore.domain_db,bucket=bucket_name.value_as_string,layer=layer)
         api.add_dependency(sf)
 
 
