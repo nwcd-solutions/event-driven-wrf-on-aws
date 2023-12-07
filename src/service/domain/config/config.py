@@ -16,10 +16,10 @@ class WrfConfig:
     """
     # list of all fields supported
     ALL_KEYS: List[str] = ['name', 'description', 'wrf_namelist', 'wps_namelist', 'cores',
-                           's3_key_geo_em', 's3_key_wrf_namelist', 's3_key_wps_namelist']
+                           's3_key_geo_em', 's3_key_wrf_namelist', 's3_key_wps_namelist','s3_key_wrf_bk_namelist']
 
     # list of fields to remove from the data
-    SANITIZE_KEYS: List[str] = ['s3_key_geo_em', 's3_key_wrf_namelist', 's3_key_wps_namelist']
+    SANITIZE_KEYS: List[str] = ['s3_key_geo_em', 's3_key_wrf_namelist', 's3_key_wps_namelist','s3_key_wrf_bk_namelist']
 
     # define a Domain type to store grid dimensions of a domain
     Domain = namedtuple('Domain', 'nx ny')
@@ -33,6 +33,7 @@ class WrfConfig:
         self.description: Union[str, None] = None
         self.wrf_namelist: Union[str, None] = None
         self.wps_namelist: Union[str, None] = None
+        self.wrf_bk_namelist: Union[str, None] = None
         self._domain_center: Union[LatLonPoint, None] = None
         self._domain_size_ew_meters: Union[int, None] = None
         self._domain_size_ns_meters: Union[int, None] = None
@@ -53,6 +54,7 @@ class WrfConfig:
             's3_key_geo_em': self.s3_key_geo_em,
             's3_key_wrf_namelist': self.s3_key_wrf_namelist,
             's3_key_wps_namelist': self.s3_key_wps_namelist,
+            's3_key_wrf_bk_namelist': self.s3_key_wrf_bk_namelist,
             'wrf_namelist': self.wrf_namelist,
             'wps_namelist': self.wps_namelist,
             'domain_center': self.domain_center.data if self.domain_center is not None else None,
@@ -69,6 +71,7 @@ class WrfConfig:
         self.name = data['name'] if 'name' in data else None
         self.description = data['description'] if 'description' in data else None
         self.wrf_namelist = data['wrf_namelist'] if 'wrf_namelist' in data else None
+        self.wrf_bk_namelist = data['wrf_bk_namelist'] if 'wrf_bk_namelist' in data else None
         self.wps_namelist = data['wps_namelist'] if 'wps_namelist' in data else None
         self.domain_center = LatLonPoint(data['domain_center']) if 'domain_center' in data else None
         self.domain_size = data['domain_size'] if 'domain_size' in data else None
@@ -101,6 +104,14 @@ class WrfConfig:
         """
         return f'configurations/{self.name}/namelist.input'
 
+    @property
+    def s3_key_wrf_bk_namelist(self) -> str:
+        """
+        Get the S3 key for the wrf bakcup namelist
+        :return: S3 key
+        """
+        return f'configurations/{self.name}/namelist.input.bk'
+        
     @property
     def s3_key_wps_namelist(self) -> str:
         """
@@ -184,8 +195,8 @@ class WrfConfig:
             # parse the WPS namelist content
             wps_namelist = f90nml.reads(self.wps_namelist)
             geogrid = wps_namelist.get('geogrid')
-            center_lat: float = geogrid.get('ref_lat', 0)
-            center_lon: float = geogrid.get('ref_lon', 0)
+            center_lat: float = geogrid.get('ref_lat', 4)
+            center_lon: float = geogrid.get('ref_lon', 4)
             projection: str = geogrid.get('map_proj', 'mercator')
             dx: int = geogrid.get('dx', 0)
             dy: int = geogrid.get('dy', 0)
