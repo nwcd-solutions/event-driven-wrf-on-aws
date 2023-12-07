@@ -13,7 +13,7 @@ class ApiGateway(NestedStack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id)
         bucket_name = kwargs["bucket"]
-        para_db = kwargs["para_db"]
+        domain_db = kwargs["domain_db"]
         #---------------------------------------------------------------------------------------------
         # Create a Cognito User Pool
         #---------------------------------------------------------------------------------------------
@@ -38,7 +38,7 @@ class ApiGateway(NestedStack):
         )
 
         # Create a Lambda function
-        para_db_handler_policy_doc = iam.PolicyDocument(statements=[
+        domain_service_handler_policy_doc = iam.PolicyDocument(statements=[
             iam.PolicyStatement(
                 actions=["s3:*"],
                 resources=["*"],
@@ -48,7 +48,7 @@ class ApiGateway(NestedStack):
                 resources=["*"],
                 effect=iam.Effect.ALLOW),
         ])
-        para_db_handler_role = iam.Role(self, "para_db_handler_Role",
+        domain_service_handler_role = iam.Role(self, "domain_service_handler_Role",
             assumed_by=iam.CompositePrincipal(
                 iam.ServicePrincipal("lambda.amazonaws.com"),
                 iam.ServicePrincipal("sts.amazonaws.com"),
@@ -58,16 +58,16 @@ class ApiGateway(NestedStack):
                 iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole"),
                 iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaVPCAccessExecutionRole"),
                 ],
-            inline_policies={"service_lambda": para_db_handler_policy_doc},
+            inline_policies={"service_lambda": domain_service_handler_policy_doc},
         )
 
-        para_db_handler = _lambda.Function(self,"para_db_op",
+        domain_service_handler = _lambda.Function(self,"domain_service",
             code=_lambda.Code.from_asset("./service/paradb"),
             environment={
-                "PARA_DB": para_db.table_name,
+                "DOAMIN_DB": domain_db.table_name,
             },
             log_retention=logs.RetentionDays.ONE_DAY,
-            role  =para_db_handler_role,
+            role  =domain_service_handler_role,
             runtime = _lambda.Runtime.PYTHON_3_9,
             handler = "index.handler",
         )
@@ -102,7 +102,7 @@ class ApiGateway(NestedStack):
                 iam.PolicyStatement(
                     actions=['lambda:InvokeFunction'],
                     resources=[
-                        para_db_handler.function_arn,
+                        domain_service_handler.function_arn,
                     ]
                 )
             ]
@@ -145,7 +145,7 @@ class ApiGateway(NestedStack):
         )
         any_method = resource.add_method(
             "GET",
-            apigw.LambdaIntegration(para_db_handler),
+            apigw.LambdaIntegration(domain_service_handler),
             authorizer=authorizer,
         )
 
