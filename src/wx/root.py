@@ -2,9 +2,8 @@
 # SPDX-License-Identifier: MIT-0
 
 from aws_cdk import (
-    Aws, CfnOutput, CfnParameter, Duration, Fn, NestedStack, Stack, Tags
+    Aws, CfnOutput, CfnParameter, Duration, Fn, NestedStack, Stack, Tags, aws_lambda as λ,
 )
-
 from constructs import Construct
 from wx.network import Vpc
 from wx.pclusterapi import ParallelClusterApi
@@ -12,7 +11,7 @@ from wx.slurmdb import SlurmDb
 from wx.statemachines import StepFunction
 from wx.apigateway import ApiGateway
 from wx.datastore import DataStore
-
+from wx.bucket import Bucket
 class Root(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
@@ -22,7 +21,7 @@ class Root(Stack):
             description="The name of the Amazon S3 bucket where the forecast files will be stored.")
 
         slurm_acct= CfnParameter(self, "SlurmAcct",type="String", default="false",description="whether slurm account is neccessary")
-
+        bucket = Bucket(self,"bucket")     
         vpc = Vpc(self, "vpc")
         datastore = DataStore(self, "datastore")
         pcluster_api = ParallelClusterApi(self, "parallel-cluster-api")
