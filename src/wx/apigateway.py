@@ -13,8 +13,8 @@ class ApiGateway(NestedStack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id)
         bucket_name = kwargs["bucket"]
-        domain_db = kwargs["domain_db"]
         layer = kwargs["layer"]
+        datastore = kwargs["datastore"]
         #---------------------------------------------------------------------------------------------
         # Create a Cognito User Pool
         #---------------------------------------------------------------------------------------------
@@ -66,7 +66,7 @@ class ApiGateway(NestedStack):
         domain_service_handler = _lambda.Function(self,"domain_service",
             code=_lambda.Code.from_asset("./service/domain"),
             environment={
-                "DOAMIN_DB": domain_db.table_name,
+                "DOAMIN_DB": datastore.domain_db.table_name,
                 "DEPLOYMENT_TYPE":"production",
                 "PATH":"/opt/node/bin:${PATH}",
                 "PYTHONPATH":"/opt/python/lib",
@@ -106,8 +106,8 @@ class ApiGateway(NestedStack):
         parameter_service_handler = _lambda.Function(self,"parameter_service",
             code=_lambda.Code.from_asset("./service/parameter"),
             environment={
-                "AUTO_MODE": domain_db.table_name,
-                "PARAS_LIST":"production",
+                "AUTO_MODE": datastore.ssm_auto_mode,
+                "PARAS_LIST":datastore..ssm_fcst_days,
             },
             log_retention=logs.RetentionDays.ONE_DAY,
             role  = parameter_service_handler_role,
