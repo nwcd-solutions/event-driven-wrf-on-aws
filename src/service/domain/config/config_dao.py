@@ -37,8 +37,6 @@ class ConfigDao(DynamoDao):
         # get the endpoint URL, but do not overwrite the local argument
         if endpoint_url is None and 'ENDPOINT_URL' in os.environ:
             endpoint_url = os.environ['ENDPOINT_URL']
-        print(table_name)
-        print(endpoint_url)
         # call the super constructor
         super().__init__(table_name, key_fields, endpoint_url)
 
@@ -58,6 +56,9 @@ class ConfigDao(DynamoDao):
         if 'wrf_namelist' in config_data:
             wrf_namelist: str = config_data.pop('wrf_namelist')
             ok = ok and self._save_namelist(config.s3_key_wrf_namelist, wrf_namelist)
+        if 'wrf_bk_namelist' in config_data:
+            wrf_bk_namelist: str = config_data.pop('wrf_bk_namelist')
+            ok = ok and self._save_namelist(config.s3_key_wrf_bk_namelist, wrf_bk_namelist)
         if 'wps_namelist' in config_data:
             wps_namelist: str = config_data.pop('wps_namelist')
             ok = ok and self._save_namelist(config.s3_key_wps_namelist, wps_namelist)
@@ -73,10 +74,10 @@ class ConfigDao(DynamoDao):
         """
         # build the database key
         key = {'name': name}
-        print(name)
+
         # get the item with the key
         data = super().get_item(key)
-        print(data)
+
         # handle the case where the key is not found
         if data is None:
             return None
@@ -86,6 +87,7 @@ class ConfigDao(DynamoDao):
 
         # load the namelists from S3
         self._load_namelist(config, config.s3_key_wrf_namelist)
+        self._load_namelist(config, config.s3_key_wrf_bk_namelist)
         self._load_namelist(config, config.s3_key_wps_namelist)
 
         return config
@@ -99,11 +101,11 @@ class ConfigDao(DynamoDao):
         configs: List[WrfConfig] = [WrfConfig(item) for item in super().get_all_items()]
 
         # Load namelists from S3
-        tpe = ThreadPoolExecutor(max_workers=16)
-        futures: List[Future] = [tpe.submit(self._load_namelist, config, config.s3_key_wrf_namelist) for config in configs]
-        futures += [tpe.submit(self._load_namelist, config, config.s3_key_wps_namelist) for config in configs]
-        for future in futures:
-            future.result()
+        #tpe = ThreadPoolExecutor(max_workers=16)
+        #futures: List[Future] = [tpe.submit(self._load_namelist, config, config.s3_key_wrf_namelist) for config in configs]
+        #futures += [tpe.submit(self._load_namelist, config, config.s3_key_wps_namelist) for config in configs]
+        #for future in futures:
+        #    future.result()
 
         return configs
 
@@ -123,6 +125,9 @@ class ConfigDao(DynamoDao):
         if 'wrf_namelist' in config_data:
             wrf_namelist: str = config_data.pop('wrf_namelist')
             ok = ok and self._save_namelist(config.s3_key_wrf_namelist, wrf_namelist)
+        if 'wrf_bk_namelist' in config_data:
+            wrf_bk_namelist: str = config_data.pop('wrf_bk_namelist')
+            ok = ok and self._save_namelist(config.s3_key_wrf_bk_namelist, wrf_bk_namelist)
         if 'wps_namelist' in config_data:
             wps_namelist: str = config_data.pop('wps_namelist')
             ok = ok and self._save_namelist(config.s3_key_wps_namelist, wps_namelist)
@@ -181,18 +186,18 @@ class ConfigDao(DynamoDao):
         """
         # get the bucket name from the environment
         bucket = os.environ['WRFCLOUD_BUCKET']
-        print(bucket)
-        print(namelist_key)
+  
         # load the namelist into the config data
         try:
             s3 = get_aws_session().client('s3')
             data: str = s3.get_object(Bucket=bucket, Key=namelist_key)['Body'].read().decode()
-            print("data")
-            print(data)
+
             if namelist_key.endswith('namelist.input'):
                 config.wrf_namelist = data
             elif namelist_key.endswith('namelist.wps'):
                 config.wps_namelist = data
+            elif namelist_key.endswith('namelist.input.bk'):
+                config.wrf_bk_namelist = data
         except Exception as e:
             self.log.error(f'Failed to read namelist from S3. s3://{bucket}/{namelist_key}', e)
             return False
