@@ -36,7 +36,7 @@ class Root(Stack):
             sf.add_dependency(slurmdb)
         sf.add_dependency(vpc)
        
-        api = ApiGateway(self,"api",para_db=datastore.para_db,bucket=bucket_name.value_as_string)
+        api = ApiGateway(self,"api",domain_db=datastore.domain_db,bucket=bucket_name.value_as_string)
         api.add_dependency(sf)
 
 
