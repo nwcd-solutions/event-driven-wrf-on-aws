@@ -25,18 +25,14 @@ def handler(event, context):
     print(event)
     operation = event['httpMethod']
     if operation == 'GET':
-        if 'configuration_name' not in event['body']['data']:
+        if event['queryStringParameters'] is None or  ('configuration_name' not in event['queryStringParameters']):
             try:
                 configs = get_all_configs_in_system()
-                response['model_configs'] = [config.sanitized_data for config in configs]
-                body['ok']=True
-                body['data']=response
-                print("body content")
-                print(body)
+                response = [config.data for config in configs]
                 return {
                     'statusCode': 200,
                     'isBase64Encoded': True,
-                    'body': base64.b64encode(gzip.compress(json.dumps(body).encode())),
+                    'body': base64.b64encode(gzip.compress(json.dumps(response).encode())),
                     'headers': {
                         'Access-Control-Allow-Origin': '*',
                         'Content-Type': 'application/json',
@@ -54,16 +50,12 @@ def handler(event, context):
             }
         else:
             try:
-                config = get_config_from_system(event['body']['configuration_name'])
-                response['model_configs'] = config.sanitized_data 
-                body['ok']=True
-                body['data']=response
-                print("body content")
-                print(body)
+                config = get_config_from_system(event['queryStringParameters']['configuration_name'])
+                response = config.sanitized_data 
                 return {
                     'statusCode': 200,
                     'isBase64Encoded': True,
-                    'body': base64.b64encode(gzip.compress(json.dumps(body).encode())),
+                    'body': base64.b64encode(gzip.compress(json.dumps(response).encode())),
                     'headers': {
                         'Access-Control-Allow-Origin': '*',
                         'Content-Type': 'application/json',
@@ -81,7 +73,8 @@ def handler(event, context):
                 }
                 
     elif operation == 'POST':
-        body['ok'],body['errors'],body['data'] = CreateNewDomain(event['body']['data']['model_config'])
+        request=json.loads(event['body'])
+        body['ok'],body['errors'],body['data'] = CreateNewDomain(json.loads(request['data']['model_config']))
         if body['ok']:
             return {
                 'statusCode': 200,
@@ -101,7 +94,9 @@ def handler(event, context):
             }
             
     elif operation == 'PUT':
-        body['ok'],body['errors'],body['data'] = UpdateDomain(event['body']['data']['model_config'])
+
+        request=json.loads(event['body'])
+        body['ok'],body['errors'],body['data'] = UpdateDomain(json.loads(request['data']['model_config']))
         if body['ok']:
             return {
                 'statusCode': 200,
@@ -121,7 +116,7 @@ def handler(event, context):
             }
         
     elif operation == 'DELETE':
-        body['ok'],body['errors'],body['data'] = DeleteDomain(event['body']['data']['configuration_name'])
+        body['ok'],body['errors'],body['data'] = DeleteDomain(event['queryStringParameters']['configuration_name'])
         if body['ok']:
             return {
                 'statusCode': 200,
@@ -206,13 +201,11 @@ def UpdateDomain(request):
     try:
         # build a WrfConfig object
         config: WrfConfig = WrfConfig(request)
-
         # validate the configuration data
         if not config.validate():
             errors.append('Configuration is invalid.')
             ok = False
             return ok,errors,response
-
         # check if the configuration with the name already exists
         existing: WrfConfig = get_config_from_system(config.name)
         if existing is None:
