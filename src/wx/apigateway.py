@@ -36,8 +36,9 @@ class ApiGateway(NestedStack):
                 user_srp=True,
             ),
         )
-
+        #---------------------------------------------------------------------------------------------
         # Create a Lambda function
+        #---------------------------------------------------------------------------------------------
         domain_service_handler_policy_doc = iam.PolicyDocument(statements=[
             iam.PolicyStatement(
                 actions=["s3:*"],
@@ -62,17 +63,30 @@ class ApiGateway(NestedStack):
         )
 
         domain_service_handler = _lambda.Function(self,"domain_service",
-            code=_lambda.Code.from_asset("./service/paradb"),
+            code=_lambda.Code.from_asset("./service/domain"),
             environment={
                 "DOAMIN_DB": domain_db.table_name,
+                "DEPLOYMENT_TYPE":"production",
+                "PATH":"/opt/node/bin:${PATH}",
+                "PYTHONPATH":"/opt/python/lib",
+                "WRFCLOUD_BUCKET":""
             },
             log_retention=logs.RetentionDays.ONE_DAY,
             role  =domain_service_handler_role,
             runtime = _lambda.Runtime.PYTHON_3_9,
             handler = "index.handler",
+            layers=[],
+            timeout=Duration.seconds(30),
+            memory=1024,                                                  
         )
+        #---------------------------------------------------------------------------------------------
+        #
+        #---------------------------------------------------------------------------------------------
 
+
+        #---------------------------------------------------------------------------------------------
         # Create an API Gateway
+        #---------------------------------------------------------------------------------------------
         api = apigw.RestApi(
             self,
             "WrfAPIGateway",
