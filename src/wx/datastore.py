@@ -52,7 +52,7 @@ class DataStore(NestedStack):
         #----------------------------------------------------------------------------------------------
         # Create a DynamoDB table to store parameters of Domain and Step function execution record
         #----------------------------------------------------------------------------------------------
-        self.para_db = dynamodb.Table(
+        self.domain_db = dynamodb.Table(
             self, "Parameters_Table",
             partition_key=dynamodb.Attribute(
                 name="name",
