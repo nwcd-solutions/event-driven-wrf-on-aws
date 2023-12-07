@@ -2,7 +2,7 @@
 
 import aws_cdk as cdk
 
-from wx.root import Root
+from nwp.root import Root
 
 app = cdk.App()
 
