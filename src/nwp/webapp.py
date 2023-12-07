@@ -1,6 +1,7 @@
 from aws_cdk import (
     aws_cloudfront as cloudfront,
     aws_s3 as s3,
+    aws_location as location,
     core as cdk
 )
 
@@ -22,5 +23,10 @@ class WebApp(cdk.Construct):
         )
         master_branch = amplify_app.add_branch('master')
 
-
+        map = location.CfnMap(self, "DomainMap",
+            configuration=location.CfnMap.MapConfigurationProperty(
+                style="VectorEsriTopographic"
+            ),
+            map_name="DomainMap",
+        )
 
