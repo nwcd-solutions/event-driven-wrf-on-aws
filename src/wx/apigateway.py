@@ -77,7 +77,8 @@ class ApiGateway(NestedStack):
             handler = "index.handler",
             layers=[],
             timeout=Duration.seconds(30),
-            memory=1024,                                                  
+            memory=Size.mebibytes(1024),  
+            ephemeralStorageSize=Size.mebibytes(512),
         )
         #---------------------------------------------------------------------------------------------
         #
