@@ -106,8 +106,8 @@ class ApiGateway(NestedStack):
         parameter_service_handler = _lambda.Function(self,"parameter_service",
             code=_lambda.Code.from_asset("./service/parameter"),
             environment={
-                "AUTO_MODE": datastore.ssm_auto_mode,
-                "PARAS_LIST":datastore..ssm_fcst_days,
+                "AUTO_MODE": datastore.auto_mode_ssm,
+                "PARAS_LIST": [datastore.fcst_days_ssm, datastore.key_string_ssm, datastore.job_timeout_ssm]
             },
             log_retention=logs.RetentionDays.ONE_DAY,
             role  = parameter_service_handler_role,
@@ -154,13 +154,12 @@ class ApiGateway(NestedStack):
             ]
         )
         api_lambda_exec_policy.attach_to_role(api_lambda_exec_role)
+        #---------------------------------------------------------------------------------------------
+        # Create Domain Resource and methods
+        #---------------------------------------------------------------------------------------------
+        domain_resource = api.root.add_resource("domain")
 
-        # Create a Resource
-        resource = api.root.add_resource("domain")
-
-        # Create a Method
-
-        options_method  = resource.add_method(
+        options_method  = domain_resource.add_method(
             'OPTIONS',
             apigw.MockIntegration(
                 integration_responses=[{
@@ -190,8 +189,47 @@ class ApiGateway(NestedStack):
          
         )
         any_method = resource.add_method(
-            "GET",
+            "ANY",
             apigw.LambdaIntegration(domain_service_handler),
+            authorizer=authorizer,
+        )
+        #---------------------------------------------------------------------------------------------
+        # Create Parameter Resource and methods
+        #---------------------------------------------------------------------------------------------
+        parameter_resource = api.root.add_resource("parameter")
+
+        options_method  = parameter_resource.add_method(
+            'OPTIONS',
+            apigw.MockIntegration(
+                integration_responses=[{
+                    'statusCode': '200',
+                    'responseParameters': {
+                        #'method.response.header.Access-Control-Allow-Headers': "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+                        'method.response.header.Access-Control-Allow-Headers': "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,access-control-allow-headers,access-control-allow-origin'",
+                        'method.response.header.Access-Control-Allow-Origin': "'*'",
+                        'method.response.header.Access-Control-Allow-Methods': "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+                    },
+                }],
+                passthrough_behavior=apigw.PassthroughBehavior.WHEN_NO_MATCH,
+                credentials_role=api_lambda_exec_role,
+                request_templates={
+                    "application/json": "{\"statusCode\": 200}"
+                },
+            ),
+            method_responses=[{
+                'statusCode': '200',
+                'responseParameters': {
+                    'method.response.header.Access-Control-Allow-Headers': True,
+                    'method.response.header.Access-Control-Allow-Methods': True,
+                    'method.response.header.Access-Control-Allow-Origin': True
+                },
+            }],
+            request_parameters={'method.request.header.access-control-allow-origin':True}
+         
+        )
+        any_method = resource.add_method(
+            "ANY",
+            apigw.LambdaIntegration(parameter_service_handler),
             authorizer=authorizer,
         )
 
