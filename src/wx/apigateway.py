@@ -14,6 +14,7 @@ class ApiGateway(NestedStack):
         super().__init__(scope, construct_id)
         bucket_name = kwargs["bucket"]
         domain_db = kwargs["domain_db"]
+        layer = kwargs["layer"]
         #---------------------------------------------------------------------------------------------
         # Create a Cognito User Pool
         #---------------------------------------------------------------------------------------------
@@ -37,7 +38,7 @@ class ApiGateway(NestedStack):
             ),
         )
         #---------------------------------------------------------------------------------------------
-        # Create a Lambda function
+        # Create domain service Lambda functions
         #---------------------------------------------------------------------------------------------
         domain_service_handler_policy_doc = iam.PolicyDocument(statements=[
             iam.PolicyStatement(
@@ -75,15 +76,45 @@ class ApiGateway(NestedStack):
             role  =domain_service_handler_role,
             runtime = _lambda.Runtime.PYTHON_3_9,
             handler = "index.handler",
-            layers=[],
+            layers=[layer],
             timeout=Duration.seconds(30),
             memory=Size.mebibytes(1024),  
             ephemeralStorageSize=Size.mebibytes(512),
         )
         #---------------------------------------------------------------------------------------------
-        #
+        # Create Parameter Service Lambda fuction
         #---------------------------------------------------------------------------------------------
+        parameter_service_handler_policy_doc = iam.PolicyDocument(statements=[
+            iam.PolicyStatement(
+                actions=["ssm:*"],
+                resources=["*"],
+                effect=iam.Effect.ALLOW),
+        ])
+        parameter_service_handler_role = iam.Role(self, "parameter_service_handler_Role",
+            assumed_by=iam.CompositePrincipal(
+                iam.ServicePrincipal("lambda.amazonaws.com"),
+                iam.ServicePrincipal("sts.amazonaws.com"),
+            ),
+            description="CreateAPILambdaRole",
+            managed_policies=[
+                iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole"),
+                iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaVPCAccessExecutionRole"),
+                ],
+            inline_policies={"service_lambda": parameter_service_handler_policy_doc},
+        )
 
+        parameter_service_handler = _lambda.Function(self,"parameter_service",
+            code=_lambda.Code.from_asset("./service/parameter"),
+            environment={
+                "AUTO_MODE": domain_db.table_name,
+                "PARAS_LIST":"production",
+            },
+            log_retention=logs.RetentionDays.ONE_DAY,
+            role  = parameter_service_handler_role,
+            runtime = _lambda.Runtime.PYTHON_3_9,
+            handler = "index.handler",
+            layers=[layer],
+        )
 
         #---------------------------------------------------------------------------------------------
         # Create an API Gateway
