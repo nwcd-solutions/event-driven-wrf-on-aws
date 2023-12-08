@@ -2,12 +2,15 @@ from aws_cdk import (
     aws_cloudfront as cloudfront,
     aws_s3 as s3,
     aws_location as location,
-    core as cdk
-)
 
-class WebApp(cdk.Construct):
-    def __init__(self, scope: cdk.Construct, id: str, props: OwnerWebAppProps):
-        super().__init__(scope, id)
+)
+from constructs import Construct
+
+class WebApp(NestedStack):
+
+    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+        super().__init__(scope, construct_id)
+
 
         amplify_react_sample_repo = codecommit.Repository(
             self, 'AmplifyReactTestRepo',
