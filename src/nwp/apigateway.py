@@ -37,7 +37,12 @@ class ApiGateway(NestedStack):
                 user_srp=True,
             ),
         )
-        cognito_domain = user_pool.add_domain("Domain")
+        cognito_domain = user_pool.add_domain(
+            "Domain",
+            cognito_domain=cognito.CognitoDomainOptions(
+                domain_prefix="nwp-nwcd"
+            )
+        )
         #---------------------------------------------------------------------------------------------
         # Create domain service Lambda functions
         #---------------------------------------------------------------------------------------------
