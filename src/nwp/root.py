@@ -35,13 +35,13 @@ class Root(Stack):
                 description="WX Lambda Layer",
             )
         
-        sf = StepFunction(self, "workflow", vpc=vpc.outputs, bucket=bucket.outputs.value_as_string, datastore=datastore,layer=layer)
+        sf = StepFunction(self, "workflow", vpc=vpc.outputs, bucket=bucket.outputs, datastore=datastore,layer=layer)
         sf.add_dependency(pcluster_api)  
         if (slurm_acct == "true") :
             sf.add_dependency(slurmdb)
         sf.add_dependency(vpc)
        
-        api = ApiGateway(self,"api",datastore=datastore ,bucket=bucket.outputs.value_as_string,layer=layer)
+        api = ApiGateway(self,"api",datastore=datastore ,bucket=bucket.outputs,layer=layer)
         api.add_dependency(sf)
         webapp = WebApp(self,"webapplication")
 
