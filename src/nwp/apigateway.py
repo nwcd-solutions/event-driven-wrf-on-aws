@@ -5,7 +5,7 @@ from aws_cdk import (
     aws_iam as iam,
     aws_logs as logs,
     aws_s3 as s3,
-    CfnOutput, NestedStack, Tags
+    CfnOutput, NestedStack, Tags, Duration, Size
 )
 from constructs import Construct
 
@@ -77,9 +77,8 @@ class ApiGateway(NestedStack):
             runtime = _lambda.Runtime.PYTHON_3_9,
             handler = "index.handler",
             layers=[layer],
-            timeout=Duration.seconds(30),
-            memory=Size.mebibytes(1024),  
-            ephemeralStorageSize=Size.mebibytes(512),
+            timeout= Duration.seconds(30),
+            memory= 1024, 
         )
         #---------------------------------------------------------------------------------------------
         # Create Parameter Service Lambda fuction
