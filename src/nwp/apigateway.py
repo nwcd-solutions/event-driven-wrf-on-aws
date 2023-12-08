@@ -13,6 +13,7 @@ class ApiGateway(NestedStack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id)
         bucket_name = kwargs["bucket"]
+        domain_name = kwargs["bucket"]
         layer = kwargs["layer"]
         datastore = kwargs["datastore"]
         #---------------------------------------------------------------------------------------------
@@ -48,7 +49,7 @@ class ApiGateway(NestedStack):
         cognito_domain = user_pool.add_domain(
             "Domain",
             cognito_domain=cognito.CognitoDomainOptions(
-                domain_prefix="nwp-nwcd"
+                domain_prefix = domain_name
             )
         )
         #---------------------------------------------------------------------------------------------
