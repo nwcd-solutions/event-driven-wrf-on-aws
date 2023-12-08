@@ -22,6 +22,7 @@ class WebApp(NestedStack):
         # Part 2 - Creation of the Amplify Application
         amplify_app = amplify.CfnApp(
             self, 'nwp-web-app',
+            name = 'nwp-web-app',
             repository=amplify_react_sample_repo,
         )
         master_branch = amplify_app.add_branch('master')
