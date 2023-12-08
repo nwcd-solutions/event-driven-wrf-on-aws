@@ -124,7 +124,7 @@ class ApiGateway(NestedStack):
             code=_lambda.Code.from_asset("./service/parameter"),
             environment={
                 "AUTO_MODE": datastore.auto_mode_ssm.parameter_name,
-                "PARAS_LIST": f"datastore.fcst_days_ssm.parameter_name,datastore.key_string_ssm.parameter_name,datastore.job_timeout_ssm.parameter_name"
+                "PARAS_LIST": f"{datastore.fcst_days_ssm.parameter_name},{datastore.key_string_ssm.parameter_name},{datastore.job_timeout_ssm.parameter_name}"
             },
             log_retention=logs.RetentionDays.ONE_DAY,
             role  = parameter_service_handler_role,
