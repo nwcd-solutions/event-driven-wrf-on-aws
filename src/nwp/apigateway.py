@@ -37,7 +37,7 @@ class ApiGateway(NestedStack):
                 user_srp=True,
             ),
         )
-        cognito_domain = userpool.add_domain("Domain")
+        cognito_domain = user_pool.add_domain("Domain")
         #---------------------------------------------------------------------------------------------
         # Create domain service Lambda functions
         #---------------------------------------------------------------------------------------------
