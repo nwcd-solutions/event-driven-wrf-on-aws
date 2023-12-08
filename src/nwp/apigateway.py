@@ -54,7 +54,7 @@ class ApiGateway(NestedStack):
                 domain_prefix = domain_name
             )
         )
-        cognito_domain = apply_removal_policy(core.RemovalPolicy.DESTROY)
+        cognito_domain.apply_removal_policy(core.RemovalPolicy.DESTROY)
         #---------------------------------------------------------------------------------------------
         # Create domain service Lambda functions
         #---------------------------------------------------------------------------------------------
