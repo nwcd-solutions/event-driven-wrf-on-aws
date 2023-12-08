@@ -2,6 +2,7 @@ from aws_cdk import (
     aws_s3 as s3,
     CfnOutput, NestedStack, Tags
 )
+import aws_cdk as core
 from constructs import Construct
 import random
 import string
