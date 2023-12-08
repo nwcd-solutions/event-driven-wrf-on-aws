@@ -3,7 +3,7 @@ from aws_cdk import (
     aws_s3 as s3,
     aws_location as location,
     aws_codecommit as codecommit,
-    aws_amplify as amplify,
+    aws_amplify_alpha as amplify,
     CfnOutput, NestedStack, Tags
 )
 from constructs import Construct
