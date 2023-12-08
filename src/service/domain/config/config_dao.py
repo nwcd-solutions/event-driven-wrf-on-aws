@@ -29,7 +29,7 @@ class ConfigDao(DynamoDao):
         #self.table_definition = yaml.safe_load(pkgutil.get_data('wrfcloud', 'config/table.yaml'))
 
         # get the table name
-        table_name = os.getenv('PARA_DB')
+        table_name = os.getenv('DOMAIN_DB')
 
         # get the key fields for the table
         key_fields = ['name']
