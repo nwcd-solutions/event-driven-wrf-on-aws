@@ -87,7 +87,7 @@ class ApiGateway(NestedStack):
                 "DOAMIN_DB": datastore.domain_db.table_name,
                 "DEPLOYMENT_TYPE":"production",
                 "PATH":"/opt/node/bin:${PATH}",
-                "PYTHONPATH":"/opt/python/lib",
+                "PYTHONPATH":"/opt/python",
                 "WRFCLOUD_BUCKET":bucket_name
             },
             log_retention=logs.RetentionDays.ONE_DAY,
@@ -124,7 +124,8 @@ class ApiGateway(NestedStack):
             code=_lambda.Code.from_asset("./service/parameter"),
             environment={
                 "AUTO_MODE": datastore.auto_mode_ssm.parameter_name,
-                "PARAS_LIST": f"{datastore.fcst_days_ssm.parameter_name},{datastore.key_str_ssm.parameter_name},{datastore.job_timeout_ssm.parameter_name}"
+                "PARAS_LIST": f"{datastore.fcst_days_ssm.parameter_name},{datastore.key_str_ssm.parameter_name},{datastore.job_timeout_ssm.parameter_name}",
+                "PYTHONPATH":"/opt/python",
             },
             log_retention=logs.RetentionDays.ONE_DAY,
             role  = parameter_service_handler_role,
