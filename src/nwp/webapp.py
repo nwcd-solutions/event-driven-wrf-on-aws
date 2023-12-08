@@ -2,6 +2,7 @@ from aws_cdk import (
     aws_cloudfront as cloudfront,
     aws_s3 as s3,
     aws_location as location,
+    aws_codecommit as codecommit,
     CfnOutput, NestedStack, Tags
 )
 from constructs import Construct
