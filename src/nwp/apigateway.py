@@ -105,8 +105,8 @@ class ApiGateway(NestedStack):
         parameter_service_handler = _lambda.Function(self,"parameter_service",
             code=_lambda.Code.from_asset("./service/parameter"),
             environment={
-                "AUTO_MODE": datastore.auto_mode_ssm,
-                "PARAS_LIST": [datastore.fcst_days_ssm, datastore.key_string_ssm, datastore.job_timeout_ssm]
+                "AUTO_MODE": datastore.auto_mode_ssm.parameter_name,
+                "PARAS_LIST": f"datastore.fcst_days_ssm.parameter_name,datastore.key_string_ssm.parameter_name,datastore.job_timeout_ssm.parameter_name"
             },
             log_retention=logs.RetentionDays.ONE_DAY,
             role  = parameter_service_handler_role,
@@ -158,7 +158,7 @@ class ApiGateway(NestedStack):
         #---------------------------------------------------------------------------------------------
         domain_resource = api.root.add_resource("domain")
 
-        options_method  = domain_resource.add_method(
+        domain_options_method  = domain_resource.add_method(
             'OPTIONS',
             apigw.MockIntegration(
                 integration_responses=[{
@@ -187,7 +187,7 @@ class ApiGateway(NestedStack):
             request_parameters={'method.request.header.access-control-allow-origin':True}
          
         )
-        any_method = resource.add_method(
+        domain_any_method = domain_resource.add_method(
             "ANY",
             apigw.LambdaIntegration(domain_service_handler),
             authorizer=authorizer,
@@ -197,7 +197,7 @@ class ApiGateway(NestedStack):
         #---------------------------------------------------------------------------------------------
         parameter_resource = api.root.add_resource("parameter")
 
-        options_method  = parameter_resource.add_method(
+        parameter_options_method  = parameter_resource.add_method(
             'OPTIONS',
             apigw.MockIntegration(
                 integration_responses=[{
@@ -226,7 +226,7 @@ class ApiGateway(NestedStack):
             request_parameters={'method.request.header.access-control-allow-origin':True}
          
         )
-        any_method = resource.add_method(
+        parameter_any_method = parameter_resource.add_method(
             "ANY",
             apigw.LambdaIntegration(parameter_service_handler),
             authorizer=authorizer,
