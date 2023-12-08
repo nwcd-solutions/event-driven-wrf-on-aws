@@ -25,7 +25,7 @@ class WebApp(NestedStack):
             name = 'nwp-web-app',
             repository=amplify_react_sample_repo.repository_name,
         )
-        master_branch = amplify_app.add_branch('master')
+        #master_branch = amplify_app.add_branch('master')
 
         map = location.CfnMap(self, "DomainMap",
             configuration=location.CfnMap.MapConfigurationProperty(
