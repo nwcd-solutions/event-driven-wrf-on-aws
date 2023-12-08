@@ -12,8 +12,7 @@ from config import delete_config_from_system
 from config import update_config_in_system
 from config import WrfConfig
 
-ddb = boto3.resource('dynamodb')
-table = ddb.Table(os.getenv('PARA_DB'))
+
 
 def handler(event, context):
     if not event['requestContext']['authorizer']:
