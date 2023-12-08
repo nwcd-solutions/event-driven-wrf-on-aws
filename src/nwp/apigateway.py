@@ -24,6 +24,7 @@ class ApiGateway(NestedStack):
             "WrfUserPool",
             #sign_in_type=cognito.SignInType.EMAIL,
             #auto_verified_attributes=[cognito.UserPoolAttribute.EMAIL],
+            removal_policy=core.RemovalPolicy.DESTROY,
         )
         #---------------------------------------------------------------------------------------------
         # Create a Cognito User Pool Client
