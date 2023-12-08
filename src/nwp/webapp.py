@@ -20,7 +20,7 @@ class WebApp(NestedStack):
             description='CodeCommit repository that will be used as the source repository for the sample react app and the cdk app',
         )
         # Part 2 - Creation of the Amplify Application
-        amplify_app = amplify.App(
+        amplify_app = amplify.CfnApp(
             self, 'nwp-web-app',
             repository=amplify_react_sample_repo,
         )
