@@ -13,6 +13,8 @@ from nwp.apigateway import ApiGateway
 from nwp.datastore import DataStore
 from nwp.bucket import Bucket
 from nwp.webapp import WebApp
+import random
+import string
 
 def generate_bucket_name():
     letters = string.ascii_lowercase
