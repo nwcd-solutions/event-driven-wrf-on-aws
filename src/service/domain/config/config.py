@@ -15,7 +15,7 @@ class WrfConfig:
     Class to contain data representing a WRF model configuration
     """
     # list of all fields supported
-    ALL_KEYS: List[str] = ['name', 'description', 'wrf_namelist', 'wps_namelist', 'cores',
+    ALL_KEYS: List[str] = ['name', 'description', 'wrf_namelist', 'wps_namelist', 'wrf_bk_namelist','cores',
                            's3_key_geo_em', 's3_key_wrf_namelist', 's3_key_wps_namelist','s3_key_wrf_bk_namelist']
 
     # list of fields to remove from the data
@@ -57,6 +57,7 @@ class WrfConfig:
             's3_key_wrf_bk_namelist': self.s3_key_wrf_bk_namelist,
             'wrf_namelist': self.wrf_namelist,
             'wps_namelist': self.wps_namelist,
+            'wrf_bk_namelist': self.wrf_bk_namelist,
             'domain_center': self.domain_center.data if self.domain_center is not None else None,
             'domain_size': self.domain_size if self.domain_size is not None else None,
             'cores': self._cores
