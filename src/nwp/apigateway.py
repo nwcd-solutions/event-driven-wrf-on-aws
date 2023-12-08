@@ -78,7 +78,7 @@ class ApiGateway(NestedStack):
             handler = "index.handler",
             layers=[layer],
             timeout= Duration.seconds(30),
-            memory= 1024, 
+            memory_size= 1024, 
         )
         #---------------------------------------------------------------------------------------------
         # Create Parameter Service Lambda fuction
