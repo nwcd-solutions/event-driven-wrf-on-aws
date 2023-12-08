@@ -84,7 +84,7 @@ class ApiGateway(NestedStack):
         domain_service_handler = _lambda.Function(self,"domain_service",
             code=_lambda.Code.from_asset("./service/domain"),
             environment={
-                "DOAMIN_DB": datastore.domain_db.table_name,
+                "DOMAIN_DB": datastore.domain_db.table_name,
                 "DEPLOYMENT_TYPE":"production",
                 "PATH":"/opt/node/bin:${PATH}",
                 "PYTHONPATH":"/opt/python",
