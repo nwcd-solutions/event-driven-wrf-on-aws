@@ -13,10 +13,10 @@ class Bucket(NestedStack):
 
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id)
-
+        bucket_name = kwargs["bucket_name"]
         self.bucket = s3.Bucket(
             self, 'NWPBucket',
-            bucket_name='nwp-'+generate_bucket_name(),
+            bucket_name = bucket_name,
             removal_policy=core.RemovalPolicy.DESTROY,
         )
 
