@@ -40,10 +40,10 @@ class ApiGateway(NestedStack):
                 user_srp=True,
             ),
             o_auth=cognito.OAuthSettings(
-                flows=cognito.OAuthFlows(
-                    authorization_code_grant=True
-                ),
-                scopes=[cognito.OAuthScope.OPENID],
+            #    flows=cognito.OAuthFlows(
+            #        authorization_code_grant=True
+            #    ),
+            #    scopes=[cognito.OAuthScope.OPENID],
                 callback_urls=["http://localhost:3000"],
                 logout_urls=["http://localhost:3000"]
             )
