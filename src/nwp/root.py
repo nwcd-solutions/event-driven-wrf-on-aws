@@ -9,10 +9,10 @@ from nwp.network import Vpc
 from nwp.pclusterapi import ParallelClusterApi
 from nwp.slurmdb import SlurmDb
 from nwp.statemachines import StepFunction
-from npw.apigateway import ApiGateway
-from npw.datastore import DataStore
-from npw.bucket import Bucket
-from npw.webapp import WebApp
+from nwp.apigateway import ApiGateway
+from nwp.datastore import DataStore
+from nwp.bucket import Bucket
+from nwp.webapp import WebApp
 class Root(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
