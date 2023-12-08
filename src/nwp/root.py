@@ -48,7 +48,7 @@ class Root(Stack):
        
         api = ApiGateway(self,"api",datastore=datastore ,bucket=f"nwp-{prefix_name}",layer=layer)
         api.add_dependency(sf)
-        webapp = WebApp(self,"webapplication",domain_name=f"nwp-{prefix_name}")
+        webapp = WebApp(self,"webapplication")
 
     @property
     def outputs(self):
