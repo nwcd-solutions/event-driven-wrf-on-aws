@@ -13,14 +13,19 @@ from nwp.apigateway import ApiGateway
 from nwp.datastore import DataStore
 from nwp.bucket import Bucket
 from nwp.webapp import WebApp
+
+def generate_bucket_name():
+    letters = string.ascii_lowercase
+    return ''.join(random.choice(letters) for i in range(10))
+
 class Root(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         slurm_acct= CfnParameter(self, "SlurmAcct",type="String", default="false",description="whether slurm account is neccessary")
-        
-        bucket = Bucket(self,"bucket")     
+        prefix_name = generate_bucket_name()
+        bucket = Bucket(self,"bucket",bucket_name=f"nwp-{prefix_name}")     
         vpc = Vpc(self, "vpc")
         datastore = DataStore(self, "datastore")
         pcluster_api = ParallelClusterApi(self, "parallel-cluster-api")
@@ -35,15 +40,15 @@ class Root(Stack):
                 description="WX Lambda Layer",
             )
         
-        sf = StepFunction(self, "workflow", vpc=vpc.outputs, bucket=bucket.outputs, datastore=datastore,layer=layer)
+        sf = StepFunction(self, "workflow", vpc=vpc.outputs, bucket=f"nwp-{prefix_name}", datastore=datastore,layer=layer)
         sf.add_dependency(pcluster_api)  
         if (slurm_acct == "true") :
             sf.add_dependency(slurmdb)
         sf.add_dependency(vpc)
        
-        api = ApiGateway(self,"api",datastore=datastore ,bucket=bucket.outputs,layer=layer)
+        api = ApiGateway(self,"api",datastore=datastore ,bucket=f"nwp-{prefix_name}",layer=layer)
         api.add_dependency(sf)
-        webapp = WebApp(self,"webapplication")
+        webapp = WebApp(self,"webapplication",domain_name=f"nwp-{prefix_name}")
 
     @property
     def outputs(self):
