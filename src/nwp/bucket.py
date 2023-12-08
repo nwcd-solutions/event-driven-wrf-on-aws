@@ -4,10 +4,6 @@ from aws_cdk import (
 )
 import aws_cdk as core
 from constructs import Construct
-import random
-import string
-
-
 
 class Bucket(NestedStack):
 
