@@ -144,7 +144,7 @@ class ConfigDao(DynamoDao):
         # delete the s3 objects
         ok = self._delete_namelist(config.s3_key_wrf_namelist)
         ok = ok and self._delete_namelist(config.s3_key_wps_namelist)
-
+        ok = ok and self._delete_namelist(config.s3_key_wrf_bk_namelist)
         # delete the dynamodb item
         return ok and super().delete_item({'name': config.name})
 
