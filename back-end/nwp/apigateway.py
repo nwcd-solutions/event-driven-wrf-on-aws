@@ -133,7 +133,41 @@ class ApiGateway(NestedStack):
             handler = "index.handler",
             layers=[layer],
         )
+        #---------------------------------------------------------------------------------------------
+        # Create Task Service Lambda fuction
+        #---------------------------------------------------------------------------------------------
+        task_service_handler_policy_doc = iam.PolicyDocument(statements=[
+            iam.PolicyStatement(
+                actions=["ssm:*"],
+                resources=["*"],
+                effect=iam.Effect.ALLOW),
+        ])
+        task_service_handler_role = iam.Role(self, "task_service_handler_Role",
+            assumed_by=iam.CompositePrincipal(
+                iam.ServicePrincipal("lambda.amazonaws.com"),
+                iam.ServicePrincipal("sts.amazonaws.com"),
+            ),
+            description="CreateAPILambdaRole",
+            managed_policies=[
+                iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole"),
+                iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaVPCAccessExecutionRole"),
+                ],
+            inline_policies={"service_lambda": task_service_handler_policy_doc},
+        )
 
+        task_service_handler = _lambda.Function(self,"task_service",
+            code=_lambda.Code.from_asset("./service/task"),
+            environment={
+                "AUTO_MODE": datastore.auto_mode_ssm.parameter_name,
+                "PARAS_LIST": f"{datastore.fcst_days_ssm.parameter_name},{datastore.key_str_ssm.parameter_name},{datastore.job_timeout_ssm.parameter_name}",
+                "PYTHONPATH":"/opt/python",
+            },
+            log_retention=logs.RetentionDays.ONE_DAY,
+            role  = parameter_service_handler_role,
+            runtime = _lambda.Runtime.PYTHON_3_9,
+            handler = "index.handler",
+            layers=[layer],
+        )
         #---------------------------------------------------------------------------------------------
         # Create an API Gateway
         #---------------------------------------------------------------------------------------------
