@@ -12,7 +12,8 @@ cd ..
 zip -r ../layer.zip python
 rm -rf python
 cd ..
-
+mkdir build
+zip -r build/console.zip console/*
 while true; do
     read -p "Do you want to use slurm accounting? (yes/no): " slurm_acct
     case $slurm_acct in
