@@ -20,7 +20,7 @@ class ApiGateway(NestedStack):
         #---------------------------------------------------------------------------------------------
         # Create a Cognito User Pool
         #---------------------------------------------------------------------------------------------
-        user_pool = cognito.UserPool(
+        self.user_pool = cognito.UserPool(
             self, 
             "WrfUserPool",
             #sign_in_type=cognito.SignInType.EMAIL,
@@ -33,7 +33,7 @@ class ApiGateway(NestedStack):
         user_pool_client = cognito.UserPoolClient(
             self,
             "WrfUserPoolClient",
-            user_pool=user_pool,
+            user_pool=self.user_pool,
             user_pool_client_name='wrf-web-app',
             auth_flows=cognito.AuthFlow(
                 user_password=True,
@@ -48,7 +48,7 @@ class ApiGateway(NestedStack):
                 logout_urls=["http://localhost:3000"]
             )
         )
-        cognito_domain = user_pool.add_domain(
+        cognito_domain = self.user_pool.add_domain(
             "Domain",
             cognito_domain=cognito.CognitoDomainOptions(
                 domain_prefix = domain_name
@@ -137,7 +137,7 @@ class ApiGateway(NestedStack):
         #---------------------------------------------------------------------------------------------
         # Create an API Gateway
         #---------------------------------------------------------------------------------------------
-        api = apigw.RestApi(
+        self.api = apigw.RestApi(
             self,
             "WrfAPIGateway",
             rest_api_name="WrfAPIGateway",
@@ -152,7 +152,7 @@ class ApiGateway(NestedStack):
         authorizer = apigw.CognitoUserPoolsAuthorizer(
             self,
             "Authorizer",
-            cognito_user_pools=[user_pool],
+            cognito_user_pools=[self.user_pool],
         )
         api_lambda_exec_role = iam.Role(
             self,
@@ -175,7 +175,7 @@ class ApiGateway(NestedStack):
         #---------------------------------------------------------------------------------------------
         # Create Domain Resource and methods
         #---------------------------------------------------------------------------------------------
-        domain_resource = api.root.add_resource("domain")
+        domain_resource = self.api.root.add_resource("domain")
 
         domain_options_method  = domain_resource.add_method(
             'OPTIONS',
@@ -214,7 +214,7 @@ class ApiGateway(NestedStack):
         #---------------------------------------------------------------------------------------------
         # Create Parameter Resource and methods
         #---------------------------------------------------------------------------------------------
-        parameter_resource = api.root.add_resource("parameter")
+        parameter_resource = self.api.root.add_resource("parameter")
 
         parameter_options_method  = parameter_resource.add_method(
             'OPTIONS',
