@@ -250,5 +250,43 @@ class ApiGateway(NestedStack):
             apigw.LambdaIntegration(parameter_service_handler),
             authorizer=authorizer,
         )
+        #---------------------------------------------------------------------------------------------
+        # Create Task Resource and methods
+        #---------------------------------------------------------------------------------------------
+        task_resource = self.api.root.add_resource("task")
 
+        task_options_method  = task_resource.add_method(
+            'OPTIONS',
+            apigw.MockIntegration(
+                integration_responses=[{
+                    'statusCode': '200',
+                    'responseParameters': {
+                        #'method.response.header.Access-Control-Allow-Headers': "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+                        'method.response.header.Access-Control-Allow-Headers': "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,access-control-allow-headers,access-control-allow-origin'",
+                        'method.response.header.Access-Control-Allow-Origin': "'*'",
+                        'method.response.header.Access-Control-Allow-Methods': "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+                    },
+                }],
+                passthrough_behavior=apigw.PassthroughBehavior.WHEN_NO_MATCH,
+                credentials_role=api_lambda_exec_role,
+                request_templates={
+                    "application/json": "{\"statusCode\": 200}"
+                },
+            ),
+            method_responses=[{
+                'statusCode': '200',
+                'responseParameters': {
+                    'method.response.header.Access-Control-Allow-Headers': True,
+                    'method.response.header.Access-Control-Allow-Methods': True,
+                    'method.response.header.Access-Control-Allow-Origin': True
+                },
+            }],
+            request_parameters={'method.request.header.access-control-allow-origin':True}
+         
+        )
+        task_any_method = task_resource.add_method(
+            "ANY",
+            apigw.LambdaIntegration(task_service_handler),
+            authorizer=authorizer,
+        )
 
