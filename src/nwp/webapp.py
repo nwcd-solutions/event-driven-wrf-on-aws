@@ -27,7 +27,7 @@ class WebApp(NestedStack):
         #)
         #master_branch = amplify_app.add_branch('master')
 
-        map = location.CfnMap(self, "DomainMap",
+        this.map = location.CfnMap(self, "DomainMap",
             configuration=location.CfnMap.MapConfigurationProperty(
                 style="VectorEsriTopographic"
             ),
