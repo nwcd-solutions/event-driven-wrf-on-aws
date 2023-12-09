@@ -55,7 +55,8 @@ class Root(Stack):
         self.cognito_domain = api.cognito_domain.domain_name
         #self.apigw_endpoint = api.api.
         webapp = WebApp(self,"webapplication")
-
+        CfnOutput(self, "BucketName", value=bucket.bucket_name)
+        CfnOutput(self, "cognito_userpool_id", value=api.user_pool.user_pool_id)
     @property
     def outputs(self):
         return self
