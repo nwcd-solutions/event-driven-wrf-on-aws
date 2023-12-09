@@ -4,10 +4,10 @@
 const config = {
     "aws_project_region": "<aws_region>",
     "aws_cognito_region": "<aws_region>",
-    "aws_user_pools_id": "<aws_user_pools_id>",
-    "aws_user_pools_web_client_id": "<aws_user_pools_web_client_id>",
+    "aws_user_pools_id": <aws_user_pools_id>,
+    "aws_user_pools_web_client_id": <aws_user_pools_web_client_id>,
     "oauth": {
-        "domain": "<cognito_domain>"
+        "domain": <cognito_domain>
     },
     "aws_cognito_username_attributes": [
         "EMAIL"
@@ -27,8 +27,8 @@ const config = {
     ],
     "aws_cloud_logic_custom": [
         {
-            "name": "<api_gateway_name>",
-            "endpoint": "<api_gateway_endpoint>",
+            "name": <api_gateway_name>,
+            "endpoint": <api_gateway_endpoint>,
             "region": "<aws_region>"
         }
     ],
@@ -41,7 +41,7 @@ const config = {
                 "style": "VectorEsriStreets"
               }
             },
-            "default": "<map_name>",
+            "default": <map_name>,
             "apikey":""
           }
         }
