@@ -41,7 +41,6 @@ export const baseConfig = {
 
 /// Navigation sidebar
 export const appNavs = [
-export const appNavs = [
   {
     eventKey: "dashboard",
     icon: <Icon as={MdDashboard} />,
