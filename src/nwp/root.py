@@ -61,8 +61,8 @@ class Root(Stack):
         CfnOutput(self, "cognito_domain", value=api.cognito_domain.domain_name)
         CfnOutput(self, "apigw_endpoint", value=api.api.url)
         CfnOutput(self, "apigw_name", value=api.api.rest_api_name)
-        CfnOutput(self, "location_map_name", value=api.webapp.map.map_name)
-        #CfnOutput(self, "location_api_key", value=api.webapp.map.)
+        CfnOutput(self, "location_map_name", value=webapp.map.map_name)
+        #CfnOutput(self, "location_api_key", value=webapp.map.)
     @property
     def outputs(self):
         return self
