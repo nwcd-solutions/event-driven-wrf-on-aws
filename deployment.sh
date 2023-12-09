@@ -32,7 +32,7 @@ cognito_domain=$(jq '.WRF.cognitodomain' outputs.json)
 apigw_endpoint=$(jq '.WRF.apigwendpoint' outputs.json)
 apigw_name=$(jq '.WRF.apigwname' outputs.json)
 location_map_name=$(jq '.WRF.locationmapname' outputs.json)
-rm layer.zip
+
 
 cd ../front-end
 cp aws-export.js console/src/
