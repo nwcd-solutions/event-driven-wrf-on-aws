@@ -55,6 +55,13 @@ class Root(Stack):
         self.cognito_domain = api.cognito_domain.domain_name
         #self.apigw_endpoint = api.api.
         webapp = WebApp(self,"webapplication")
+        with open('console/src/aws-export.js', 'r') as f:
+            filedata = f.read()
+
+        filedata = filedata.replace('<aws_user_pools_id>', api.user_pool.user_pool_id)
+
+        with open('console/src/aws-export.js', 'w') as f:
+            f.write(filedata)
 
         CfnOutput(self, "cognito_userpool_id", value=api.user_pool.user_pool_id)
         CfnOutput(self, "cognito_client_id", value=api.user_pool_client.user_pool_client_id)
