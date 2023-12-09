@@ -88,7 +88,7 @@ const Dashboard = () => {
     <>
       <View padding="1rem">
         <Heading color="#333" level={5} > Dashboard </Heading>
-      </View>>
+      </View>
       <View borderRadius="6px" maxWidth="100%" padding="0rem" minHeight="100vh">
         <Grid
           templateColumns={{ base: "1fr", large: "1fr 1fr 1fr" }}
