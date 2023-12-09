@@ -32,12 +32,12 @@ cognito_domain=$(jq '.WRF.cognitodomain' outputs.json)
 apigw_endpoint=$(jq '.WRF.apigwendpoint' outputs.json)
 apigw_name=$(jq '.WRF.apigwname' outputs.json)
 location_map_name=$(jq '.WRF.locationmapname' outputs.json)
-echo $cognito_userpool_id
-echo $cognito_client_id
-#sed -i "s/<aws_user_pools_id>/$cognito_userpool_id/g" console/src/aws-export.js
-#sed -i "s/<aws_user_pools_web_client_id>/$cognito_client_id/g" console/src/aws-export.js
-#sed -i "s/<aws_user_pools_web_client_id>/$cognito_domain/g" console/src/aws-export.js
-#sed -i "s/<aws_user_pools_web_client_id>/$apigw_endpoint/g" console/src/aws-export.js
-#sed -i "s/<aws_user_pools_web_client_id>/$apigw_name/g" console/src/aws-export.js
-#sed -i "s/<aws_user_pools_web_client_id>/$location_map_name/g" console/src/aws-export.js
+
+sed -i "s/<aws_user_pools_id>/$cognito_userpool_id/g" console/src/aws-export.js
+sed -i "s/<aws_user_pools_web_client_id>/$cognito_client_id/g" console/src/aws-export.js
+sed -i "s/<cognito_domain>/$cognito_domain/g" console/src/aws-export.js
+sed -i "s/<api_gateway_endpoint>/$apigw_endpoint/g" console/src/aws-export.js
+sed -i "s/<api_gateway_name>/$apigw_name/g" console/src/aws-export.js
+sed -i "s/<map_name>/$location_map_name/g" console/src/aws-export.js
+sed -i "s/<aws_region>/us-east-2/g" console/src/aws-export.js
 rm outputs.json layer.zip
