@@ -50,19 +50,25 @@ class Root(Stack):
        
         api = ApiGateway(self,"api",datastore=datastore ,bucket=f"nwp-{prefix_name}",layer=layer)
         api.add_dependency(sf)
-        self.cognito_userpool_id = api.user_pool.user_pool_id
-        self.cognito_client_id = api.user_pool_client.user_pool_client_id
-        self.cognito_domain = api.cognito_domain.domain_name
-        #self.apigw_endpoint = api.api.
-        webapp = WebApp(self,"webapplication")
+        
         with open('console/src/aws-export.js', 'r') as f:
             filedata = f.read()
-
-        filedata = filedata.replace('<aws_user_pools_id>', api.user_pool.user_pool_id)
+        replacements = {
+            '<aws_user_pools_id>': api.user_pool.user_pool_id,
+            '<aws_user_pools_web_client_id>': api.user_pool_client.user_pool_client_id,
+            '<cognito_domain>': api.cognito_domain.domain_name,
+            '<api_gateway_endpoint>': api.api.url',
+            '<api_gateway_name': api.api.rest_api_name,
+            '<map_name>': api.map.map_name,
+            # add more replacements as needed
+        }
+        for old_value, new_value in replacements.items():
+            filedata = filedata.replace(old_value, new_value)
 
         with open('console/src/aws-export.js', 'w') as f:
             f.write(filedata)
-
+        webapp = WebApp(self,"webapplication")
+        
         CfnOutput(self, "cognito_userpool_id", value=api.user_pool.user_pool_id)
         CfnOutput(self, "cognito_client_id", value=api.user_pool_client.user_pool_client_id)
         CfnOutput(self, "cognito_domain", value=api.cognito_domain.domain_name)
