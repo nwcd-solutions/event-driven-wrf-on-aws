@@ -9,7 +9,7 @@ import {
 } from "react-icons/md";
 
 export const baseConfig = {
-  projectLink: "/", // GitHub link in the navbar
+  projectLink: "", // GitHub link in the navbar
   docsRepositoryBase: "", // base URL for the docs repository
   titleSuffix: "",
   search: true,
