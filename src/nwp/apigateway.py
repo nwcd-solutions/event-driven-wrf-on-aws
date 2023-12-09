@@ -30,7 +30,7 @@ class ApiGateway(NestedStack):
         #---------------------------------------------------------------------------------------------
         # Create a Cognito User Pool Client
         #---------------------------------------------------------------------------------------------        
-        user_pool_client = cognito.UserPoolClient(
+        self.user_pool_client = cognito.UserPoolClient(
             self,
             "WrfUserPoolClient",
             user_pool=self.user_pool,
@@ -48,13 +48,13 @@ class ApiGateway(NestedStack):
                 logout_urls=["http://localhost:3000"]
             )
         )
-        cognito_domain = self.user_pool.add_domain(
+        self.cognito_domain = self.user_pool.add_domain(
             "Domain",
             cognito_domain=cognito.CognitoDomainOptions(
                 domain_prefix = domain_name
             )
         )
-        cognito_domain.apply_removal_policy(core.RemovalPolicy.DESTROY)
+        self.cognito_domain.apply_removal_policy(core.RemovalPolicy.DESTROY)
         #---------------------------------------------------------------------------------------------
         # Create domain service Lambda functions
         #---------------------------------------------------------------------------------------------
