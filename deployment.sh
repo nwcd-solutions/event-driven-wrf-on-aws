@@ -1,6 +1,6 @@
 #!/bin/bash 
 
-cd src/
+cd back-end/
 python3 -m venv .venv
 . .venv/bin/activate
 pip install -r requirements.txt
@@ -12,8 +12,7 @@ cd ..
 zip -r ../layer.zip python
 rm -rf python
 cd ..
-mkdir build
-zip -r build/console.zip console/*
+
 while true; do
     read -p "Do you want to use slurm accounting? (yes/no): " slurm_acct
     case $slurm_acct in
@@ -33,7 +32,10 @@ cognito_domain=$(jq '.WRF.cognitodomain' outputs.json)
 apigw_endpoint=$(jq '.WRF.apigwendpoint' outputs.json)
 apigw_name=$(jq '.WRF.apigwname' outputs.json)
 location_map_name=$(jq '.WRF.locationmapname' outputs.json)
+rm layer.zip
 
+cd ../front-end
+cp aws-export.js console/src/
 sed -i "s|<aws_user_pools_id>|$cognito_userpool_id|g" console/src/aws-export.js
 sed -i "s|<aws_user_pools_web_client_id>|$cognito_client_id|g" console/src/aws-export.js
 sed -i "s|<cognito_domain>|$cognito_domain|g" console/src/aws-export.js
@@ -41,4 +43,4 @@ sed -i "s|<api_gateway_endpoint>|$apigw_endpoint|g" console/src/aws-export.js
 sed -i "s|<api_gateway_name>|$apigw_name|g" console/src/aws-export.js
 sed -i "s|<map_name>|$location_map_name|g" console/src/aws-export.js
 sed -i "s|<aws_region>|us-east-2|g" console/src/aws-export.js
-rm outputs.json layer.zip
+
