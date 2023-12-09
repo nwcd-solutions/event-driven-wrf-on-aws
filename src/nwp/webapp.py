@@ -7,7 +7,7 @@ from aws_cdk import (
     CfnOutput, NestedStack, Tags
 )
 from constructs import Construct
-import os
+from os import path
 
 class WebApp(NestedStack):
 
