@@ -28,7 +28,7 @@ import {
     return (
       <Grid templateColumns={{ base: "1fr 0", medium: "1fr 1fr" }}>
         <Flex
-          backgroundColor={tokens.colors.background.secondary}
+
           justifyContent="center"
         >
           <Authenticator components={components}>
