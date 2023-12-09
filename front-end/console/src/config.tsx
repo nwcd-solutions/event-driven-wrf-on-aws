@@ -41,6 +41,7 @@ export const baseConfig = {
 
 /// Navigation sidebar
 export const appNavs = [
+export const appNavs = [
   {
     eventKey: "dashboard",
     icon: <Icon as={MdDashboard} />,
@@ -49,45 +50,17 @@ export const appNavs = [
   },
 
   {
-    eventKey: "settings",
-    icon: <Icon as={MdOutlineTableChart} />,
-    title: "Setting",
-    to: "/settings",
-    children: [
-      {
-        eventKey: "basic-table",
-        title: "Basic Table",
-        to: "/tables",
-      },
-      {
-        eventKey: "users",
-        title: "Users Table",
-        to: "/users-table",
-      },
-    ],
-  },
-  {
-    eventKey: "forms",
+    eventKey: "domainconfig",
     icon: <Icon as={MdModeEditOutline} />,
-    title: "Forms",
-    to: "/forms",
-    children: [
-      {
-        eventKey: "form-basic",
-        title: "Basic",
-        to: "/forms",
-      },
-      {
-        eventKey: "form-wizard",
-        title: "Edit Form",
-        to: "/edit-form",
-      },
-    ],
+    title: "Domain Config",
+    to: "/settings",
   },
   {
-    eventKey: "profile",
-    icon: <Icon as={MdAccountBox} />,
-    title: "Profile",
-    to: "/profile",
+    eventKey: "tasksettings",
+    icon: <Icon as={MdOutlineTableChart} />,
+    title: "Task Setting",
+    to: "/settings",
   },
+
+
 ];
