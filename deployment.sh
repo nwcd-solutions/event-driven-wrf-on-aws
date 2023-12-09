@@ -10,6 +10,7 @@ cd python
 rm -Rf pygrib pygrib.libs matplotlib numpy numpy.libs pyproj netCDF4 netCDF4.libs Pillow.libs fontTools kiwisolver setuptools cftime PIL contourpy botocore pyproj.libs mpl_toolkits
 cd ..
 zip -r ../layer.zip python
+rm -rf python
 cd ..
 
 while true; do
@@ -24,10 +25,19 @@ done
 #read -p "Please enter the admin username" username
 
 cdk bootstrap
-cdk_out=$(cdk deploy)
-cognito_userpool_id=$(echo "$cdk_output" | grep "WRF.cognitouserpoolid" | awk '{print $2}')
-cognito_client_id=$(echo "$cdk_output" | grep "WRF.cognitoclientid" | awk '{print $2}')
+cdk_out=$(cdk deploy --outputs-file outputs.json)
+cognito_userpool_id=$(jq '.WRF.cognitouserpoolid' outputs.json)
+cognito_client_id=$(jq '.WRF.cognitoclientid' outputs.json)
+cognito_domain=$(jq '.WRF.cognitodomain' outputs.json)
+apigw_endpoint=$(jq '.WRF.apigwendpoint' outputs.json)
+apigw_name=$(jq '.WRF.apigwname' outputs.json)
+location_map_name=$(jq '.WRF.locationmapname' outputs.json)
 echo $cognito_userpool_id
 echo $cognito_client_id
 sed -i "s/<aws_user_pools_id>/$cognito_userpool_id/g" console/src/aws-export.js
 sed -i "s/<aws_user_pools_web_client_id>/$cognito_client_id/g" console/src/aws-export.js
+sed -i "s/<aws_user_pools_web_client_id>/$cognito_domain/g" console/src/aws-export.js
+sed -i "s/<aws_user_pools_web_client_id>/$apigw_endpoint/g" console/src/aws-export.js
+sed -i "s/<aws_user_pools_web_client_id>/$apigw_name/g" console/src/aws-export.js
+sed -i "s/<aws_user_pools_web_client_id>/$location_map_name/g" console/src/aws-export.js
+rm outputs.json layer.zip
