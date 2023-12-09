@@ -50,6 +50,10 @@ class Root(Stack):
        
         api = ApiGateway(self,"api",datastore=datastore ,bucket=f"nwp-{prefix_name}",layer=layer)
         api.add_dependency(sf)
+        self.cognito_userpool_id = api.user_pool.user_pool_id
+        self.cognito_client_id = api.user_pool_client.user_pool_client_id
+        self.cognito_domain = api.cognito_domain.domain_name
+        #self.apigw_endpoint = api.api.
         webapp = WebApp(self,"webapplication")
 
     @property
