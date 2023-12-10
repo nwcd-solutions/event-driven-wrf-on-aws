@@ -265,7 +265,7 @@ build_dir(){
         echo ${row} | base64 --decode | jq -r ${1}
      }     
      echo $(_jq '.name')
-     jobdir="domain_"$(_jq '.name')
+     jobdir=$(_jq '.name')
      echo $jobdir
      mkdir -p $jobdir/run
      mkdir -p $jobdir/preproc
