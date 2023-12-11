@@ -51,13 +51,14 @@ def handler(event, context):
         print("stop working")
         exec_table.update_item(
             Key={
-                'ftime':ftime,
-                'id': current_timestamp
+                'id': current_timestamp,
+                'receive_time': current_time
             },
-            UpdateExpression = 'SET end_time = :end_time, exec_status = :exec_status, reason = :reason',
+            UpdateExpression = 'SET end_time = :end_time, exec_status = :exec_status, reason = :reason, ftime = :ftime',
             ExpressionAttributeValues = {
                 ':end_time':current_time,
                 ':exec_status':'failed',
+                ':ftime':ftime, 
                 ':reason':r'condition not satisfied,domains number is {},auto mode is {}, fcst days is {}'.format(domains_num,auto_mode,fcst_days)
             }
         )
