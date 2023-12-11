@@ -600,7 +600,7 @@ class StepFunction (NestedStack):
               "Choices": [
                 {
                   "Variable": "$.stack_status",
-                  "StringEquals": "stack exist",
+                  "StringEquals": "exist",
                   "Next": "destroy cluster"
                 }
               ],
