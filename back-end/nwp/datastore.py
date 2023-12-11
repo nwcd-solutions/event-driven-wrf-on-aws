@@ -52,7 +52,7 @@ class DataStore(NestedStack):
         self.receive_time_ssm = ssm.StringParameter(
             self, "receive_time_ssm",
             parameter_name="/event-driven-wrf/receive-time",
-            string_value=""
+            string_value="0000-00-00"
         )
         #----------------------------------------------------------------------------------------------
         # Create a DynamoDB table to store parameters of Domain and Step function execution record
