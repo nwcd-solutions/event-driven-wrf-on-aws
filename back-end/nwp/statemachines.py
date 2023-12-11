@@ -817,7 +817,8 @@ class StepFunction (NestedStack):
                     "SM_ARN":destroy_sf.attr_arn,
                     "EXEC_DB":exec_db.table_name,
                     "FTIME": ftime_ssm.parameter_name,
-                    "EXEC_ID": exec_id_ssm.parameter_name
+                    "EXEC_ID": exec_id_ssm.parameter_name,
+                    "EXEC_RECEIVE_TIME": receive_time_ssm.parameter_name
                 },
                 handler="index.handler",
                 layers=[layer],
