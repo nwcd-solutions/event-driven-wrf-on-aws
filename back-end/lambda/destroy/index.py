@@ -13,6 +13,8 @@ def handler(event, context):
     ftime = response['Parameter']['Value']    
     response = ssm.get_parameter(Name= os.getenv('EXEC_ID'))
     id = response['Parameter']['Value']    
+    response = ssm.get_parameter(Name= os.getenv('EXEC_RECEIVE_TIME'))
+    receive_time = response['Parameter']['Value'] 
     clustername=os.getenv('CLUSTER_NAME')
     region=os.getenv('REGION')
     sfn = boto3.client('stepfunctions')
@@ -24,12 +26,13 @@ def handler(event, context):
     exec_table = dynamodb.Table(os.getenv('EXEC_DB'))
     exec_table.update_item(
         Key={
-            'ftime':ftime,
-            'id': id
+            'id': id,
+            'receive_time': current_time
         },
-        UpdateExpression = 'SET job_finished_time = :job_finished_time  , exec_status = :exec_status',
+        UpdateExpression = 'SET job_finished_time = :job_finished_time  , exec_status = :exec_status, ftime = :ftime',
         ExpressionAttributeValues = {
             ':job_finished_time':current_time,
+            ':ftime':ftime,
             ':exec_status':"success"
         }
     )   
