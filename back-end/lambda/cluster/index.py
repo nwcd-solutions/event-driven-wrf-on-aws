@@ -79,7 +79,7 @@ def handler(event, context):
           current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
           exec_table.update_item(
             Key={
-                'id': id,
+                'id': int(id),
                 'receive_time': receive_time
             },
             UpdateExpression = 'SET end_time = :end_time, exec_status = :exec_status, reason = :reason, ftime = :ftime',
@@ -154,7 +154,7 @@ def handler(event, context):
             current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             exec_table.update_item(
               Key={
-                'id': id,
+                'id': int(id),
                 'receive_time': receive_time
               },
               UpdateExpression = 'SET cluster_create_completed_time = :cluster_create_completed_time , exec_status = :exec_status, ftime = :ftime',
@@ -215,7 +215,7 @@ def handler(event, context):
           if job_status=="in progress":
               exec_table.update_item(
                   Key={
-                      'id': id,
+                      'id': int(id),
                       'receive_time': receive_time
                   },
                   UpdateExpression = 'SET cluster_delete_completed_time = :cluster_delete_completed_time , exec_status = :exec_status, ftime = :ftime',
@@ -228,7 +228,7 @@ def handler(event, context):
           else:
               exec_table.update_item(
                   Key={
-                      'id': id,
+                      'id': int(id),
                       'receive_time': receive_time
                   },
                   UpdateExpression = 'SET cluster_delete_completed_time = :cluster_delete_completed_time , exec_status = :exec_status, ftime = :ftime',
