@@ -54,6 +54,21 @@ Scheduling:
         S3Access:
           - BucketName: {BUCKET_NAME: ''}
             EnableWriteAccess: true
+    - Name: wps
+      ComputeResources:
+        - Name: c6a
+          InstanceType: c6a.large
+          MinCount: 0
+          MaxCount: 100
+      Networking:
+        SubnetIds: !!seq
+          - {SUBNET: ''}
+        PlacementGroup:
+          Enabled: true
+      Iam:
+        S3Access:
+          - BucketName: {BUCKET_NAME: ''}
+            EnableWriteAccess: true
 SharedStorage:
   - Name: Ebs0
     StorageType: Ebs
