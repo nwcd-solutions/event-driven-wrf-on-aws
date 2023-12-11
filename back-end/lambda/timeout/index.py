@@ -9,7 +9,7 @@ def handler(event, context):
     id=event['id']
     region=event['region']
     receive_time=event['receive_time']
-    stark_name=stack_arn.split('/')[1]
+    stack_name=stack_arn.split('/')[1]
     cfn = boto3.client('cloudformation')
     res = cfn.describe_stacks(StackName=stack_arn)
     if res['Stacks'][0]['StackStatus']=="DELETE_COMPLETE":
