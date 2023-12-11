@@ -13,6 +13,7 @@ class Bucket(NestedStack):
         self.bucket = s3.Bucket(
             self, 'NWPBucket',
             bucket_name = bucket_name,
+            autoDeleteObjects = True,
             removal_policy=core.RemovalPolicy.DESTROY,
         )
 
