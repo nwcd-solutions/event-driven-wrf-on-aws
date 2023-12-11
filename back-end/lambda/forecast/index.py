@@ -182,7 +182,8 @@ def handler(event, context):
     i=1
     for item in items:
         n='domain_'+item['name']
-        jids.append(run_wrf(n,pids[i-1],item['nodes']))
+        nodes=item['cores']
+        jids.append(run_wrf(n,pids[i-1],nodes))
         i=i+1
     fini(jids)
 
