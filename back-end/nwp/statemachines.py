@@ -152,6 +152,7 @@ class StepFunction (NestedStack):
                     "KMS_POLICY": kms_all_policy.managed_policy_arn,
                     "PARA_DB": domain_db.table_name,
                     "EXEC_DB": exec_db.table_name,
+                    "PYTHONPATH":"/opt/python"
                 },
                 handler="index.handler",
                 layers=[layer],
@@ -215,7 +216,9 @@ class StepFunction (NestedStack):
                     #"EXEC_DB":exec_db.table_name,
                     "FTIME":ftime_ssm.parameter_name ,
                     "EXEC_ID": exec_id_ssm.parameter_name,
-                    "JOB_TIMEOUT": job_timeout_ssm.parameter_name
+                    "JOB_TIMEOUT": job_timeout_ssm.parameter_name,
+                    "EXEC_RECEIVE_TIME": receive_time_ssm.parameter_name,
+                    "PYTHONPATH":"/opt/python"
                 },
                 handler="index.handler",
                 layers=[layer],
@@ -264,6 +267,7 @@ class StepFunction (NestedStack):
                 code=λ.Code.from_asset("./lambda/timeout"),
                 environment={
                     "EXEC_DB":exec_db.table_name,
+                    "PYTHONPATH":"/opt/python"
                 },
                 handler="index.handler",
                 layers=[layer],
@@ -793,7 +797,6 @@ class StepFunction (NestedStack):
                     "AUTO_MODE": auto_mode_ssm.parameter_name,
                 },
                 handler="index.handler",
-                layers=[layer],
                 log_retention=logs.RetentionDays.ONE_DAY,
                 role=trigger_lambda_role,
                 runtime=λ.Runtime.PYTHON_3_9,
