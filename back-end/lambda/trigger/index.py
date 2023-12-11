@@ -62,20 +62,25 @@ def handler(event, context):
             }
         )
         return
+    for item in items:
+        item['cores']=str(item['cores'])
+        item.pop('domain_size')
+        item.pop('domain_center')
     domain_items=json.dumps(items)
     sfn = boto3.client('stepfunctions')
     sfn.start_execution(
         stateMachineArn=os.getenv("SM_ARN"),
-        input = "{\"action\" : \"create\",\"type\" : \"od\",\"ftime\":\"" + ftime + "\",\"fcst_days\":\""+fcst_days+"\",\"domains\":"+domain_items+",\"id\":\""+current_timestamp+"\",\"id\":\""+current_timestamp+"\"}"
+        input = "{\"action\" : \"create\",\"type\" : \"od\",\"ftime\":\"" + ftime + "\",\"fcst_days\":\""+fcst_days+"\",\"domains\":"+domain_items+",\"id\":\""+current_timestamp+"\",\"receive_time\":\""+current_time+"\"}"
     )
     exec_table.update_item(
-        Key={
-            'ftime':ftime,
-            'id': current_timestamp
+        Key={            
+            'id': current_timestamp,
+            'receive_time': current_time
         },
-        UpdateExpression = 'SET start_time = :start_time, exec_status = :exec_status',
+        UpdateExpression = 'SET start_time = :start_time, exec_status = :exec_status, ftime = :ftime',
             ExpressionAttributeValues = {
                 ':start_time':current_time,
+                ':ftime':ftime,
                 ':exec_status':"in progress"
             }
     )
