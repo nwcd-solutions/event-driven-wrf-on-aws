@@ -22,7 +22,7 @@ def handler(event, context):
         exec_table = dynamodb.Table(os.getenv('EXEC_DB'))
         exec_table.update_item(
             Key={
-                'id': id,
+                'id': int(id),
                 'receive_time': receive_time
             },
             UpdateExpression = 'SET job_timeout_time = :job_timeout_time , exec_status = :exec_status, ftime = :ftime',
