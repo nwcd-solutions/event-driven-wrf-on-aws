@@ -39,6 +39,7 @@ def handler(event, context):
     global region
     ftime=event['ftime']
     id = event['id']
+    receive_time=event['receive_time']
     if (event['action']=='create'):
       if (event['type']=='od'):
         with open("hpc6a.yaml", "r") as cf:
@@ -70,18 +71,20 @@ def handler(event, context):
           out['action']='status'
           out['ftime']=ftime
           out['id']=id
+          out['receive_time']=receive_time
         else:
           print(res.json())
           current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
           exec_table.update_item(
             Key={
-                'ftime':ftime,
-                'id': id
+                'id': id,
+                'receive_time': receive_time
             },
-            UpdateExpression = 'SET end_time = :end_time, exec_status = :exec_status, reason = :reason',
+            UpdateExpression = 'SET end_time = :end_time, exec_status = :exec_status, reason = :reason, ftime = :ftime',
             ExpressionAttributeValues = {
                 ':end_time':current_time,
                 ':exec_status':'failed',
+                ':ftime':ftime,
                 ':reason':res.json()
             }
           )
@@ -89,6 +92,7 @@ def handler(event, context):
           out['failed_message']=res.json()
           out['clusterName']=cluster_name
           out['id']=id
+          out['receive_time']=receive_time
         return out
       elif (event['type']=='spot'):
         with open("hpc6a.yaml", "r") as cf:
@@ -143,22 +147,25 @@ def handler(event, context):
             out['action']='status'
             out['ftime']=ftime
             out['id']=id
+            out['receive_time']=receive_time
         else:
             current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             exec_table.update_item(
               Key={
-                'ftime':ftime,
-                'id': id
+                'id': id,
+                'receive_time': receive_time
               },
-              UpdateExpression = 'SET cluster_create_completed_time = :cluster_create_completed_time , exec_status = :exec_status',
+              UpdateExpression = 'SET cluster_create_completed_time = :cluster_create_completed_time , exec_status = :exec_status, ftime = :ftime',
               ExpressionAttributeValues = {
                 ':cluster_create_completed_time':current_time,
+                ':ftime':ftime,
                 ':exec_status': "in progress"
               }
             )            
             out['action']='destroy'
             out['ftime']=ftime
             out['id']=id
+            out['receive_time']=receive_time
       else:
         out={"CheckclusterStatus":"failed"}
       return out
@@ -188,6 +195,7 @@ def handler(event, context):
         out['ftime']=ftime
         out['id']=id
         out['status']=job_status
+        out['receive_time']=receive_time
       else:
         print(res.json())
         out={"CheckclusterStatus":"deleted failed"}
@@ -205,24 +213,26 @@ def handler(event, context):
           if job_status=="in progress":
               exec_table.update_item(
                   Key={
-                      'ftime':ftime,
-                      'id': id
+                      'id': id,
+                      'receive_time': receive_time
                   },
-                  UpdateExpression = 'SET cluster_delete_completed_time = :cluster_delete_completed_time , exec_status = :exec_status',
+                  UpdateExpression = 'SET cluster_delete_completed_time = :cluster_delete_completed_time , exec_status = :exec_status, ftime = :ftime',
                   ExpressionAttributeValues = {
                       ':cluster_delete_completed_time':current_time,
+                      ':ftime':ftime,
                       ':exec_status': "success"
                   }
               )
           else:
               exec_table.update_item(
                   Key={
-                      'ftime':ftime,
-                      'id': id
+                      'id': id,
+                      'receive_time': receive_time
                   },
-                  UpdateExpression = 'SET cluster_delete_completed_time = :cluster_delete_completed_time , exec_status = :exec_status',
+                  UpdateExpression = 'SET cluster_delete_completed_time = :cluster_delete_completed_time , exec_status = :exec_status, ftime = :ftime',
                   ExpressionAttributeValues = {
                       ':cluster_delete_completed_time':current_time,
+                      ':ftime':ftime,
                       ':exec_status': "timeout error"
                   }
               )
@@ -230,6 +240,7 @@ def handler(event, context):
       out['action']='destroystatus'
       out['ftime']=ftime
       out['id']=id
+      out['receive_time']=receive_time
       out['status']=job_status
       out['cluster']={
         "cloudformationStackArn":cf_arn,
