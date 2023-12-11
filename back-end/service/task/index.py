@@ -4,6 +4,7 @@ import json
 import base64
 import os
 from boto3.dynamodb.conditions import Key
+from datetime import datetime,timedelta
 
 ddb = boto3.resource('dynamodb')
 table = ddb.Table(os.getenv('PARA_DB'))
@@ -14,11 +15,11 @@ def handler(event, context):
     username = event['requestContext']['authorizer']['claims']['cognito:username']
     operation = event['httpMethod']
     if operation == 'GET':
-        if 'id' in event['queryStringParameters']:
-            response = table.get_item(
-                Key={
-                    'id': event['queryStringParameters']['id']
-                }
+        if 'days' in event['queryStringParameters']:
+            start_date = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
+            end_date = datetime.now().strftime('%Y-%m-%d')
+            response = table.query(
+                KeyConditionExpression=Key('id').ne('0') & Key('receive_time').between(start_date, end_date),
             )
             return {
                 'statusCode': 200,
