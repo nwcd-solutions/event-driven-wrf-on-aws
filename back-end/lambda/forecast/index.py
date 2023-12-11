@@ -177,11 +177,11 @@ def handler(event, context):
     print("domains:")
     print(job_num)
     for item in items:
-        n='domain_'+ item['name']
+        n=item['name']
         pids.append(preproc(n))
     i=1
     for item in items:
-        n='domain_'+item['name']
+        n=item['name']
         nodes=item['cores']
         jids.append(run_wrf(n,pids[i-1],nodes))
         i=i+1
