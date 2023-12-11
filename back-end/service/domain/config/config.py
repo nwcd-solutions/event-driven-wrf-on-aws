@@ -60,7 +60,7 @@ class WrfConfig:
             'wrf_bk_namelist': self.wrf_bk_namelist,
             'domain_center': self.domain_center.data if self.domain_center is not None else None,
             'domain_size': self.domain_size if self.domain_size is not None else None,
-            'cores': self._cores
+            'cores': self.cores
         }
 
     @data.setter
