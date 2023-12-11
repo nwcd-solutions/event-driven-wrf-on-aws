@@ -198,6 +198,12 @@ def handler(event, context):
         Type='String',
         Overwrite=True
     )
+    ssm.put_parameter(
+        Name=os.getenv('EXEC_RECEIVE_TIME'),
+        Value= id,
+        Type='String',
+        Overwrite=True
+    )
     timeout_value=ssm.get_parameter(
         Name=os.getenv('JOB_TIMEOUT'),
     )
