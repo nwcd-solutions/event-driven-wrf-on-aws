@@ -57,7 +57,7 @@ Scheduling:
     - Name: wps
       ComputeResources:
         - Name: c6a
-          InstanceType: c6a.large
+          InstanceType: c6a.xlarge
           MinCount: 0
           MaxCount: 100
       Networking:
