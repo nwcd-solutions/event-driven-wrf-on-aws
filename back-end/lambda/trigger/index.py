@@ -31,7 +31,7 @@ def handler(event, context):
     print(key)
     ftime = f"{m.group('y')}-{m.group('m')}-{m.group('d')}T{m.group('h')}:00:00Z"
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    current_timestamp = str(int(datetime.now().timestamp()))
+    current_timestamp = int(datetime.now().timestamp())
 
     exec_table = dynamodb.Table(os.getenv('EXEC_DB'))
     exec_table.put_item(Item={'ftime': ftime, 'receive_time': current_time,'id':current_timestamp})
@@ -71,7 +71,7 @@ def handler(event, context):
     sfn = boto3.client('stepfunctions')
     sfn.start_execution(
         stateMachineArn=os.getenv("SM_ARN"),
-        input = "{\"action\" : \"create\",\"type\" : \"od\",\"ftime\":\"" + ftime + "\",\"fcst_days\":\""+fcst_days+"\",\"domains\":"+domain_items+",\"id\":\""+current_timestamp+"\",\"receive_time\":\""+current_time+"\"}"
+        input = "{\"action\" : \"create\",\"type\" : \"od\",\"ftime\":\"" + ftime + "\",\"fcst_days\":\""+fcst_days+"\",\"domains\":"+domain_items+",\"id\":\""+str(current_timestamp)+"\",\"receive_time\":\""+current_time+"\"}"
     )
     exec_table.update_item(
         Key={            
