@@ -49,6 +49,8 @@ def handler(event, context):
         config_data["HeadNode"]["Networking"]["AdditionalSecurityGroups"][0] = os.getenv("SG")
         config_data["Scheduling"]["SlurmQueues"][0]["Networking"]["SubnetIds"][0] = os.getenv("SUBNETID")
         config_data["Scheduling"]["SlurmQueues"][0]["Iam"]["S3Access"][0]["BucketName"] = os.getenv("BUCKET_NAME")
+        config_data["Scheduling"]["SlurmQueues"][1]["Networking"]["SubnetIds"][0] = os.getenv("SUBNETID")
+        config_data["Scheduling"]["SlurmQueues"][1]["Iam"]["S3Access"][0]["BucketName"] = os.getenv("BUCKET_NAME")
         config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Script"] = os.getenv("S3_URL_POST_INSTALL_HEADNODE")
         config_data["HeadNode"]["Iam"]["AdditionalIamPolicies"][0] = {"Policy":os.getenv("KMS_POLICY")}
         config_data["HeadNode"]["CustomActions"]["OnNodeConfigured"]["Args"][0] = region
