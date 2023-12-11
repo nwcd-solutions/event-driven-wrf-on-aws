@@ -8,6 +8,7 @@ def handler(event, context):
     ftime=event['ftime']
     id=event['id']
     region=event['region']
+    receive_time=event['receive_time']
     stark_name=stack_arn.split('/')[1]
     cfn = boto3.client('cloudformation')
     res = cfn.describe_stacks(StackName=stack_arn)
@@ -21,12 +22,13 @@ def handler(event, context):
         exec_table = dynamodb.Table(os.getenv('EXEC_DB'))
         exec_table.update_item(
             Key={
-                'ftime':ftime,
-                'id': id
+                'id': id,
+                'receive_time': current_time
             },
-            UpdateExpression = 'SET job_timeout_time = :job_timeout_time , exec_status = :exec_status',
+            UpdateExpression = 'SET job_timeout_time = :job_timeout_time , exec_status = :exec_status, ftime = :ftime',
             ExpressionAttributeValues = {
             ':job_timeout_time':current_time,
+            ':ftime':ftime, 
             ':exec_status': "error"
             }
         )        
@@ -37,6 +39,7 @@ def handler(event, context):
             "ftime":ftime,
             "id":id,
             "region":region,
+            "receive_time":receive_time,
             "clusterName":stack_name
         }
         return out
