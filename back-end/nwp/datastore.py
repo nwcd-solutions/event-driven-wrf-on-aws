@@ -71,7 +71,7 @@ class DataStore(NestedStack):
             self, "execution_Table",
             partition_key=dynamodb.Attribute(
                 name="id",
-                type=dynamodb.AttributeType.STRING
+                type=dynamodb.AttributeType.NUMBER
             ),
             sort_key=dynamodb.Attribute(
                 name="receive_time",
