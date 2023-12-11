@@ -159,6 +159,7 @@ def handler(event, context):
     print(event)
     ip=event['headNode']['privateIpAddress']
     ftime=event['ftime']
+    receive_time=event['receive_time']
     id=event['id']
     region=event['region']
     cluster_name=event['cloudformationStackArn']
@@ -204,6 +205,7 @@ def handler(event, context):
         "ftime":ftime,
         "id":id,
         "region":region,
+        'receive_time':receive_time,
         "clustername":cluster_name,
         "job_timeout":timeout_value['Parameter']['Value']
     }
