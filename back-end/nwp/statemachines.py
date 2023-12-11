@@ -59,7 +59,7 @@ class StepFunction (NestedStack):
         ftime_ssm = datastore.ftime_ssm
         exec_id_ssm = datastore.exec_id_ssm
         job_timeout_ssm = datastore.job_timeout_ssm
-
+        receive_time_ssm = datastore.receive_time_ssm
         #----------------------------------------------------------------------------------------------
         # Create a DynamoDB table to store parameters of Domain and Step function execution record
         #----------------------------------------------------------------------------------------------
