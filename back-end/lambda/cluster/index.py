@@ -231,11 +231,12 @@ def handler(event, context):
                       'id': int(id),
                       'receive_time': receive_time
                   },
-                  UpdateExpression = 'SET cluster_delete_completed_time = :cluster_delete_completed_time , exec_status = :exec_status, ftime = :ftime',
+                  UpdateExpression = 'SET cluster_delete_completed_time = :cluster_delete_completed_time , exec_status = :exec_status, ftime = :ftime, reason=:reason',
                   ExpressionAttributeValues = {
                       ':cluster_delete_completed_time':current_time,
                       ':ftime':ftime,
-                      ':exec_status': "timeout error"
+                      ':reason':"wrf run timeout",
+                      ':exec_status': "failed"
                   }
               )
       out={}
