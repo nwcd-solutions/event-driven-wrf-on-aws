@@ -25,11 +25,12 @@ def handler(event, context):
                 'id': int(id),
                 'receive_time': receive_time
             },
-            UpdateExpression = 'SET job_timeout_time = :job_timeout_time , exec_status = :exec_status, ftime = :ftime',
+            UpdateExpression = 'SET job_timeout_time = :job_timeout_time , exec_status = :exec_status, ftime = :ftime, reason = :reason',
             ExpressionAttributeValues = {
             ':job_timeout_time':current_time,
             ':ftime':ftime, 
-            ':exec_status': "error"
+            ':reason':"wrf run timeout",
+            ':exec_status': "failed"
             }
         )        
         out={
