@@ -818,6 +818,7 @@ class StepFunction (NestedStack):
                     "EXEC_DB":exec_db.table_name,
                     "FTIME": ftime_ssm.parameter_name,
                     "EXEC_ID": exec_id_ssm.parameter_name,
+                    "PYTHONPATH":"/opt/python",
                     "EXEC_RECEIVE_TIME": receive_time_ssm.parameter_name
                 },
                 handler="index.handler",
