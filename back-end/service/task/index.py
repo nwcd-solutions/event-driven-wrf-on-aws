@@ -15,13 +15,14 @@ def handler(event, context):
     #username = event['requestContext']['authorizer']['claims']['cognito:username']
     operation = event['httpMethod']
     if operation == 'GET':
-            start_date = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
-            past = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
-            end_date = datetime.now().strftime('%Y-%m-%d')
-            print(start_date,end_date)
-            response = table.scan(
-                FilterExpression=Key("receive_time").gt(start_date)
-            )
+        start_date = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
+        past = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+        end_date = datetime.now().strftime('%Y-%m-%d')
+        print(start_date,end_date)
+        response = table.scan(
+            FilterExpression=Key("receive_time").gt(start_date)
+        )
+        if 'Item' in res:
             last_7d_success=0
             last_7d_failed=0
             last_7d_error=0
@@ -62,6 +63,18 @@ def handler(event, context):
             }        
 
             print(last_d_failed,last_d_success,last_7d_error,last_7d_failed,last_7d_success)
+            return {
+                'statusCode': 200,
+                'body': json.dumps(response),
+                'headers': {'Access-Control-Allow-Origin': '*'}
+            }
+        else:
+            response={
+                "last_7d_success":0,
+                "last_7d_failed":0,
+                "last_day_success":{},
+                "last_day_failed": {}
+            }  
             return {
                 'statusCode': 200,
                 'body': json.dumps(response),
