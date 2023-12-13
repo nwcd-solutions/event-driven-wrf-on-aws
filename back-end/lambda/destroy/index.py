@@ -20,7 +20,7 @@ def handler(event, context):
     sfn = boto3.client('stepfunctions')
     sfn.start_execution(
         stateMachineArn=os.getenv("SM_ARN"),
-        input = "{\"status\" : \"in progress\",\"action\" : \"destroy\",\"clusterName\":\""+clustername+ "\",\"region\":\""+region+"\",\"ftime\":\""+ftime + "\",\"id\":\""+id + "\"}"
+        input = "{\"status\" : \"in progress\",\"action\" : \"destroy\",\"clusterName\":\""+clustername+ "\",\"region\":\""+region+"\",\"ftime\":\""+ftime + "\",\"id\":\""+id + "\",\"receive_time\":\""+receive_time + "\"}"
     )
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     exec_table = dynamodb.Table(os.getenv('EXEC_DB'))
