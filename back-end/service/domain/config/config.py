@@ -265,7 +265,7 @@ class WrfConfig:
         core_estimate = self._estimate_core_count(domain_list)
         print(f'Estimate core count: {core_estimate}')
         # TODO: if more than 1 node is supported, factor that into result
-        return 96 if core_estimate > 96 else core_estimate
+        return  core_estimate
 
     @staticmethod
     def _estimate_core_count(domain_list: list):
