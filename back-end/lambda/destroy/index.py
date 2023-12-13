@@ -27,7 +27,7 @@ def handler(event, context):
     exec_table.update_item(
         Key={
             'id': int(id),
-            'receive_time': current_time
+            'receive_time': receive_time
         },
         UpdateExpression = 'SET job_finished_time = :job_finished_time  , exec_status = :exec_status, ftime = :ftime',
         ExpressionAttributeValues = {
