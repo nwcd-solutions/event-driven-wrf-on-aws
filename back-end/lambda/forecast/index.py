@@ -102,8 +102,9 @@ def preproc(zone):
     script += f"\naws s3 cp run/real.*.log {output}/logs/\n"
     template["job"]["name"] = "pre_" + zone
     template["job"]["nodes"] = 1
-    template["job"]["cpus_per_task"] = 1
-    template["job"]["tasks_per_node"] = 12
+    template["job"]["cpus_per_task"] = 4
+    template["job"]["tasks_per_node"] = 1
+    template['job']['partition']='wps'
     template["job"]["current_working_directory"] = f"/fsx/{zone}"
     template["script"] = script
     print(template)
@@ -128,6 +129,7 @@ def run_wrf(zone,pid,nodes):
     template["job"]["tasks_per_node"] = 24
     template["job"]["current_working_directory"] = f"/fsx/{zone}"
     template["job"]["dependency"] = f"afterok:{pid}"
+    template['job']['partition']='general'
     template["script"] = script
     print(template)
     return submit(template)
