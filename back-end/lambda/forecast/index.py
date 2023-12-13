@@ -201,7 +201,7 @@ def handler(event, context):
     )
     ssm.put_parameter(
         Name=os.getenv('EXEC_RECEIVE_TIME'),
-        Value= id,
+        Value= receive_time,
         Type='String',
         Overwrite=True
     )
