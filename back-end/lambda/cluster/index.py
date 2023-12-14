@@ -87,7 +87,7 @@ def handler(event, context):
                 ':end_time':current_time,
                 ':exec_status':'failed',
                 ':ftime':ftime,
-                ':reason':res.json()
+                ':reason':res.json()['message']
             }
           )
           out={"clusterStatus":"failed"}
