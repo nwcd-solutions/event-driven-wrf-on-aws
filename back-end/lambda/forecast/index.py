@@ -8,7 +8,7 @@ import boto3
 import botocore
 import json
 import requests
-import match
+import math
 
 ssm = boto3.client('ssm')
 #region = os.getenv("AWS_REGION")
@@ -185,7 +185,7 @@ def handler(event, context):
     i=1
     for item in items:
         n=item['name']
-        nodes=str(match.cell(int(item['cores'])/64))
+        nodes=str(math.cell(int(item['cores'])/64))
         jids.append(run_wrf(n,pids[i-1],nodes))
         i=i+1
     fini(jids)
