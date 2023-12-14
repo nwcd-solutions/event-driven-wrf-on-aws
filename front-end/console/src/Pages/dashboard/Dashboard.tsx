@@ -2,22 +2,29 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Grid,
-  Heading,
   Flex,
   Card,
   Placeholder,
   useTheme,
+  Loader,
+  Heading,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody
 } from "@aws-amplify/ui-react";
 import { MdRemoveRedEye, MdWeb, MdPermIdentity } from "react-icons/md";
-
+import { Statistics } from "./Data";
 import MiniStatistics from "./MiniStatistics";
 import TrafficSources from "./TrafficSources";
-import SalesSummary from "./SalesSummary";
-import TrafficSummary from "./TrafficSummary";
-import CustomersSummary from "./CustomersSummary";
 
+import { get } from 'aws-amplify/api';
 import "./Dashboard.css";
 
+interface SettingsProps {
+  getToken: () => void;
+}
 /// Mock Data
 const barChartDataDemo = [
   {
@@ -43,23 +50,7 @@ const barChartDataDemo = [
   },
 ];
 
-const lineChartData = [
-  {
-    name: "Mobile apps",
-    data: [50, 40, 300, 220, 500, 250, 400, 230, 500],
-  },
-  {
-    name: "Websites",
-    data: [30, 90, 40, 140, 290, 290, 340, 230, 400],
-  },
-];
 
-const customersData = [
-  {
-    name: "New Customers",
-    data: [50, 60, 140, 190, 180, 230],
-  },
-];
 
 const getChartData = () =>
   new Promise((resolve, reject) => {
@@ -70,12 +61,63 @@ const getChartData = () =>
     setTimeout(() => resolve(Object.values(barChartDataDemo)), 750);
   });
 
-const Dashboard = () => {
+const Dashboard = ({ getToken }: SettingsProps) => {
   const [barChartData, setBarChartData] = useState<any | null>(null);
   const [trafficSourceData, setTrafficSourceData] = useState<any | null>(null);
+  const [error, setError] = useState<string | undefined>(undefined);
+  const [loading, setLoading] = useState(false);
+  const [stat, setStat] = useState<Statistics>(
+    {
+      last_7d_failed: "0",
+      last_7d_success: "0",
+      last_day_success: [],
+      last_day_failed: [],
+
+    }
+  )
   const { tokens } = useTheme();
 
+  async function loadStaticstics() {
+    setLoading(true);
+
+    try {
+      const { body } = await get({
+        apiName: 'WrfAPIGateway',
+        path: '/task/',
+        options: {
+          headers: {
+            Authorization: await getToken()!,
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': '*',
+          },
+
+        }
+      }).response;
+      setLoading(true);
+      const result = await body.json() as { [key: string]: any };
+      console.log("get all statistics:", result);
+      const data: Statistics = {
+        last_7d_failed: result['last_7d_failed'],
+        last_7d_success: result['last_7d_success'],
+        last_day_success: result['last_day_success'],
+        last_day_failed: result['last_day_failed'],
+      }
+      console.log("statistics success record:", data.last_day_success);
+      setError('');
+      setStat(data);
+    }
+    catch (e) {
+      if (e instanceof Error) {
+        setError(e.message);
+        console.log(e)
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
   useEffect(() => {
+    loadStaticstics();
+
     const doChartData = async () => {
       const result = await getChartData();
       setBarChartData(result);
@@ -90,7 +132,9 @@ const Dashboard = () => {
       <View padding="1rem">
         <Heading color="#333" level={5} > Dashboard </Heading>
       </View>
+
       <View borderRadius="6px" maxWidth="100%" padding="0rem" minHeight="100vh">
+
         <Grid
           templateColumns={{ base: "1fr", large: "1fr 1fr 1fr" }}
           templateRows={{ base: "repeat(4, 10rem)", large: "repeat(3, 8rem)" }}
@@ -98,17 +142,17 @@ const Dashboard = () => {
         >
           <View rowSpan={{ base: 1, large: 1 }}>
             <MiniStatistics
-              title="Page Views"
-              amount="321,236"
+              title="Success Tasks(last 7 days)"
+              amount={stat.last_7d_success}
               icon={<MdRemoveRedEye />}
             />
           </View>
           <View rowSpan={{ base: 1, large: 1 }}>
-            <MiniStatistics title="Visits" amount="251,607" icon={<MdWeb />} />
+            <MiniStatistics title="Failed Tasks(last 7 days)" amount={stat.last_7d_failed} icon={<MdWeb />} />
           </View>
           <View rowSpan={{ base: 1, large: 1 }}>
             <MiniStatistics
-              title="Unique Visitors"
+              title="Execution Time Per Day"
               amount="23,762"
               icon={<MdPermIdentity />}
             />
@@ -116,69 +160,69 @@ const Dashboard = () => {
 
           <View columnSpan={[1, 1, 1, 2]} rowSpan={{ base: 3, large: 4 }}>
             <Card borderRadius="15px">
-              <div className="card-title">Traffic Summary</div>
-              <div className="chart-wrap">
-                {barChartData ? (
-                  <div className="row">
-                    <TrafficSummary
-                      title="Traffic Summary"
-                      data={barChartData}
-                      type="bar"
-                      labels={[
-                        "2022-01-20",
-                        "2022-01-21",
-                        "2022-01-22",
-                        "2022-01-23",
-                        "2022-01-24",
-                        "2022-01-25",
-                        "2022-01-26",
-                        "2022-01-27",
-                        "2022-01-28",
-                        "2022-01-29",
-                        "2022-01-30",
-                        "2022-02-01",
-                        "2022-02-02",
-                        "2022-02-03",
-                        "2022-02-04",
-                        "2022-02-05",
-                        "2022-02-06",
-                        "2022-02-07",
-                        "2022-02-08",
-                        "2022-02-09",
-                        "2022-02-10",
-                        "2022-02-11",
-                        "2022-02-12",
-                        "2022-02-13",
-                        "2022-02-14",
-                        "2022-02-15",
-                        "2022-02-16",
-                        "2022-02-17",
-                        "2022-02-18",
-                        "2022-02-19",
-                        "2022-02-20",
-                        "2022-02-21",
-                        "2022-02-22",
-                        "2022-02-23",
-                        "2022-02-24",
-                        "2022-02-25",
-                        "2022-02-26",
-                      ]}
-                    />
-                  </div>
-                ) : (
-                  <Flex direction="column" minHeight="285px">
-                    <Placeholder size="small" />
-                    <Placeholder size="small" />
-                    <Placeholder size="small" />
-                    <Placeholder size="small" />
-                  </Flex>
-                )}
-              </div>
+              <div className="card-title">Tasks Executation Records in Last 24 Hours</div>
+              <br></br>
+              <Flex direction="column" minHeight="285px">
+                {stat.last_day_success.length === 0 ?
+                  <View>
+                    <br></br>
+                    <h4>No Record Found</h4>
+                    <br></br>
+                  </View>
+                  :
+   
+                  <View>
+                    <Heading color="green" level={6} > Successed Task </Heading>
+                    <br></br>
+                    <Table caption="test" highlightOnHover={false}>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell as="th">Trigger Time</TableCell>
+                          <TableCell as="th">Cluster Ready Time</TableCell>
+                          <TableCell as="th">Job Finished Time</TableCell>
+                          <TableCell as="th">Run Duration</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {stat.last_day_success.map((item) => (
+                            <TableRow key={item.receive_time}>
+                              <TableCell>{item.receive_time}</TableCell>
+                              <TableCell>{item.cluster_created_time}</TableCell>
+                              <TableCell>{item.job_finished_time}</TableCell>
+                              <TableCell>{item.run_duration}</TableCell>
+                            </TableRow>
+                          )
+                        )}
+                      </TableBody>
+                    </Table>
+                    <br></br>
+                    <Heading color="red" level={6} > Failed Task </Heading>
+                    <br></br>
+                    <Table >
+                      <TableHead>
+                        <TableRow>
+                          <TableCell as="th">Trigger Time</TableCell>
+                          <TableCell as="th">Reason</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                      {stat.last_day_failed.map((item2) => (
+                            <TableRow key={item2.receive_time}>
+                              <TableCell>{item2.receive_time}</TableCell>
+                              <TableCell>{item2.reason.toString()}</TableCell>
+                            </TableRow>
+                          )
+                        )}
+                      </TableBody>
+                    </Table>                                 
+                  </View>
+                }
+              </Flex>
             </Card>
           </View>
           <View rowSpan={{ base: 1, large: 4 }}>
             <Card height="100%" borderRadius="15px">
-              <div className="card-title">Traffic Sources</div>
+              <div className="card-title">Analytics</div>
               <div className="chart-wrap">
                 {barChartData ? (
                   <TrafficSources
@@ -193,69 +237,6 @@ const Dashboard = () => {
                       "Other",
                     ]}
                   />
-                ) : (
-                  <Flex direction="column" minHeight="285px">
-                    <Placeholder size="small" />
-                    <Placeholder size="small" />
-                    <Placeholder size="small" />
-                    <Placeholder size="small" />
-                  </Flex>
-                )}
-              </div>
-            </Card>
-          </View>
-
-          <View columnSpan={[1, 1, 1, 2]} rowSpan={{ base: 3, large: 4 }}>
-            <Card borderRadius="15px">
-              <div className="card-title">Sales Summary</div>
-              <div className="chart-wrap">
-                {barChartData ? (
-                  <div className="row">
-                    <SalesSummary
-                      title="Sales Summary"
-                      data={lineChartData}
-                      type="line"
-                      labels={[
-                        "Jan",
-                        "Feb",
-                        "Mar",
-                        "Apr",
-                        "May",
-                        "Jun",
-                        "Jul",
-                        "Aug",
-                        "Sep",
-                        "Oct",
-                        "Nov",
-                        "Dec",
-                      ]}
-                    />
-                  </div>
-                ) : (
-                  <Flex direction="column" minHeight="285px">
-                    <Placeholder size="small" />
-                    <Placeholder size="small" />
-                    <Placeholder size="small" />
-                    <Placeholder size="small" />
-                  </Flex>
-                )}
-              </div>
-            </Card>
-          </View>
-
-          <View rowSpan={{ base: 1, large: 4 }}>
-            <Card height="100%" borderRadius="15px">
-              <div className="card-title">New Customers</div>
-              <div className="chart-wrap">
-                {barChartData ? (
-                  <div className="row">
-                    <CustomersSummary
-                      title="CutomersSummary"
-                      data={customersData}
-                      type="line"
-                      labels={["Jan", "Feb", "Mar", "Apr", "May", "Jun"]}
-                    />
-                  </div>
                 ) : (
                   <Flex direction="column" minHeight="285px">
                     <Placeholder size="small" />
