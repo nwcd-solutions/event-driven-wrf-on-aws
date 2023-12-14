@@ -54,12 +54,7 @@ export const appNavs = [
     title: "Domain Config",
     to: "/settings",
   },
-  {
-    eventKey: "tasksettings",
-    icon: <Icon as={MdOutlineTableChart} />,
-    title: "Task Setting",
-    to: "/settings",
-  },
+
 
 
 ];
