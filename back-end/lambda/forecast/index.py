@@ -182,10 +182,10 @@ def handler(event, context):
     for item in items:
         n=item['name']
         pids.append(preproc(n))
-    i=1
+    i=1i
     for item in items:
         n=item['name']
-        nodes=str(math.cell(int(item['cores'])/64))
+        nodes=str(math.ceil(int(item['cores'])/64))
         jids.append(run_wrf(n,pids[i-1],nodes))
         i=i+1
     fini(jids)
