@@ -1,16 +1,16 @@
 #!/bin/bash -l
-export I_MPI_OFI_LIBRARY_INTERNAL=0
-export FI_PROVIDER=efa
-export I_MPI_DEBUG=5
-export I_MPI_FABRICS=ofi
-export I_MPI_OFI_PROVIDER=efa
-export I_MPI_PIN_DOMAIN=omp
-export KMP_AFFINITY=compact
-export OMP_STACKSIZE=12G
+#export I_MPI_OFI_LIBRARY_INTERNAL=0
+#export FI_PROVIDER=efa
+#export I_MPI_DEBUG=5
+#export I_MPI_FABRICS=ofi
+#export I_MPI_OFI_PROVIDER=efa
+#export I_MPI_PIN_DOMAIN=omp
+#export KMP_AFFINITY=compact
+#export OMP_STACKSIZE=12G
 export SLURM_EXPORT_ENV=ALL
 export WRF_VERSION=4.2.2
-export MKL_NUM_THREADS=4
-export OMP_NUM_THREADS=4
+#export MKL_NUM_THREADS=4
+#export OMP_NUM_THREADS=4
 
 echo $(pwd)
 source /apps/scripts/env.sh 3 2
