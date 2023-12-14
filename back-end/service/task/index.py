@@ -72,8 +72,8 @@ def handler(event, context):
             response={
                 "last_7d_success":0,
                 "last_7d_failed":0,
-                "last_day_success":{},
-                "last_day_failed": {}
+                "last_day_success":[],
+                "last_day_failed": []
             }  
             return {
                 'statusCode': 200,
