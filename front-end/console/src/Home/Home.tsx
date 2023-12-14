@@ -33,7 +33,7 @@ export function Home() {
             parent route elements. See the note about <Outlet> below. */}
         <Routes>
           <Route path="/" element={<Layout />}>
-            <Route index element={<Dashboard />} />
+            <Route index element={<Dashboard getToken={getToken} />} />
             <Route path="domain/:id" element={<DomainDetail getToken={getToken}/>} />
             <Route path="domain" element={<DomainCreate getToken={getToken}/>} />
             <Route path="settings" element={<Settings getToken={getToken}/>} />
