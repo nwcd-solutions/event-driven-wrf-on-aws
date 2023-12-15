@@ -123,7 +123,12 @@ const Tasks = ({getToken}:SettingsProps) => {
       <View padding="1rem">
         <Heading color="#333" level={5} > Parameters Setting </Heading>
       </View>
-      
+      { loading ? 
+          <Loader 
+            size="large"
+            variation="linear"
+          />  
+          :      
       <View
         backgroundColor="var(--amplify-colors-white)"
         borderRadius="6px"
@@ -132,6 +137,7 @@ const Tasks = ({getToken}:SettingsProps) => {
         minHeight="80vh"
       >
         <br></br>
+        
         <SwitchField
           isDisabled={false}
           label="Auto Enabled"
@@ -141,15 +147,18 @@ const Tasks = ({getToken}:SettingsProps) => {
         />
         <br></br>
         <br></br>
+
         <ScrollView width="100%">        
           <ParaTable parameters= { parameters } onEdit = { handleEditParameter }/>
         </ScrollView>
+      
         <br></br>
         <Divider orientation="horizontal" />
         <br></br>
 
 
       </View>
+      }
       {/* if parameter is not null*/}
 
       { parameter &&
