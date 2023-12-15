@@ -163,17 +163,23 @@ const Dashboard = ({ getToken }: SettingsProps) => {
               <div className="card-title">Tasks Executation Records in Last 24 Hours</div>
               <br></br>
               <Flex direction="column" minHeight="285px">
-                {stat.last_day_success.length === 0 ?
-                  <View>
-                    <br></br>
-                    <h4>No Record Found</h4>
-                    <br></br>
-                  </View>
-                  :
-   
-                  <View>
-                    <Heading color="green" level={6} > Successed Task </Heading>
-                    <br></br>
+              {loading?
+                <Loader 
+                  size="large"
+                  variation="linear"
+                />
+                :
+                <View>
+                  <Heading color="green" level={6} > Successed Task </Heading>
+                  <br></br>
+
+                  {stat.last_day_success.length === 0 ?
+                    <View>
+                      <br></br>
+                      <h6>No Record Found</h6>
+                      <br></br>
+                    </View>
+                    :
                     <Table caption="test" highlightOnHover={false}>
                       <TableHead>
                         <TableRow>
@@ -185,19 +191,27 @@ const Dashboard = ({ getToken }: SettingsProps) => {
                       </TableHead>
                       <TableBody>
                         {stat.last_day_success.map((item) => (
-                            <TableRow key={item.receive_time}>
-                              <TableCell>{item.receive_time}</TableCell>
-                              <TableCell>{item.cluster_created_time}</TableCell>
-                              <TableCell>{item.job_finished_time}</TableCell>
-                              <TableCell>{item.run_duration}</TableCell>
-                            </TableRow>
-                          )
+                          <TableRow key={item.receive_time}>
+                            <TableCell>{item.receive_time}</TableCell>
+                            <TableCell>{item.cluster_created_time}</TableCell>
+                            <TableCell>{item.job_finished_time}</TableCell>
+                            <TableCell>{item.run_duration}</TableCell>
+                          </TableRow>
+                        )
                         )}
                       </TableBody>
                     </Table>
-                    <br></br>
-                    <Heading color="red" level={6} > Failed Task </Heading>
-                    <br></br>
+                  }
+                  <br></br>
+                  <Heading color="red" level={6} > Failed Task </Heading>
+                  <br></br>
+                  {stat.last_day_failed.length === 0 ?
+                    <View>
+                      <br></br>
+                      <h6>No Record Found</h6>
+                      <br></br>
+                    </View>
+                    :
                     <Table >
                       <TableHead>
                         <TableRow>
@@ -206,17 +220,18 @@ const Dashboard = ({ getToken }: SettingsProps) => {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                      {stat.last_day_failed.map((item2) => (
-                            <TableRow key={item2.receive_time}>
-                              <TableCell>{item2.receive_time}</TableCell>
-                              <TableCell>{item2.reason.toString()}</TableCell>
-                            </TableRow>
-                          )
+                        {stat.last_day_failed.map((item2) => (
+                          <TableRow key={item2.receive_time}>
+                            <TableCell>{item2.receive_time}</TableCell>
+                            <TableCell>{item2.reason.toString()}</TableCell>
+                          </TableRow>
+                        )
                         )}
                       </TableBody>
-                    </Table>                                 
-                  </View>
-                }
+                    </Table>
+                  }
+                </View>
+              }
               </Flex>
             </Card>
           </View>
