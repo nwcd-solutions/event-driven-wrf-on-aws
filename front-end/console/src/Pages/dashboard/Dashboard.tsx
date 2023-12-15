@@ -182,7 +182,7 @@ const Dashboard = ({ getToken }: SettingsProps) => {
                       <br></br>
                     </View>
                     :
-                    <Table caption="test" highlightOnHover={false}>
+                    <Table caption="" highlightOnHover={false}>
                       <TableHead>
                         <TableRow>
                           <TableCell as="th">Trigger Time</TableCell>
