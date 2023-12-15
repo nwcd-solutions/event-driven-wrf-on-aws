@@ -22,7 +22,7 @@ def handler(event, context):
         response = table.scan(
             FilterExpression=Key("receive_time").gt(start_date)
         )
-        if 'Item' in res:
+        if 'Items' in response:
             last_7d_success=0
             last_7d_failed=0
             last_7d_error=0
