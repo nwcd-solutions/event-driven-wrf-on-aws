@@ -9,7 +9,6 @@ import {
   Flex
 } from "@aws-amplify/ui-react";
 
-import { MOCK_PARAMETERS } from "./mock";
 import { Parameter } from "./Parameter"
 
 interface ParaTableProps {
