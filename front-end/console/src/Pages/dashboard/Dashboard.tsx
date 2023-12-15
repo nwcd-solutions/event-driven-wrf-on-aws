@@ -14,7 +14,7 @@ import {
   TableCell,
   TableBody
 } from "@aws-amplify/ui-react";
-import { MdRemoveRedEye, MdWeb, MdPermIdentity } from "react-icons/md";
+import { MdPermIdentity,MdThumbUp ,MdThumbDown} from "react-icons/md";
 import { Statistics } from "./Data";
 import MiniStatistics from "./MiniStatistics";
 import TrafficSources from "./TrafficSources";
@@ -144,17 +144,19 @@ const Dashboard = ({ getToken }: SettingsProps) => {
             <MiniStatistics
               title="Success Tasks(last 7 days)"
               amount={stat.last_7d_success}
-              icon={<MdRemoveRedEye />}
+              icon={<MdThumbUp />}
+              loading={loading}
             />
           </View>
           <View rowSpan={{ base: 1, large: 1 }}>
-            <MiniStatistics title="Failed Tasks(last 7 days)" amount={stat.last_7d_failed} icon={<MdWeb />} />
+            <MiniStatistics title="Failed Tasks(last 7 days)" amount={stat.last_7d_failed} icon={<MdThumbDown />} loading={loading}/>
           </View>
           <View rowSpan={{ base: 1, large: 1 }}>
             <MiniStatistics
               title="Execution Time Per Day"
               amount="23,762"
               icon={<MdPermIdentity />}
+              loading={loading}
             />
           </View>
 
