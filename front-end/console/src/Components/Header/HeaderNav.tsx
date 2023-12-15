@@ -23,21 +23,16 @@ const HeaderNav = () => {
       ) : (
         <></>
       )}
-
       <Menu
         menuAlign="end"
         trigger={
-          <MenuButton variation="menu">
-          
-            <div className="header-avatar">
-
-              <img alt="avatar" src={"https://i.pravatar.cc/150?img=3"}></img>
+          <MenuButton variation="menu">          
+            <div>
+              {user.username} 
             </div>
           </MenuButton>
         }
       >
-        <MenuItem onClick={() => navigate("/profile")}>Profile</MenuItem>
-        <MenuItem>Settings</MenuItem>
         <MenuItem onClick={signOut}>Logout</MenuItem>
       </Menu>
     </>
