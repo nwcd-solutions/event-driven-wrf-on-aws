@@ -52,7 +52,7 @@ def handler(event, context):
                         time_diff = end_time - start_time
                         last_d_item['run_duration'] = str(int(time_diff.total_seconds() / 60))
                         last_d_success.append(last_d_item)
-                    else:
+                    elif item['exec_status']=='failed':
                         last_d_item['reason']=item['reason']
                         last_d_failed.append(last_d_item)
             response={
