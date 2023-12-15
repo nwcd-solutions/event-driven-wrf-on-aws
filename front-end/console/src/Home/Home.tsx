@@ -12,7 +12,7 @@ import Settings from "../Pages/settings";
 import UsersTable from "../Pages/usersAdmin/UsersTablePage";
 import DomainDetail from "../Pages/domainDetail";
 import DomainCreate from "../Pages/domainCreate";
-
+import Tasks from "../Pages/task/Tasks";
 import { fetchAuthSession } from 'aws-amplify/auth'
 
 export function Home() {
@@ -37,6 +37,7 @@ export function Home() {
             <Route path="domain/:id" element={<DomainDetail getToken={getToken}/>} />
             <Route path="domain" element={<DomainCreate getToken={getToken}/>} />
             <Route path="settings" element={<Settings getToken={getToken}/>} />
+            <Route path="tasks" element={<Tasks getToken={getToken}/>} />
             <Route path="users-table" element={<UsersTable />} />
             <Route path="profile" element={<Profile />} />
 
