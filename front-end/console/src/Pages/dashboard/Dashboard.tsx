@@ -185,6 +185,7 @@ const Dashboard = ({ getToken }: SettingsProps) => {
                     <Table caption="" highlightOnHover={false}>
                       <TableHead>
                         <TableRow>
+                          <TableCell as="th">Ftime</TableCell>
                           <TableCell as="th">Trigger Time</TableCell>
                           <TableCell as="th">Cluster Ready Time</TableCell>
                           <TableCell as="th">Job Finished Time</TableCell>
@@ -194,6 +195,7 @@ const Dashboard = ({ getToken }: SettingsProps) => {
                       <TableBody>
                         {stat.last_day_success.map((item) => (
                           <TableRow key={item.receive_time}>
+                            <TableCell>{item.ftime}</TableCell>
                             <TableCell>{item.receive_time}</TableCell>
                             <TableCell>{item.cluster_created_time}</TableCell>
                             <TableCell>{item.job_finished_time}</TableCell>
