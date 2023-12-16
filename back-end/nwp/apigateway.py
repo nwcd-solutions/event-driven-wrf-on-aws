@@ -48,13 +48,30 @@ class ApiGateway(NestedStack):
                 logout_urls=["http://localhost:3000"]
             )
         )
-        self.cognito_domain = self.user_pool.add_domain(
-            "Domain",
-            cognito_domain=cognito.CognitoDomainOptions(
-                domain_prefix = domain_name
-            )
+        #self.cognito_domain = self.user_pool.add_domain(
+        #    "Domain",
+        #    cognito_domain=cognito.CognitoDomainOptions(
+        #        domain_prefix = domain_name
+        #    )
+        #)
+        #self.cognito_domain.apply_removal_policy(core.RemovalPolicy.DESTROY)
+        
+        # Create a Cognito Identity Pool
+        identity_pool = cognito.IdentityPool(self, "IdentityPool", 
+            authentication_providers={
+                cognito.UserPoolAuthProvider(self.user_pool, self.user_pool_client)
+            }
         )
-        self.cognito_domain.apply_removal_policy(core.RemovalPolicy.DESTROY)
+        s3_policy = iam.PolicyStatement(
+            effect=iam.Effect.ALLOW,
+            actions=[
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:DeleteObject"
+            ],
+            resources=["*"],
+        )
+        identity_pool.authenticated_role.add_to_policy(s3_policy)
         #---------------------------------------------------------------------------------------------
         # Create domain service Lambda functions
         #---------------------------------------------------------------------------------------------
