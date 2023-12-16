@@ -5,7 +5,6 @@ from aws_cdk import (
     aws_iam as iam,
     aws_logs as logs,
     aws_s3 as s3,
-    aws_cognito_identitypool_alpha as cognito_alpha,
     CfnOutput, NestedStack, Tags, Duration, Size
 )
 import aws_cdk as core
@@ -58,9 +57,10 @@ class ApiGateway(NestedStack):
         #self.cognito_domain.apply_removal_policy(core.RemovalPolicy.DESTROY)
         
         # Create a Cognito Identity Pool
-        identity_pool = cognito_alpha.IdentityPool(self, "IdentityPool", 
-            authentication_providers={
-                cognito.UserPoolAuthProvider(self.user_pool, self.user_pool_client)
+        identity_pool = cognito.IdentityPool(self, "IdentityPool", 
+            cognito_identity_providers={
+                client_id=self.user_pool_client.user_pool_client_id,
+                provider_name=self.user_pool.user_pool_provider_url
             }
         )
         s3_policy = iam.PolicyStatement(
@@ -72,7 +72,22 @@ class ApiGateway(NestedStack):
             ],
             resources=["*"],
         )
-        identity_pool.authenticated_role.add_to_policy(s3_policy)
+        auth_role = iam.Role(
+            self, 'AuthRole',
+            assumed_by=iam.FederatedPrincipal(
+                'cognito-identity.amazonaws.com',
+            ),
+        )
+
+        auth_role.add_to_policy(s3_policy)
+        cognito.CfnIdentityPoolRoleAttachment(
+            self, 'IdentityPoolRoleMap',
+            identity_pool_id=identity_pool.ref,
+            roles={
+                'authenticated': core.Fn.ref('authRoleArn'),
+            },
+        )
+
         #---------------------------------------------------------------------------------------------
         # Create domain service Lambda functions
         #---------------------------------------------------------------------------------------------
