@@ -57,13 +57,12 @@ class ApiGateway(NestedStack):
         #self.cognito_domain.apply_removal_policy(core.RemovalPolicy.DESTROY)
         
         # Create a Cognito Identity Pool
+        cognito_identity_provider_property = cognito.CfnIdentityPool.CognitoIdentityProviderProperty(
+            client_id = self.user_pool_client.user_pool_client_id,
+            provider_name = self.user_pool.user_pool_provider_url,
+        )
         identity_pool = cognito.CfnIdentityPool(self, "IdentityPool", 
-            cognito_identity_providers=[
-                {
-                    'client_id':self.user_pool_client.user_pool_client_id,
-                    'provider_name':self.user_pool.user_pool_provider_url
-                }
-            ],
+            cognito_identity_providers=[cognito_identity_provider_property ],
             allow_unauthenticated_identities=False
         )
         s3_policy = iam.PolicyStatement(
