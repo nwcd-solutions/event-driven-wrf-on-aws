@@ -5,6 +5,7 @@ from aws_cdk import (
     aws_iam as iam,
     aws_logs as logs,
     aws_s3 as s3,
+    aws_cognito_identitypool_alpha as cognito_alpha,
     CfnOutput, NestedStack, Tags, Duration, Size
 )
 import aws_cdk as core
@@ -57,7 +58,7 @@ class ApiGateway(NestedStack):
         #self.cognito_domain.apply_removal_policy(core.RemovalPolicy.DESTROY)
         
         # Create a Cognito Identity Pool
-        identity_pool = cognito.IdentityPool(self, "IdentityPool", 
+        identity_pool = cognito_alpha.IdentityPool(self, "IdentityPool", 
             authentication_providers={
                 cognito.UserPoolAuthProvider(self.user_pool, self.user_pool_client)
             }
