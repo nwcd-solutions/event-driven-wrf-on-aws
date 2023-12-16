@@ -58,10 +58,12 @@ class ApiGateway(NestedStack):
         
         # Create a Cognito Identity Pool
         identity_pool = cognito.IdentityPool(self, "IdentityPool", 
-            cognito_identity_providers={
-                client_id=self.user_pool_client.user_pool_client_id,
-                provider_name=self.user_pool.user_pool_provider_url
-            }
+            cognito_identity_providers=[
+                {
+                    'client_id':self.user_pool_client.user_pool_client_id,
+                    'provider_name':self.user_pool.user_pool_provider_url
+                }
+            ]
         )
         s3_policy = iam.PolicyStatement(
             effect=iam.Effect.ALLOW,
