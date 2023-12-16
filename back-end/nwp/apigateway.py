@@ -63,7 +63,8 @@ class ApiGateway(NestedStack):
                     'client_id':self.user_pool_client.user_pool_client_id,
                     'provider_name':self.user_pool.user_pool_provider_url
                 }
-            ]
+            ],
+            allow_unauthenticated_identities=False
         )
         s3_policy = iam.PolicyStatement(
             effect=iam.Effect.ALLOW,
