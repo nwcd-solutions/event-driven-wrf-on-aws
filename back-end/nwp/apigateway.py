@@ -87,7 +87,7 @@ class ApiGateway(NestedStack):
             self, 'IdentityPoolRoleMap',
             identity_pool_id=identity_pool.ref,
             roles={
-                'authenticated': core.Fn.ref('authRoleArn'),
+                'authenticated': auth_role.role_arn,
             },
         )
 
