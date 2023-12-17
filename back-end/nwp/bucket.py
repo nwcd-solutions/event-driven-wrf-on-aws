@@ -13,14 +13,14 @@ class Bucket(NestedStack):
         self.bucket = s3.Bucket(
             self, 'NWPBucket',
             bucket_name = bucket_name,
-            cors=s3.CorsRule(
+            cors=[s3.CorsRule(
                 allowed_headers=["*"],
                 allowed_methods=[s3.HttpMethods.GET, s3.HttpMethods.HEAD, s3.HttpMethods.PUT, s3.HttpMethods.POST, s3.HttpMethods.DELETE],
                 allowed_origins=["*"],
                 exposed_headers=["x-amz-server-side-encryption", "x-amz-request-id", "x-amz-id-2", "ETag"],
                 id="S3CORSRuleId1",
                 max_age=3000
-            ),
+            )],
             auto_delete_objects = True,
             removal_policy=core.RemovalPolicy.DESTROY,
         )
