@@ -48,15 +48,9 @@ class ApiGateway(NestedStack):
                 logout_urls=["http://localhost:3000"]
             )
         )
-        #self.cognito_domain = self.user_pool.add_domain(
-        #    "Domain",
-        #    cognito_domain=cognito.CognitoDomainOptions(
-        #        domain_prefix = domain_name
-        #    )
-        #)
-        #self.cognito_domain.apply_removal_policy(core.RemovalPolicy.DESTROY)
-        
+        #---------------------------------------------------------------------------------------------
         # Create a Cognito Identity Pool
+        #---------------------------------------------------------------------------------------------
         cognito_identity_provider_property = cognito.CfnIdentityPool.CognitoIdentityProviderProperty(
             client_id = self.user_pool_client.user_pool_client_id,
             provider_name = self.user_pool.user_pool_provider_name,
@@ -65,15 +59,7 @@ class ApiGateway(NestedStack):
             cognito_identity_providers=[cognito_identity_provider_property],
             allow_unauthenticated_identities=False
         )
-        s3_policy = iam.PolicyStatement(
-            effect=iam.Effect.ALLOW,
-            actions=[
-                "s3:PutObject",
-                "s3:GetObject",
-                "s3:DeleteObject"
-            ],
-            resources=["*"],
-        )
+
         auth_role = iam.Role(
             self, 'AuthRole',
             assumed_by=iam.FederatedPrincipal(
@@ -81,7 +67,61 @@ class ApiGateway(NestedStack):
             ),
         )
 
-        auth_role.add_to_policy(s3_policy)
+        s3_auth_public_policy = iam.Policy(
+            self,
+            "S3AuthPublicPolicy",
+            policy_name="S3AuthPublicPolicy",
+            statements=[
+                iam.PolicyStatement(
+                    effect=iam.Effect.ALLOW,
+                    actions=[
+                        "s3:PutObject",
+                        "s3:GetObject",
+                        "s3:ListBucket",
+                        "s3:DeleteObject"
+                    ],
+                    resources=[f"arn:aws:s3:::{bucket_name}/public/*"]
+                )
+            ]
+        )
+        s3_auth_public_policy.attach_to_role(auth_role)
+        s3_auth_protected_policy = iam.Policy(
+            self,
+            "S3AuthProtectedPolicy",
+            policy_name="S3AuthProtectedPolicy",
+            statements=[
+                iam.PolicyStatement(
+                    effect=iam.Effect.ALLOW,
+                    actions=[
+                        "s3:PutObject",
+                        "s3:GetObject",
+                        "s3:ListBucket",
+                        "s3:DeleteObject"                        
+                    ],
+                    resources=[f"arn:aws:s3:::{bucket_name}/protected/${{cognito-identity.amazonaws.com:sub}}/*"]
+                )
+            ]
+        )
+        s3_auth_protected_policy.attach_to_role(auth_role)
+        s3_auth_private_policy = iam.Policy(
+            self,
+            "S3AuthPrivatePolicy",
+            policy_name="S3AuthPrivatePolicy",
+            statements=[
+                iam.PolicyStatement(
+                    effect=iam.Effect.ALLOW,
+                    actions=[
+                        "s3:PutObject",
+                        "s3:GetObject",
+                        "s3:ListBucket",
+                        "s3:DeleteObject"                       
+                    ],
+                    resources=[f"arn:aws:s3:::{bucket_name}/private/${{cognito-identity.amazonaws.com:sub}}/*"]
+                )
+            ]
+        )
+        s3_auth_private_policy.attach_to_role(auth_role)
+        
         cognito.CfnIdentityPoolRoleAttachment(
             self, 'IdentityPoolRoleMap',
             identity_pool_id=identity_pool.ref,
@@ -89,7 +129,7 @@ class ApiGateway(NestedStack):
                 'authenticated': auth_role.role_arn,
             },
         )
-
+        
         #---------------------------------------------------------------------------------------------
         # Create domain service Lambda functions
         #---------------------------------------------------------------------------------------------
