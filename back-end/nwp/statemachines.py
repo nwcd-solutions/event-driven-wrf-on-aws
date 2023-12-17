@@ -805,35 +805,7 @@ class StepFunction (NestedStack):
         Tags.of(trigger_create).add("Purpose", "Event Driven Weather Forecast", priority=300)
         gfs = sns.Topic.from_topic_arn(self, "NOAAGFS", "arn:aws:sns:us-east-1:123901341784:NewGFSObject")
         trigger_create.add_event_source(λ_events.SnsEventSource(gfs))
-        #-----------------------------------------------------------------------------
-        # Create lambda function to response for s3 receiving fcst.done file
-        #-----------------------------------------------------------------------------        
-        trigger_destroy = λ.Function(self, "destroy_cluster",
-                code=λ.Code.from_asset("./lambda/destroy"),
-                environment={
-                    "CLUSTER_NAME": cluster_name,
-                    #"PCLUSTER_API_URL": purl,
-                    "REGION": Aws.REGION,
-                    "SM_ARN":destroy_sf.attr_arn,
-                    "EXEC_DB":exec_db.table_name,
-                    "FTIME": ftime_ssm.parameter_name,
-                    "EXEC_ID": exec_id_ssm.parameter_name,
-                    "PYTHONPATH":"/opt/python",
-                    "EXEC_RECEIVE_TIME": receive_time_ssm.parameter_name
-                },
-                handler="index.handler",
-                layers=[layer],
-                log_retention=logs.RetentionDays.ONE_DAY,
-                role=trigger_lambda_role,
-                runtime=λ.Runtime.PYTHON_3_9,
-                timeout=Duration.seconds(60)
-            )
-        Tags.of(trigger_destroy).add("Purpose", "Event Driven Weather Forecast", priority=300)
 
-        outputs = aws_s3_notifications.LambdaDestination(trigger_destroy)
-        bucket = s3.Bucket.from_bucket_name(self, "nwp-bucket", bucket_name)
-        bucket.add_event_notification(s3.EventType.OBJECT_CREATED, outputs,
-                s3.NotificationKeyFilter(prefix="outputs/", suffix="done"))
 
         CfnOutput(self, "StateMachineArn", value=main_sf.attr_arn,
             export_name="StateMachineArn")
