@@ -6,6 +6,7 @@ import {
   MdModeEditOutline,
   MdAccountBox,
   MdOutlineTableChart,
+  MdCloudUpload
 } from "react-icons/md";
 
 export const baseConfig = {
@@ -59,6 +60,12 @@ export const appNavs = [
     icon: <Icon as={MdOutlineTableChart} />,
     title: "Task Setting",
     to: "/tasks",
+  },
+  {
+    eventKey: "files",
+    icon: <Icon as={MdCloudUpload} />,
+    title: "Files Management",
+    to: "/files",
   },
 
 
