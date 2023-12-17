@@ -47,7 +47,7 @@ class Root(Stack):
         if (slurm_acct == "true") :
             sf.add_dependency(slurmdb)
         sf.add_dependency(vpc)
-       
+        sf.add_dependency(bucket)
         api = ApiGateway(self,"api",datastore=datastore ,bucket=f"nwp-{prefix_name}",layer=layer)
         api.add_dependency(sf)
         
