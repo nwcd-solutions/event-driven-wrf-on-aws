@@ -19,7 +19,7 @@ class Bucket(NestedStack):
                 allowed_origins=["*"],
                 exposed_headers=["x-amz-server-side-encryption", "x-amz-request-id", "x-amz-id-2", "ETag"],
                 id="S3CORSRuleId1",
-                max_age=core.Duration.seconds(3000)
+                max_age=3000
             ),
             auto_delete_objects = True,
             removal_policy=core.RemovalPolicy.DESTROY,
