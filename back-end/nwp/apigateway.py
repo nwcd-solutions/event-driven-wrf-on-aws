@@ -260,7 +260,7 @@ class ApiGateway(NestedStack):
         #---------------------------------------------------------------------------------------------
         task_service_handler_policy_doc = iam.PolicyDocument(statements=[
             iam.PolicyStatement(
-                actions=["ssm:*"],
+                actions=["dynamodb:*"],
                 resources=["*"],
                 effect=iam.Effect.ALLOW),
         ])
