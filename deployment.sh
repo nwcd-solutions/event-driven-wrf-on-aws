@@ -45,4 +45,5 @@ sed -i "s|<map_name>|$location_map_name|g" console/src/aws-export.js
 sed -i "s|<s3_bucket>|$s3_bucket|g" console/src/aws-export.js
 sed -i "s|<aws_region>|us-east-2|g" console/src/aws-export.js
 sed -i "s|<cognito_identity_pool_id>|$cognito_identity_pool_id|g" console/src/aws-export.js
-
+cd console
+npm install react-scripts
