@@ -59,11 +59,26 @@ class ApiGateway(NestedStack):
             cognito_identity_providers=[cognito_identity_provider_property],
             allow_unauthenticated_identities=False
         )
+        unauth_role = iam.Role(self, 'UnauthRole',
+            assumed_by=iam.FederatedPrincipal(
+                'cognito-identity.amazonaws.com', 
+                {
+                    "StringEquals": {"cognito-identity.amazonaws.com:aud": identity_pool.ref},
+                    "ForAnyValue:StringLike": {"cognito-identity.amazonaws.com:amr": "unauthenticated"}
+                }, 
+                "sts:AssumeRoleWithWebIdentity")
+        )
 
         auth_role = iam.Role(
             self, 'AuthRole',
             assumed_by=iam.FederatedPrincipal(
                 'cognito-identity.amazonaws.com',
+                {
+                    "StringEquals": {"cognito-identity.amazonaws.com:aud": self.identity_pool.ref},
+                    "ForAnyValue:StringLike": {"cognito-identity.amazonaws.com:amr": "authenticated"}
+
+                },
+                "sts:AssumeRoleWithWebIdentity"
             ),
         )
 
@@ -158,6 +173,7 @@ class ApiGateway(NestedStack):
             identity_pool_id=self.identity_pool.ref,
             roles={
                 'authenticated': auth_role.role_arn,
+                'unauthenticated': unauth_role.role_arn,
             },
         )
         
