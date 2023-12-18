@@ -55,7 +55,7 @@ class ApiGateway(NestedStack):
             client_id = self.user_pool_client.user_pool_client_id,
             provider_name = self.user_pool.user_pool_provider_name,
         )
-        identity_pool = cognito.CfnIdentityPool(self, "IdentityPool", 
+        self.identity_pool = cognito.CfnIdentityPool(self, "IdentityPool", 
             cognito_identity_providers=[cognito_identity_provider_property],
             allow_unauthenticated_identities=False
         )
