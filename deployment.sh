@@ -32,7 +32,7 @@ cognito_client_id=$(jq '.WRF.cognitoclientid' outputs.json)
 apigw_endpoint=$(jq '.WRF.apigwendpoint' outputs.json)
 apigw_name=$(jq '.WRF.apigwname' outputs.json)
 location_map_name=$(jq '.WRF.locationmapname' outputs.json)
-
+s3_bucket=$(jq '.WRF.s3bucket' outputs.json)
 
 cd ../front-end
 cp aws-export.js console/src/
@@ -42,5 +42,6 @@ sed -i "s|<aws_user_pools_web_client_id>|$cognito_client_id|g" console/src/aws-e
 sed -i "s|<api_gateway_endpoint>|$apigw_endpoint|g" console/src/aws-export.js
 sed -i "s|<api_gateway_name>|$apigw_name|g" console/src/aws-export.js
 sed -i "s|<map_name>|$location_map_name|g" console/src/aws-export.js
+sed -i "s|<s3_bucket>|$s3_bucket|g" console/src/aws-export.js
 sed -i "s|<aws_region>|us-east-2|g" console/src/aws-export.js
 
