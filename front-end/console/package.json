@@ -6,6 +6,7 @@
     "@aws-amplify/geo": "^3.0.6",
     "@aws-amplify/ui-react": "^6.0.3",
     "@aws-amplify/ui-react-geo": "^2.0.3",
+    "@aws-amplify/ui-react-storage": "^3.0.7",
     "@aws/amazon-location-utilities-auth-helper": "^1.0.3",
     "@faker-js/faker": "^8.3.1",
     "@testing-library/jest-dom": "^5.17.0",
