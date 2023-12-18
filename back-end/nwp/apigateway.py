@@ -155,7 +155,7 @@ class ApiGateway(NestedStack):
         
         cognito.CfnIdentityPoolRoleAttachment(
             self, 'IdentityPoolRoleMap',
-            identity_pool_id=identity_pool.ref,
+            identity_pool_id=self.identity_pool.ref,
             roles={
                 'authenticated': auth_role.role_arn,
             },
