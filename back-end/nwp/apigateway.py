@@ -280,8 +280,7 @@ class ApiGateway(NestedStack):
         task_service_handler = _lambda.Function(self,"task_service",
             code=_lambda.Code.from_asset("./service/task"),
             environment={
-                "AUTO_MODE": datastore.auto_mode_ssm.parameter_name,
-                "PARAS_LIST": f"{datastore.fcst_days_ssm.parameter_name},{datastore.key_str_ssm.parameter_name},{datastore.job_timeout_ssm.parameter_name}",
+                "EXEC_DB":datastore.exec_db.table_name,
                 "PYTHONPATH":"/opt/python",
             },
             log_retention=logs.RetentionDays.ONE_DAY,
