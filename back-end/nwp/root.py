@@ -60,6 +60,7 @@ class Root(Stack):
         CfnOutput(self, "apigw_name", value=api.api.rest_api_name)
         CfnOutput(self, "location_map_name", value=webapp.map.map_name)
         CfnOutput(self, "s3_bucket", value=f"nwp-{prefix_name}")
+        CfnOutput(self, "cognito_identity_pool_id", value=api.api.identity_pool.attr_id)
         #CfnOutput(self, "location_api_key", value=webapp.map.)
     @property
     def outputs(self):
