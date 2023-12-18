@@ -77,7 +77,6 @@ class ApiGateway(NestedStack):
                     actions=[
                         "s3:PutObject",
                         "s3:GetObject",
-                        "s3:ListBucket",
                         "s3:DeleteObject"
                     ],
                     resources=[f"arn:aws:s3:::{bucket_name}/public/*"]
@@ -95,7 +94,6 @@ class ApiGateway(NestedStack):
                     actions=[
                         "s3:PutObject",
                         "s3:GetObject",
-                        "s3:ListBucket",
                         "s3:DeleteObject"                        
                     ],
                     resources=[f"arn:aws:s3:::{bucket_name}/protected/${{cognito-identity.amazonaws.com:sub}}/*"]
@@ -113,7 +111,6 @@ class ApiGateway(NestedStack):
                     actions=[
                         "s3:PutObject",
                         "s3:GetObject",
-                        "s3:ListBucket",
                         "s3:DeleteObject"                       
                     ],
                     resources=[f"arn:aws:s3:::{bucket_name}/private/${{cognito-identity.amazonaws.com:sub}}/*"]
@@ -121,6 +118,40 @@ class ApiGateway(NestedStack):
             ]
         )
         s3_auth_private_policy.attach_to_role(auth_role)
+        s3_read_only_policy = iam.Policy(
+            self,
+            "S3ReadOnlyPolicy",
+            policy_name="S3ReadOnlyPolicy",
+            statements=[
+                iam.PolicyStatement(
+                    effect=iam.Effect.ALLOW,
+                    actions=[
+                        "s3:ListBucket",                    
+                    ],
+                    resources=[f"arn:aws:s3:::{bucket_name}"],
+                    conditions={
+                        "StringLike": {
+                            "s3:prefix": [
+                                "public/",
+                                "public/*",
+                                "protected/",
+                                "protected/*",
+                                "private/${cognito-identity.amazonaws.com:sub}/",
+                                "private/${cognito-identity.amazonaws.com:sub}/*"
+                            ]    
+                        }    
+                    }   
+                ),
+                iam.PolicyStatement(
+                    effect=iam.Effect.ALLOW,
+                    actions=[
+                        "s3:GetObject",                    
+                    ],
+                    resources=[f"arn:aws:s3:::{bucket_name}/protected/*"],  
+                )
+            ]
+        )
+        s3_read_only_policy.attach_to_role(auth_role)
         
         cognito.CfnIdentityPoolRoleAttachment(
             self, 'IdentityPoolRoleMap',
