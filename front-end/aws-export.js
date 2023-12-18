@@ -4,6 +4,7 @@
 const config = {
     "aws_project_region": "<aws_region>",
     "aws_cognito_region": "<aws_region>",
+    "aws_cognito_identity_pool_id": <cognito_identity_pool_id>,
     "aws_user_pools_id": <aws_user_pools_id>,
     "aws_user_pools_web_client_id": <aws_user_pools_web_client_id>,
     "oauth": {
