@@ -7,9 +7,6 @@ const config = {
     "aws_cognito_identity_pool_id": <cognito_identity_pool_id>,
     "aws_user_pools_id": <aws_user_pools_id>,
     "aws_user_pools_web_client_id": <aws_user_pools_web_client_id>,
-    "oauth": {
-        "domain": <cognito_domain>
-    },
     "aws_cognito_username_attributes": [
         "EMAIL"
     ],
