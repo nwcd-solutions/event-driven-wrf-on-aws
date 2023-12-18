@@ -215,4 +215,5 @@ export function Files() {
       </Modal>
     </>
   );
-}
+};
+export default Files;
