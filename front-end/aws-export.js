@@ -47,7 +47,7 @@ const config = {
         }
     },
     "aws_user_files_s3_bucket": <s3_bucket>,
-    "aws_user_files_s3_bucket_region": <aws_region>
+    "aws_user_files_s3_bucket_region": "<aws_region>"
 
 };
 
