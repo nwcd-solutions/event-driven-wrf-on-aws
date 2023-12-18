@@ -63,7 +63,7 @@ class ApiGateway(NestedStack):
             assumed_by=iam.FederatedPrincipal(
                 'cognito-identity.amazonaws.com', 
                 {
-                    "StringEquals": {"cognito-identity.amazonaws.com:aud": identity_pool.ref},
+                    "StringEquals": {"cognito-identity.amazonaws.com:aud": self.identity_pool.ref},
                     "ForAnyValue:StringLike": {"cognito-identity.amazonaws.com:amr": "unauthenticated"}
                 }, 
                 "sts:AssumeRoleWithWebIdentity")
