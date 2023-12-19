@@ -182,7 +182,7 @@ def handler(event, context):
     for item in items:
         n=item['name']
         pids.append(preproc(n))
-    i=1i
+    i=1
     for item in items:
         n=item['name']
         nodes=str(math.ceil(int(item['cores'])/64))
