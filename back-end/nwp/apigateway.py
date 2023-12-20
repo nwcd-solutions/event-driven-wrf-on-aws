@@ -17,6 +17,7 @@ class ApiGateway(NestedStack):
         domain_name = kwargs["bucket"]
         layer = kwargs["layer"]
         datastore = kwargs["datastore"]
+        map_arn = kwargs["map_arn"]
         #---------------------------------------------------------------------------------------------
         # Create a Cognito User Pool
         #---------------------------------------------------------------------------------------------
@@ -81,7 +82,24 @@ class ApiGateway(NestedStack):
                 "sts:AssumeRoleWithWebIdentity"
             ),
         )
-
+        map_auth_policy = iam.Policy(
+            self,
+            "MapAuthPolicy",
+            policy_name="MapAuthPolicy",
+            statements=[
+                iam.PolicyStatement(
+                    effect=iam.Effect.ALLOW,
+                    actions=[
+                        "geo:GetMapStyleDescriptor",
+                        "geo:GetMapGlyphs",
+                        "geo:GetMapSprites",
+                        "geo:GetMapTile"
+                    ],
+                    resources=[map_arn]
+                )
+            ]
+        )
+        map_auth_policy.attach_to_role(auth_role)
         s3_auth_public_policy = iam.Policy(
             self,
             "S3AuthPublicPolicy",
