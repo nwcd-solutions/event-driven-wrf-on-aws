@@ -49,7 +49,7 @@ class Root(Stack):
         sf.add_dependency(vpc)
         sf.add_dependency(bucket)
         webapp = WebApp(self,"webapplication")
-        api = ApiGateway(self,"api",datastore=datastore ,bucket=f"nwp-{prefix_name}",layer=layer,map_arn=webapp.map.arn)
+        api = ApiGateway(self,"api",datastore=datastore ,bucket=f"nwp-{prefix_name}",layer=layer,map_arn=webapp.map.attr_arn)
         api.add_dependency(sf)
         api.add_dependency(webapp)
         
