@@ -48,10 +48,11 @@ class Root(Stack):
             sf.add_dependency(slurmdb)
         sf.add_dependency(vpc)
         sf.add_dependency(bucket)
-        api = ApiGateway(self,"api",datastore=datastore ,bucket=f"nwp-{prefix_name}",layer=layer)
-        api.add_dependency(sf)
-        
         webapp = WebApp(self,"webapplication")
+        api = ApiGateway(self,"api",datastore=datastore ,bucket=f"nwp-{prefix_name}",layer=layer,map_arn=webapp.map.arn)
+        api.add_dependency(sf)
+        api.add_dependency(webapp)
+        
         
         CfnOutput(self, "cognito_userpool_id", value=api.user_pool.user_pool_id)
         CfnOutput(self, "cognito_client_id", value=api.user_pool_client.user_pool_client_id)
