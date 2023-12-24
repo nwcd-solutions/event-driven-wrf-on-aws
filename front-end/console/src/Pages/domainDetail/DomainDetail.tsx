@@ -196,8 +196,24 @@ const DomainDetail = ({getToken}:DomainDetailProps) => {
 
   const handleNamelistUpdate = (namelist:string,type:string) => {
     if (domain !=null){
-      setDomain({...domain,wps_namelist:namelist});
-    }   
+      if (type=='wps'){
+        setDomain({...domain,wps_namelist:namelist});
+        if(domain.name!='' &&  domain.wrf_namelist!='' && domain.wrf_bk_namelist!=''){
+          setEnableCreate(true);
+         } 
+      }else if (type=='wrf'){
+        setDomain({...domain,wrf_namelist:namelist});
+        if(domain.name!='' && domain.wps_namelist!=''  && domain.wrf_bk_namelist!=''){
+          setEnableCreate(true);
+         } 
+      }else if(type=='wrf_bk'){
+        setDomain({...domain,wrf_bk_namelist:namelist});
+        if(domain.name!='' && domain.wps_namelist!='' && domain.wrf_namelist!='' ){
+          setEnableCreate(true);
+         } 
+      }
+      validate();
+    }     
   };
 
   const handleCheck =  () => {
