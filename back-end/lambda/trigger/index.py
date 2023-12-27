@@ -6,6 +6,17 @@ from datetime import datetime
 
 ssm = boto3.client('ssm')
 dynamodb = boto3.resource('dynamodb')
+s3 = boto3.resource('s3')
+bucket = s3.Bucket(os.getenv('bucket_name'))
+
+def check_files_exist():
+    files_to_check = ['zCal.py', 'zFunc.py', 'zConfig.py','GFSwrfout_varnames.xlsx', 'process_gfs.py','process_gfs.sh']
+    for file in files_to_check:
+        file_path =  'public/' + file
+        if not any(obj.key == file_path for obj in bucket.objects.filter(Prefix=folder_path)):
+            return False
+    return True
+
 
 def handler(event, context):
     if (event["Records"]=="test"):
@@ -47,7 +58,7 @@ def handler(event, context):
     auto_mode = response['Parameter']['Value']    
     response = ssm.get_parameter(Name=os.getenv('FCST_DAYS'))
     fcst_days = response['Parameter']['Value']    
-    if domains_num==0 or auto_mode=="False" or fcst_days=="0":
+    if domains_num==0 or auto_mode=="False" or fcst_days=="0" or not check_files_exist():
         print("stop working")
         exec_table.update_item(
             Key={
@@ -59,7 +70,7 @@ def handler(event, context):
                 ':end_time':current_time,
                 ':exec_status':'failed',
                 ':ftime':ftime, 
-                ':reason':r'condition not satisfied,domains number is {},auto mode is {}, fcst days is {}'.format(domains_num,auto_mode,fcst_days)
+                ':reason':r'condition not satisfied,domains number is {},auto mode is {}, fcst days is {}, whether post-scripts exist:{}'.format(domains_num,auto_mode,fcst_days,check_files_exist())
             }
         )
         return
