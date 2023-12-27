@@ -16,10 +16,10 @@ class WrfConfig:
     """
     # list of all fields supported
     ALL_KEYS: List[str] = ['name', 'description', 'wrf_namelist', 'wps_namelist', 'wrf_bk_namelist','cores',
-                           's3_key_geo_em', 's3_key_wrf_namelist', 's3_key_wps_namelist','s3_key_wrf_bk_namelist']
+                           's3_key_geo_em', 's3_key_wrf_namelist', 's3_key_wps_namelist','s3_key_wrf_bk_namelist','s3_key_location']
 
     # list of fields to remove from the data
-    SANITIZE_KEYS: List[str] = ['s3_key_geo_em', 's3_key_wrf_namelist', 's3_key_wps_namelist','s3_key_wrf_bk_namelist']
+    SANITIZE_KEYS: List[str] = ['s3_key_geo_em', 's3_key_wrf_namelist', 's3_key_wps_namelist','s3_key_wrf_bk_namelist','s3_key_location']
 
     # define a Domain type to store grid dimensions of a domain
     Domain = namedtuple('Domain', 'nx ny')
@@ -37,6 +37,7 @@ class WrfConfig:
         self._domain_center: Union[LatLonPoint, None] = None
         self._domain_size_ew_meters: Union[int, None] = None
         self._domain_size_ns_meters: Union[int, None] = None
+        self.location:dict=[]
         self._cores: int = 0
 
         if data:
@@ -55,9 +56,11 @@ class WrfConfig:
             's3_key_wrf_namelist': self.s3_key_wrf_namelist,
             's3_key_wps_namelist': self.s3_key_wps_namelist,
             's3_key_wrf_bk_namelist': self.s3_key_wrf_bk_namelist,
+            's3_key_location': self.s3_key_location,
             'wrf_namelist': self.wrf_namelist,
             'wps_namelist': self.wps_namelist,
             'wrf_bk_namelist': self.wrf_bk_namelist,
+            'location':self.location,
             'domain_center': self.domain_center.data if self.domain_center is not None else None,
             'domain_size': self.domain_size if self.domain_size is not None else None,
             'cores': self.cores
@@ -74,6 +77,7 @@ class WrfConfig:
         self.wrf_namelist = data['wrf_namelist'] if 'wrf_namelist' in data else None
         self.wrf_bk_namelist = data['wrf_bk_namelist'] if 'wrf_bk_namelist' in data else None
         self.wps_namelist = data['wps_namelist'] if 'wps_namelist' in data else None
+        self.location = data['location'] if 'location' in data else {}
         self.domain_center = LatLonPoint(data['domain_center']) if 'domain_center' in data else None
         self.domain_size = data['domain_size'] if 'domain_size' in data else None
         self.cores = data['cores'] if 'cores' in data else 0
@@ -121,6 +125,14 @@ class WrfConfig:
         """
         return f'configurations/{self.name}/namelist.wps'
 
+    @property
+    def s3_key_location(self) -> str:
+        """
+        Get the S3 key for the wps namelist
+        :return: S3 key
+        """
+        return f'configurations/{self.name}/location.xlsx'
+        
     @property
     def s3_key_geo_em(self) -> str:
         """
@@ -301,3 +313,4 @@ class WrfConfig:
                 max_idx = idx
 
         return domain_list[min_idx], domain_list[max_idx]
+
