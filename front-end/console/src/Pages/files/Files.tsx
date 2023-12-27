@@ -203,7 +203,7 @@ export function Files() {
           <br></br>
           <StorageManager
             accessLevel="guest"
-            maxFileCount={1}
+            maxFileCount={10}
             path="scripts/"
             onUploadSuccess={handleComplete}
             isResumable
