@@ -89,11 +89,14 @@ class StepFunction (NestedStack):
         # Create Lambda  Subnet
         #-------------------------------------------------------------------------------------------
 
-        subnet = vpc.public_subnets[1].subnet_id
+        pub_subnet = vpc.public_subnets[1].subnet_id
         for net in vpc.public_subnets:
             if net.availability_zone == "us-east-2b":
-                subnet = net
-        
+                pub_subnet = net
+        private_subnet = vpc.private_subnets[1].subnet_id
+        for net in vpc.private_subnets:
+            if net.availability_zone == "us-east-2b":
+                private_subnet = net
         #-----------------------------------------------------------------------------------------------------------------------------
         # Create Lambda function to create parallel-cluster
         #-----------------------------------------------------------------------------------------------------------------------------
@@ -146,7 +149,8 @@ class StepFunction (NestedStack):
                     "REGION": Aws.REGION,
                     "S3_URL_POST_INSTALL_HEADNODE": f"{post_head_amd64.s3_object_url}",
                     "SG": sg_rds.security_group_id,
-                    "SUBNETID": subnet,
+                    "PUBLIC_SUBNETID": public_subnet,
+                    "PRIVATE_SUBNETID": private_subnet,
                     "FORECAST_DAYS": fcst_days_ssm.parameter_name,
                     #"NUM_DOMAINS": domains,                    
                     "KMS_POLICY": kms_all_policy.managed_policy_arn,
