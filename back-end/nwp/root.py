@@ -24,8 +24,8 @@ class Root(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
-
-        slurm_acct= CfnParameter(self, "SlurmAcct",type="String", default="false",description="whether slurm account is neccessary")
+        slurm_acct="true"
+        #slurm_acct= CfnParameter(self, "SlurmAcct",type="String", default="false",description="whether slurm account is neccessary")
         prefix_name = generate_bucket_name()
         bucket = Bucket(self,"bucket",bucket_name=f"nwp-{prefix_name}")     
         vpc = Vpc(self, "vpc")
