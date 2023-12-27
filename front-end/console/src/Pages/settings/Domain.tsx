@@ -12,6 +12,7 @@ export class Domain {
     wrf_namelist: string = '';
     wrf_bk_namelist: string = '';
     wps_namelist: string =  '';
+    location:any = [];
     domain_center?: LatLonPoint;
     domain_size: number[]=[0,0];    
     s3_key_wrf_namelist?:string = '';
@@ -34,7 +35,7 @@ export class Domain {
       if (initializer.s3_key_geo_em) this.s3_key_geo_em = initializer.s3_key_geo_em;
       if (initializer.s3_key_wrf_bk_namelist) this.s3_key_wrf_bk_namelist = initializer.s3_key_wrf_bk_namelist;
       if (initializer.wrf_bk_namelist) this.wrf_bk_namelist = initializer.wrf_bk_namelist;
-    
+      if (initializer.location) this.location = initializer.location;
     
           
     }
