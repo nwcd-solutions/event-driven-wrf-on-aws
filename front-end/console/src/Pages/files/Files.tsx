@@ -9,6 +9,7 @@ import {
   TableBody,
   TableCell,
   TableRow,
+  CheckboxField,
   View,
   Menu,
   MenuButton,
@@ -174,6 +175,7 @@ export function Files() {
                   <TableRow key={item.name}>
                     <TableCell>
                       <Flex >
+                         <CheckboxField label="" name="selectfile" value="yes" />
                         {item.type == 'aolder' ? <Icon width="10" size="small" as={FcFolder} /> : <Icon width="10" size="large" as={FcFile} />}
 
                         {item.name}
