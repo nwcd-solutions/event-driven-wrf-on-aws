@@ -67,7 +67,7 @@ const DomainTable = ({domains, onDelete}:DomainTableProps) => {
                 <TableCell>{item.description}</TableCell>
                 <TableCell>{item.cores}</TableCell>
                 <TableCell> [ lat: {item.domain_center?.latitude} , lon: {item.domain_center?.longitude} ]  </TableCell>
-                <TableCell> [ {item.domain_size[0]},{item.domain_size[1]}]   </TableCell>
+                <TableCell> [ {item.domain_size[0]},{item.domain_size[1]} ]   </TableCell>
                 <TableCell> s3://{bucket}/{item.s3_key_wrf_namelist?.substring(0,item.s3_key_wrf_namelist.lastIndexOf('/'))}/  </TableCell>
         
                 <TableCell>
