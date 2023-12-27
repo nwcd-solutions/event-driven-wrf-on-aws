@@ -10,3 +10,4 @@ numpy==1.23.5
 requests>=2.20
 pytz>=2020.4
 pygrib>=2.1.4
+openpyxl
