@@ -5,7 +5,7 @@ import { Domain } from "../settings/Domain";
 import { post } from 'aws-amplify/api';
 import  Namelist  from "./Namelist";
 import { en } from "@faker-js/faker";
-
+import Location from "./Location";
 
 interface DomainDetailProps {
   getToken:()=>void;
@@ -20,7 +20,6 @@ const DomainCreate = ({getToken}:DomainDetailProps) => {
   const [enableCreate,setEnableCreate]= useState<boolean>(false);
   async function CreateDomain() {
     setLoading(true);    
-
     try {        
       const { body } = await post({
         apiName: 'WrfAPIGateway',
@@ -54,38 +53,47 @@ const DomainCreate = ({getToken}:DomainDetailProps) => {
 
   const validate =() => {
     if (domain !=null){
-       if(domain.name!='' && domain.wps_namelist!='' && domain.wrf_namelist!='' && domain.wrf_bk_namelist!=''){
+       if(domain.name!='' && domain.wps_namelist!='' && domain.wrf_namelist!='' && domain.wrf_bk_namelist!=''&& domain.location.length>0){
         setEnableCreate(true);
        }      
     }
   }
+  const handleLocationUpdate =(location:any)=>{
+    if (domain !=null){
+      setDomain({...domain,location:location});
+      if(domain.name!='' && domain.wps_namelist!='' && domain.wrf_namelist!='' && domain.wrf_bk_namelist!=''){
+        setEnableCreate(true);
+       }      
+    }
   
+  };
   const handleNamelistUpdate = (namelist:string,type:string) => {
     if (domain !=null){
       if (type=='wps'){
         setDomain({...domain,wps_namelist:namelist});
-        if(domain.name!='' &&  domain.wrf_namelist!='' && domain.wrf_bk_namelist!=''){
+        if(domain.name!='' &&  domain.wrf_namelist!='' && domain.wrf_bk_namelist!=''&& domain.location.length>0){
           setEnableCreate(true);
          } 
       }else if (type=='wrf'){
         setDomain({...domain,wrf_namelist:namelist});
-        if(domain.name!='' && domain.wps_namelist!=''  && domain.wrf_bk_namelist!=''){
+        if(domain.name!='' && domain.wps_namelist!=''  && domain.wrf_bk_namelist!=''&& domain.location.length>0){
           setEnableCreate(true);
          } 
       }else if(type=='wrf_bk'){
         setDomain({...domain,wrf_bk_namelist:namelist});
-        if(domain.name!='' && domain.wps_namelist!='' && domain.wrf_namelist!='' ){
+        if(domain.name!='' && domain.wps_namelist!='' && domain.wrf_namelist!=''&& domain.location.length>0 ){
           setEnableCreate(true);
          } 
       }
+      validate();
     }   
   };
 
   const handleCheck =  () => {
     console.log('update domain:',domain);
-    if (domain !=null){
-      setDomain({...domain});
-    } 
+    //if (domain !=null){
+    //  setDomain({...domain});
+    //} 
   };
 
   const handleCancel = () => {
@@ -121,8 +129,7 @@ const DomainCreate = ({getToken}:DomainDetailProps) => {
   };  
 
   useEffect(() => { 
-    //if id is not null
-     
+
   },[]);
 
   return (
@@ -194,6 +201,13 @@ const DomainCreate = ({getToken}:DomainDetailProps) => {
                                (<Namelist namelist={ domain?.wrf_bk_namelist} type={'wrf_bk'} onUpdate = {handleNamelistUpdate}></Namelist>) :
                                (<Namelist namelist={ ''} type={'wrf_bk'} onUpdate = {handleNamelistUpdate}></Namelist>)
                   },
+                  { 
+                    label: 'Location', 
+                    value: 'Tab 4', 
+                    content: domain?.location ?
+                             (<Location location={ domain?.location}  onUpdate = {handleLocationUpdate}></Location>) :
+                             (<Location location={ []}  onUpdate = {handleLocationUpdate}></Location>)
+                },
                   ]}
               />
           </View>
