@@ -5,6 +5,7 @@ import { Domain } from "../settings/Domain"
 import { get,put } from 'aws-amplify/api';
 import  Namelist  from "./Namelist";
 import DomainMap from "./Map";
+import Location from "./Location";
 
 interface DomainDetailProps {
   getToken:()=>void;
@@ -154,23 +155,20 @@ const DomainDetail = ({getToken}:DomainDetailProps) => {
       const domain:Domain=await body.json() as any;
       
       setLatlonPoint('[ Latitude: '+ String(domain?.domain_center?.latitude) +' , Longitude: '+ String(domain?.domain_center?.longitude) +' ]');
-      console.log('domain center:',domain.domain_size);
-      console.log('latitude:',domain?.domain_center?.latitude);
-      console.log('print response:',domain )
+
       setError('');
       setDomain(domain);
       if ((domain != null) && ('wps_namelist' in domain)){
         setWpsNameList(parseNamelist(domain.wps_namelist));
-        console.log(wpsNamelist);
+       
       };
       if ((domain != null) && ('wrf_namelist' in domain)){
         setWrfNameList(parseNamelist(domain.wrf_namelist));
-        console.log(wrfNamelist);
+     
       }
       if ((domain != null) && ('domain_size' in domain)){
         setDomainSize(domain.domain_size);
-        console.log("domain.domain_size");
-        console.log(domain.domain_center);
+
       }
          
       let a:number[]=[];
@@ -194,32 +192,31 @@ const DomainDetail = ({getToken}:DomainDetailProps) => {
     }
   };
 
+  const handleLocationUpdate =(location:any)=>{
+    if (domain !=null){
+      setDomain({...domain,location:location});
+     
+    }
+  
+  };
   const handleNamelistUpdate = (namelist:string,type:string) => {
     if (domain !=null){
       if (type=='wps'){
         setDomain({...domain,wps_namelist:namelist});
-        if(domain.name!='' &&  domain.wrf_namelist!='' && domain.wrf_bk_namelist!=''){
-          setEnableCreate(true);
-         } 
+   
       }else if (type=='wrf'){
         setDomain({...domain,wrf_namelist:namelist});
-        if(domain.name!='' && domain.wps_namelist!=''  && domain.wrf_bk_namelist!=''){
-          setEnableCreate(true);
-         } 
+ 
       }else if(type=='wrf_bk'){
         setDomain({...domain,wrf_bk_namelist:namelist});
-        if(domain.name!='' && domain.wps_namelist!='' && domain.wrf_namelist!='' ){
-          setEnableCreate(true);
-         } 
+    
       }
-      validate();
-    }     
+   
+    }   
   };
 
   const handleCheck =  () => {
-    console.log('update domain:',domain);
-    console.log('domain size:',domainSize);
-    console.log('domain center:',domainCenter);
+
     if (domain !=null){
       //setDomain({...domain});
     } 
@@ -230,8 +227,6 @@ const DomainDetail = ({getToken}:DomainDetailProps) => {
   };
 
   const handleUpdate = () =>{
-    console.log('update new domain:',domain);
-    
     if (domain !=null){
       UpdateDomain();
     }  
@@ -249,11 +244,8 @@ const DomainDetail = ({getToken}:DomainDetailProps) => {
     if(id){
       loadDomain(id);
       let h='Domain' + JSON.stringify(id) + 'Detail Information';
-      setTitle(h);
-
-       
       
-      
+      setTitle(h);     
     }
     else{
       setDomain(undefined);
@@ -329,6 +321,13 @@ const DomainDetail = ({getToken}:DomainDetailProps) => {
                       value: 'Tab 3', 
                       content: domain?.wrf_bk_namelist ?(<Namelist namelist={ domain?.wrf_bk_namelist} type={'wrf_bk'} onUpdate = {handleNamelistUpdate}></Namelist>) :null 
                   },
+                  { 
+                    label: 'Location', 
+                    value: 'Tab 4', 
+                    content: domain?.location ?
+                             (<Location location={ domain?.location}  onUpdate = {handleLocationUpdate}></Location>) :
+                             (<Location location={ []}  onUpdate = {handleLocationUpdate}></Location>)
+                },
                   ]}
               />
           </View>
