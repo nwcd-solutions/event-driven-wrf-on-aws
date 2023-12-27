@@ -11,7 +11,8 @@ import {
 } from "@aws-amplify/ui-react";
 import { Domain } from "./Domain"
 import { useNavigate } from "react-router-dom";
-
+import config from "../../aws-export";
+const bucket=config.aws_user_files_s3_bucket;
 
 interface DomainTableProps {
   domains:Domain[];
@@ -65,9 +66,9 @@ const DomainTable = ({domains, onDelete}:DomainTableProps) => {
                 <TableCell>{item.name}</TableCell>
                 <TableCell>{item.description}</TableCell>
                 <TableCell>{item.cores}</TableCell>
-                <TableCell>   </TableCell>
-                <TableCell>   </TableCell>
-                <TableCell>  <View><div>{item.s3_key_geo_em}</div><div>{item.s3_key_wps_namelist}</div></View> </TableCell>
+                <TableCell> [ lat: {item.domain_center?.latitude} , lon: {item.domain_center?.longitude} ]  </TableCell>
+                <TableCell> [ {item.domain_size[0]},{item.domain_size[1]}]   </TableCell>
+                <TableCell> s3://{bucket}/{item.s3_key_wrf_namelist?.substring(0,item.s3_key_wrf_namelist.lastIndexOf('/'))}/  </TableCell>
         
                 <TableCell>
                   <Flex justifyContent="flex-end">
