@@ -302,7 +302,7 @@ class ApiGateway(NestedStack):
                 "PYTHONPATH":"/opt/python",
             },
             log_retention=logs.RetentionDays.ONE_DAY,
-            role  = parameter_service_handler_role,
+            role  = task_service_handler_role,
             runtime = _lambda.Runtime.PYTHON_3_9,
             handler = "index.handler",
             layers=[layer],
