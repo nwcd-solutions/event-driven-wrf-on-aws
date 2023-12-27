@@ -11,7 +11,8 @@ from concurrent.futures import Future, ThreadPoolExecutor
 import yaml
 from dynamodb import DynamoDao
 from config import WrfConfig
-
+from openpyxl import Workbook
+import openpyxl
 from  system import get_aws_session
 
 
@@ -51,7 +52,8 @@ class ConfigDao(DynamoDao):
 
         # deep copy the configuration data
         config_data = config.data
-
+        #print('config_data')
+        #print(config_data)
         # save the namelists to S3
         if 'wrf_namelist' in config_data:
             wrf_namelist: str = config_data.pop('wrf_namelist')
@@ -62,7 +64,9 @@ class ConfigDao(DynamoDao):
         if 'wps_namelist' in config_data:
             wps_namelist: str = config_data.pop('wps_namelist')
             ok = ok and self._save_namelist(config.s3_key_wps_namelist, wps_namelist)
-
+        if 'location' in config_data:
+            location: dict = config_data.pop('location')
+            ok = ok and self._save_xlsx(config.s3_key_location, location)
         # save the item to the database
         return ok and super().put_item(config_data)
 
@@ -74,10 +78,8 @@ class ConfigDao(DynamoDao):
         """
         # build the database key
         key = {'name': name}
-
         # get the item with the key
         data = super().get_item(key)
-
         # handle the case where the key is not found
         if data is None:
             return None
@@ -86,9 +88,12 @@ class ConfigDao(DynamoDao):
         config = WrfConfig(data)
 
         # load the namelists from S3
+        
         self._load_namelist(config, config.s3_key_wrf_namelist)
         self._load_namelist(config, config.s3_key_wrf_bk_namelist)
         self._load_namelist(config, config.s3_key_wps_namelist)
+        # load the location file from S3
+        self._load_xlsx(config, config.s3_key_location)
 
         return config
 
@@ -131,7 +136,9 @@ class ConfigDao(DynamoDao):
         if 'wps_namelist' in config_data:
             wps_namelist: str = config_data.pop('wps_namelist')
             ok = ok and self._save_namelist(config.s3_key_wps_namelist, wps_namelist)
-
+        if 'location' in config_data:
+            location: dict = config_data.pop('location')
+            ok = ok and self._save_xlsx(config.s3_key_location, location)
         # save the item to the database
         return ok and super().update_item(config_data)
 
@@ -145,6 +152,7 @@ class ConfigDao(DynamoDao):
         ok = self._delete_namelist(config.s3_key_wrf_namelist)
         ok = ok and self._delete_namelist(config.s3_key_wps_namelist)
         ok = ok and self._delete_namelist(config.s3_key_wrf_bk_namelist)
+        ok = ok and self._delete_namelist(config.s3_key_location)
         # delete the dynamodb item
         return ok and super().delete_item({'name': config.name})
 
@@ -176,6 +184,41 @@ class ConfigDao(DynamoDao):
             return False
 
         return True
+        
+    def _save_xlsx(self, location_key: str, xlsx_data: dict) -> bool:
+        """
+        Save the namelist to S3
+        :param namelist_key: S3 key for the namelist
+        :param namelist_data: Contents of the namelist file
+        :return: True if successfully saved to S3, otherwise False
+        """
+        #print(xlsx_data)
+        #df = pd.DataFrame(xlsx_data[1:], columns=xlsx_data[0])
+        #with io.BytesIO() as buffer:
+        #    writer = pd.ExcelWriter(buffer, engine='xlsxwriter')
+        #    df.to_excel(writer, index=False)
+        #    writer._save()
+        #    data = buffer.getvalue()
+        wb=Workbook()
+        ws=wb.active
+        ws.title='locations'
+        for row in xlsx_data:
+            ws.append(row)
+        file=io.BytesIO()
+        wb.save(file)
+        file.seek(0)
+
+        bucket_name = os.environ['WRFCLOUD_BUCKET']
+
+        try:
+            s3 = get_aws_session().resource('s3')
+            bucket=s3.Bucket(bucket_name)
+            bucket.put_object(Key=location_key, Body=file)
+        except Exception as e:
+            self.log.error('Failed to write location file to S3.', e)
+            return False
+
+        return True
 
     def _load_namelist(self, config: WrfConfig, namelist_key: str) -> bool:
         """
@@ -202,6 +245,31 @@ class ConfigDao(DynamoDao):
             self.log.error(f'Failed to read namelist from S3. s3://{bucket}/{namelist_key}', e)
             return False
 
+    def _load_xlsx(self, config: WrfConfig, location_key: str) -> bool:
+        # get the bucket name from the environment
+        bucket = os.environ['WRFCLOUD_BUCKET']
+        # load the namelist into the config data
+        try:
+            s3 = get_aws_session().client('s3')
+            response = s3.get_object(Bucket=bucket, Key=location_key)
+            # Load workbook from S3
+            
+            wb = openpyxl.load_workbook(io.BytesIO(response['Body'].read()))
+
+            # Get the active worksheet
+            ws = wb.active
+
+            # Create an empty list
+            data_list = []
+
+            # Iterate through rows and columns
+            for row in ws.iter_rows(min_row=1, max_row=ws.max_row, max_col=ws.max_column):
+                data_list.append([cell.value for cell in row])
+            config.location = data_list
+        except Exception as e:
+            self.log.error(f'Failed to read location file from S3. s3://{bucket}/{location_key}', e)
+            return False            
+            
     def _delete_namelist(self, namelist_key: str) -> bool:
         """
         Delete the namelist from S3
@@ -209,7 +277,6 @@ class ConfigDao(DynamoDao):
         :return: True if successful, otherwise False
         """
         bucket = os.environ['WRFCLOUD_BUCKET']
-
         try:
             s3 = get_aws_session().client('s3')
             s3.delete_object(Bucket=bucket, Key=namelist_key)
