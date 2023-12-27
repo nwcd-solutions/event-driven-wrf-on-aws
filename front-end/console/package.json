@@ -38,7 +38,9 @@
     "typescript": "^4.9.5",
     "uninstall": "^0.0.0",
     "uuid": "^9.0.1",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "xlsx": "^0.18.5",
+    "react-spreadsheet": "^0.9.2",
   },
   "scripts": {
     "start": "react-scripts start",
