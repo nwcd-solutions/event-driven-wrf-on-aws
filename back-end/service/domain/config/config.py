@@ -131,7 +131,7 @@ class WrfConfig:
         Get the S3 key for the wps namelist
         :return: S3 key
         """
-        return f'configurations/{self.name}/location.xlsx'
+        return f'configurations/{self.name}/locations.xlsx'
         
     @property
     def s3_key_geo_em(self) -> str:
