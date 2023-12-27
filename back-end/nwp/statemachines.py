@@ -799,6 +799,7 @@ class StepFunction (NestedStack):
                     "KEY_STR": key_str_ssm.parameter_name,
                     "FCST_DAYS": fcst_days_ssm.parameter_name,
                     "AUTO_MODE": auto_mode_ssm.parameter_name,
+                    "BUCKET_NAME": bucket_name,
                 },
                 handler="index.handler",
                 log_retention=logs.RetentionDays.ONE_DAY,
