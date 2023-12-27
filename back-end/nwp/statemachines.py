@@ -89,10 +89,10 @@ class StepFunction (NestedStack):
         # Create Lambda  Subnet
         #-------------------------------------------------------------------------------------------
 
-        pub_subnet = vpc.public_subnets[1].subnet_id
+        public_subnet = vpc.public_subnets[1].subnet_id
         for net in vpc.public_subnets:
             if net.availability_zone == "us-east-2b":
-                pub_subnet = net
+                public_subnet = net
         private_subnet = vpc.private_subnets[1].subnet_id
         for net in vpc.private_subnets:
             if net.availability_zone == "us-east-2b":
