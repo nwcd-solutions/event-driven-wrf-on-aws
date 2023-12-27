@@ -45,9 +45,9 @@ def handler(event, context):
         with open("hpc6a.yaml", "r") as cf:
           config_data = yaml.safe_load(cf)
         config_data["Region"] = region
-        config_data["HeadNode"]["Networking"]["SubnetId"] = os.getenv("SUBNETID")
+        config_data["HeadNode"]["Networking"]["SubnetId"] = os.getenv("PUBLIC_SUBNETID")
         config_data["HeadNode"]["Networking"]["AdditionalSecurityGroups"][0] = os.getenv("SG")
-        config_data["Scheduling"]["SlurmQueues"][0]["Networking"]["SubnetIds"][0] = os.getenv("SUBNETID")
+        config_data["Scheduling"]["SlurmQueues"][0]["Networking"]["SubnetIds"][0] = os.getenv("PRIVATE_SUBNETID")
         config_data["Scheduling"]["SlurmQueues"][0]["Iam"]["S3Access"][0]["BucketName"] = os.getenv("BUCKET_NAME")
         config_data["Scheduling"]["SlurmQueues"][1]["Networking"]["SubnetIds"][0] = os.getenv("SUBNETID")
         config_data["Scheduling"]["SlurmQueues"][1]["Iam"]["S3Access"][0]["BucketName"] = os.getenv("BUCKET_NAME")
