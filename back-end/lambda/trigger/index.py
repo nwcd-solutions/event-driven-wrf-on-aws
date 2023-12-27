@@ -12,7 +12,11 @@ bucket = s3.Bucket(os.getenv('BUCKET_NAME'))
 def check_files_exist():
     files_to_check = ['zCal.py', 'zFunc.py', 'zConfig.py','GFSwrfout_varnames.xlsx', 'process_gfs.py','process_gfs.sh']
     for file in files_to_check:
-        if not any(obj.key == file for obj in bucket.objects.filter(Prefix='public')):
+        #if not any(obj.key == file for obj in bucket.objects.filter(Prefix='public')):
+        obj = bucket.Object('public/' + file)
+        try:
+            obj.load()
+        except:
             return False
     return True
 
