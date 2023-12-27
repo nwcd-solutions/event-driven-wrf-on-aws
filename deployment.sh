@@ -13,14 +13,14 @@ zip -r ../layer.zip python
 rm -rf python
 cd ..
 
-while true; do
-    read -p "Do you want to use slurm accounting? (yes/no): " slurm_acct
-    case $slurm_acct in
-        [Yy]*) slurm_acct=true; break;;
-        [Nn]*|"") slurm_acct=false; break;;
-        *) echo "Please answer yes or no.";;
-    esac
-done
+#while true; do
+#    read -p "Do you want to use slurm accounting? (yes/no): " slurm_acct
+#    case $slurm_acct in
+#        [Yy]*) slurm_acct=true; break;;
+#        [Nn]*|"") slurm_acct=false; break;;
+#        *) echo "Please answer yes or no.";;
+#    esac
+#done
 
 #read -p "Please enter the admin username" username
 
