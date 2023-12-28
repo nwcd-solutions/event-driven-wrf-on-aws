@@ -40,7 +40,7 @@ const config = {
               }
             },
             "default": <map_name>,
-            "apikey":""
+            "apikey":"<Location_API_Key>"
           }
         }
     },
