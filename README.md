@@ -7,29 +7,18 @@ For HPC6a instance only available in us-east-2, you should deploy the solution i
 
 ## Prerequisites
 1. Create an EC2 Key pair with name us-east-2.
-2. Create S3 bucket to host input files of each domain that necessary for WRF running and the output files ,the structure should like belowing:
-```
----my-bucket-name
-    |---inputs
-    |       |---domain_1
-    |       |       |---namelist.wps
-    |       |       |---namelist.input
-    |       |---domain_2
-    |               |---namelist.wps
-    |               |---namelist.input
-    |---outputs
-```  
-## Installation
+2. Create Amazon Location API Keys and copy API Key value.
+* Open the AWS Management Console and navigate to the Amazon Location Service console.
+* In the left navigation pane, choose API keys.
+* Choose Create API key.
+* In the Create API key dialog box, enter a name for your API key in the Name field.
+* Optionally, enter a description for your API key in the Description field.
+* Under Referers, specify the domains where the API key can be used. This is an optional step.
+* Choose Create API key.
+* Once the API key is created, you can view the API key value by clicking on the Show button next to the key.Copy the value.
 
-Install the AWS CDK application and the python library.
 
-```
-npm install -g aws-cdk
-cd src/
-python3 -m venv .venv
-. .venv/bin/activate
-pip install -r requirements.txt
-```
+
 ## Deploying
 
 Create a lambda layer that contains `requests` and `pyyaml`.
