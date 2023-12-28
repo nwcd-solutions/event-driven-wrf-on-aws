@@ -8,9 +8,14 @@ while true; do
         break
     fi
 done
-
-#echo "Username: $username"
-#echo "Password: $password"
+while true; do
+    read -p "Enter Amazon Location API Key value: " apikey
+    if [ -z "$apikey" ] ; then
+        echo "Error: Amazon Location API Key value cannot be empty. Please try again."
+    else
+        break
+    fi
+done
 
 cd back-end/
 python3 -m venv .venv
@@ -57,5 +62,9 @@ sed -i "s|<map_name>|$location_map_name|g" console/src/aws-export.js
 sed -i "s|<s3_bucket>|$s3_bucket|g" console/src/aws-export.js
 sed -i "s|<aws_region>|us-east-2|g" console/src/aws-export.js
 sed -i "s|<cognito_identity_pool_id>|$cognito_identity_pool_id|g" console/src/aws-export.js
+sed -i "s|<Location_API_Key>|$apikey|g" console/src/aws-export.js
 cd console
 npm install react-scripts
+amplify init --yes
+amplify hosting add
+amplify publish --yes
