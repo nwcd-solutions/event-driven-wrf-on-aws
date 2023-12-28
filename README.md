@@ -22,7 +22,7 @@ For HPC6a instance only available in us-east-2, you should deploy the solution i
 ## Deploying
 
 ```
-git clone
+git clone https://github.com/nwcd-solutions/event-driven-wrf-on-aws.git
 cd event-driven-wrf-on-aws
 bash deployment.sh
 ```
