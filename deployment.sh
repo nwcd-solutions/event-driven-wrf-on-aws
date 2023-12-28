@@ -1,4 +1,16 @@
 #!/bin/bash 
+while true; do
+    read -p "Enter username: " username
+    read -sp "Enter password: " password
+    if [ -z "$username" ] || [ -z "$password" ]; then
+        echo "Error: Username and password cannot be empty. Please try again."
+    else
+        break
+    fi
+done
+
+#echo "Username: $username"
+#echo "Password: $password"
 
 cd back-end/
 python3 -m venv .venv
