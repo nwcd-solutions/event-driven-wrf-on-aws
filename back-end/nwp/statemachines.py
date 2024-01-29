@@ -192,6 +192,7 @@ class StepFunction (NestedStack):
         run_policy_doc.add_statements(iam.PolicyStatement(
             actions=[
                 "ssm:*",  
+                "s3:*"
             ],
             resources=[
                 "*"             
