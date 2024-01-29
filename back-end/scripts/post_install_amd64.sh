@@ -109,6 +109,7 @@ slurm_db() {
     --output text > /tmp/dbcreds
   export DBHOST=$(jq -r '.host' /tmp/dbcreds)
   export DBPASSWD=$(jq -r '.password' /tmp/dbcreds)
+  export DBINSTANCEID=$(jq -r '.dbInstanceIdentifier' /tmp/dbcreds)
   rm /tmp/dbcreds
 
   cat > /opt/slurm/etc/slurmdbd.conf <<- EOF
@@ -161,7 +162,9 @@ EOF
 	AccountingStorageUser=admin
 	AccountingStoragePort=6819
 EOF
-
+  rds_instance_status=$(aws rds describe-db-instances --db-instance-identifier $DBINSTANCEID --region $region | jq .DBInstances[0].DBInstanceStatus)
+  echo $rds_instance_status
+  systemctl restart slurmctld.service
   systemctl start slurmdbd.service
   systemctl start slurmrestd.service
 }
@@ -335,7 +338,12 @@ case ${cfn_node_type} in
                 systemd_units
                 slurm_db $region
                 fini $region $ftime $jwt
-                
+	        echo "Begin to setup wrf run scheduler"
+	    	# upload job_monitor.sh to bucket/monitor folder first
+	    	aws s3 cp s3://${bucket}/monitor/job_monitor.sh /fsx/monitor/job_monitor.sh
+	    	chmod u+x /fsx/monitor/job_monitor.sh
+	    	(crontab -l; echo "*/2 * * * * /fsx/monitor/job_monitor.sh ${bucket}") | sort -u | crontab -
+                  
         ;;
         ComputeFleet)
                 echo "I am a Compute node"
