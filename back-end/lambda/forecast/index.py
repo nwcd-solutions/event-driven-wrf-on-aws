@@ -9,6 +9,8 @@ import botocore
 import json
 import requests
 import math
+import io
+from template2sh import Template2Script
 
 ssm = boto3.client('ssm')
 #region = os.getenv("AWS_REGION")
@@ -32,6 +34,12 @@ template = {
     "script": ""
 }
 
+@lru_cache
+def s3client():
+    session = boto3.session.Session()
+    s3 = session.client("s3")
+    return s3
+    
 @lru_cache
 def token():
     session = boto3.session.Session()
@@ -109,7 +117,11 @@ def preproc(zone):
     template["job"]["current_working_directory"] = f"/fsx/{zone}"
     template["script"] = script
     print(template)
-    return submit(template)
+    job_id = submit(template)
+    s3 = s3client()
+    Template2Script(template, job_id, bucket,s3, zone)
+    return job_id
+
 
 def run_wrf(zone,pid,nodes):
     global bucket
@@ -133,32 +145,38 @@ def run_wrf(zone,pid,nodes):
     template['job']['partition']='general'
     template["script"] = script
     print(template)
-    return submit(template)
+    job_id = submit(template)
+    s3 = s3client()
+    Template2Script(template, job_id, bucket,s3, zone)
+    return job_id
     
 
-def post(pid):
+def post(zone,jid):
+    global bucket
+    global ftime
+    y=ftime[0:4]
+    m=ftime[5:7]
+    d=ftime[8:10]
+    h=ftime[11:13]
+    output = f"s3://{bucket}/outputs/{y}/{m}/{d}/{h}/{zone}"
     with open("jobs/post.sh", "r") as f:
         script = f.read()
-    script += f"\naws s3 cp --no-progress ${{grib}} {output}/${{grib}}"
-    script += f"\naws s3 cp slurm-${{SLURM_JOB_ID}}.out {output}/logs/slurm-${{SLURM_JOB_ID}}.out\n"
+    script += f"python process_gfs.py /fsx/{zone} {output}"
     template["job"]["nodes"] = 1
-    jids = []
-    for i in range(0, 7):
-        template["job"]["name"] = f"post-{i:03}"
-        template["job"]["dependency"] = f"afterok:{pid}"
-        template["job"]["current_working_directory"] = f"/fsx/run/post/{i:02}"
-        template["script"] = script
-        print(template)
-        jids.append(submit(template))
-    return jids
-
-
-
-def handler(event, context):
-
-    global ip
-    global ftime
+    template["job"]["name"] = f"post_"+zone
+    template["job"]["dependency"] = f"afterok:{jid}"
+    # 设置当前工作路径
+    template["job"]["current_working_directory"] = f"/fsx/post-scripts"
+    template["script"] = script
+    print(template)
+    job_id = submit(template)
+    s3 = s3client()
+    Template2Script(template, job_id, bucket, s3, zone)
+    return job_id
     
+def handler(event, context):
+    global ip
+    global ftime    
     print(event)
     ip=event['headNode']['privateIpAddress']
     ftime=event['ftime']
@@ -188,7 +206,12 @@ def handler(event, context):
         nodes=str(math.ceil(int(item['cores'])/64))
         jids.append(run_wrf(n,pids[i-1],nodes))
         i=i+1
-    fini(jids)
+    i=1
+    for item in items:
+        n=item['name']
+        lids.append(post(n,jids[i-1]))
+        i=i+1    
+    fini(lids)
 
     ssm.put_parameter(
         Name=os.getenv('FTIME'),
